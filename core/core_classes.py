@@ -2,6 +2,7 @@ from itertools import product
 from core.num import *
 
 # TODO check sub for CoreTemplate and SumTemplate
+# TODO all classes must implement decomp, group, simplify, expand and factorise
 
 class _CoreTemplate:
     def __eq__(self, other):
@@ -59,12 +60,23 @@ class _CoreTemplate:
     def __pos__(self):
         return self
 
-    # Removed as xor comes after other stuff in order of operations
-    # def __xor__(self, other):
-    #     return self.__pow__(other)
-    #
-    # def __rxor__(self, other):
-    #     return self.__rpow__(other)
+    def decomp(self):
+        """Decomposes the expression into its constituent factors"""
+        return [self]
+
+    def group(self):
+        """Collects like terms"""
+        return self
+
+    def simplify(self):
+        """Simplifies the expression"""
+        return self
+
+    def expand(self):
+        return self
+
+    def factorise(self, out=None):
+        return self
 
 
 class _CoreVarTemplate(_CoreTemplate):
@@ -276,17 +288,6 @@ class Var(_CoreVarTemplate):
     def __init__(self, symbol):
         self.sym = symbol
 
-    def decomp(self):
-        """Decomposes the expression into its constituent factors"""
-        return [self]
-
-    def group(self):
-        return self
-
-    def simplify(self, auto_factorise=True):
-        """Simplifies the expression"""
-        return self
-
 
 class Sum(_CoreSumTemplate):
     def __init__(self, terms):
@@ -304,13 +305,9 @@ class Sum(_CoreSumTemplate):
         if not self.terms:
             self.terms = [zero]
 
-    def decomp(self):
-        """Decomposes the expression into its constituent factors"""
-        return [self]
-
     def group(self):
         """Collects like terms"""
-        decomp = [term.decomp() for term in self.terms]
+        decomp = [term.group().decomp() for term in self.terms]
         unique = {}
         for term in decomp:
             # Multiplying constants in each term to get coefficient
@@ -327,10 +324,10 @@ class Sum(_CoreSumTemplate):
         output = [coeff * term for term, coeff in unique.items()]
         return Sum(output)
 
-    def simplify(self, auto_factorise=True):
+    def simplify(self):
         """Simplifies the expression"""
         terms = self.group().terms
-        terms = [term.simplify(auto_factorise) for term in terms]
+        terms = [term.simplify() for term in terms]
         terms = [term for term in terms if term != zero]
         if len(terms) == 0:
             return zero
@@ -338,8 +335,12 @@ class Sum(_CoreSumTemplate):
             return terms[0]
         return Sum(terms)
 
+    def expand(self):
+        """Returns the expanded form of each term"""
+        return Sum([term.expand() for term in self.terms])
+
     def factorise(self, out=None):
-        """Factorises the Sum globally; if out is provided, factorises it out"""
+        """Factorises the Sum; if out is provided, factorises it out"""
         if out is not None:
             return self._factorise_out(out)
         decomp = [term.decomp() for term in self.terms]
@@ -405,10 +406,10 @@ class Prod(_CoreProdTemplate):
         output = [base ** power for base, power in unique.items()]
         return const * Prod(output)
 
-    def simplify(self, auto_factorise=True):
-        """Simplifies the expression"""
+    def simplify(self):
+        """Simplifies the expression; if factors contain zero, returns zero"""
         factors = self.group().factors
-        factors = [factor.simplify(auto_factorise) for factor in factors]
+        factors = [factor.simplify() for factor in factors]
         if zero in factors:
             return zero
         factors = [factor for factor in factors if factor != one]
@@ -420,9 +421,11 @@ class Prod(_CoreProdTemplate):
 
     def expand(self):
         """Returns an expansion of the product following distributive law"""
+        # First expand all factors to get rid of Exp
+        prod = [factor.expand() for factor in self.factors]
         # Get all factors as a list of their terms
         factors = []
-        for factor in self.factors:
+        for factor in prod:
             if isinstance(factor, Sum):
                 factors.append(factor.terms)
             else:
@@ -432,23 +435,23 @@ class Prod(_CoreProdTemplate):
         output = [Prod(list(term)) for term in new_terms]
         return Sum(output)
 
-    def to_frac(self):
-        numers, denoms = [], []
-        for factor in self.factors:
-            if isinstance(factor, Frac):
-                numers.append(factor.numer)
-                denoms.append(factor.denom)
-            elif isinstance(factor, Exp):
-                if Num.isnum(factor.power):
-                    if factor.power < 0:
-                        denoms.append(Exp(factor.base, -factor.power))
-                    else:
-                        numers.append(factor)
-                else:
-                    numers.append(factor)
-            else:
-                numers.append(factor)
-        return Frac(Prod(numers), Prod(denoms))
+    # def to_frac(self):
+    #     numers, denoms = [], []
+    #     for factor in self.factors:
+    #         if isinstance(factor, Frac):
+    #             numers.append(factor.numer)
+    #             denoms.append(factor.denom)
+    #         elif isinstance(factor, Exp):
+    #             if Num.isnum(factor.power):
+    #                 if factor.power < 0:
+    #                     denoms.append(Exp(factor.base, -factor.power))
+    #                 else:
+    #                     numers.append(factor)
+    #             else:
+    #                 numers.append(factor)
+    #         else:
+    #             numers.append(factor)
+    #     return Frac(Prod(numers), Prod(denoms))
 
 
 class Frac(_CoreFracTemplate):
@@ -463,11 +466,11 @@ class Frac(_CoreFracTemplate):
         denoms = [Exp(denom, neg_one) for denom in denoms]
         return numers + denoms
 
-    def simplify(self, auto_factorise=True):
-        """Simplifies the expression"""
+    def simplify(self):
+        """Returns the fraction in its simplest form"""
         # Resolving nested fractions
-        numer = self.numer.simplify(auto_factorise)
-        denom = self.denom.simplify(auto_factorise)
+        numer = self.numer.simplify()
+        denom = self.denom.simplify()
         if isinstance(numer, Frac) and isinstance(denom, Frac):
             numer_flat = numer.numer * denom.denom
             denom_flat = numer.denom * denom.numer
@@ -481,12 +484,11 @@ class Frac(_CoreFracTemplate):
             numer_flat = numer
             denom_flat = denom
 
-        # Decomposing numerator and denominator based on auto_factorise
-        if auto_factorise:
-            if isinstance(numer_flat, Sum):
-                numer_flat = numer_flat.factorise()
-            if isinstance(denom_flat, Sum):
-                denom_flat = denom_flat.factorise()
+        # Decomposing numerator and denominator (always factorising)
+        if isinstance(numer_flat, Sum):
+            numer_flat = numer_flat.factorise()
+        if isinstance(denom_flat, Sum):
+            denom_flat = denom_flat.factorise()
         numer_decomp = numer_flat.decomp()
         denom_decomp = denom_flat.decomp()
 
@@ -495,8 +497,8 @@ class Frac(_CoreFracTemplate):
             if factor in denom_decomp:
                 numer_decomp.remove(factor)
                 denom_decomp.remove(factor)
-        numer_out = Prod(numer_decomp).simplify(auto_factorise)
-        denom_out = Prod(denom_decomp).simplify(auto_factorise)
+        numer_out = Prod(numer_decomp).simplify()
+        denom_out = Prod(denom_decomp).simplify()
         if denom_out == zero:
             return Undefined
         if numer_out == zero and denom_out != zero:
@@ -505,11 +507,15 @@ class Frac(_CoreFracTemplate):
             return numer_out
         return numer_out / denom_out
 
-    def to_prod(self):
-        numer_prod = self.numer.decomp()
-        denom_prod = self.denom.decomp()
-        denom_prod = [Exp(factor, neg_one) for factor in denom_prod]
-        return Prod(numer_prod + denom_prod)
+    def expand(self):
+        """Returns an expansion of the numerator and denominator"""
+        return self.numer.expand() / self.denom.expand()
+
+    # def to_prod(self):
+    #     numer_prod = self.numer.decomp()
+    #     denom_prod = self.denom.decomp()
+    #     denom_prod = [Exp(factor, neg_one) for factor in denom_prod]
+    #     return Prod(numer_prod + denom_prod)
 
 
 class Exp(_CoreExpTemplate):
@@ -528,12 +534,12 @@ class Exp(_CoreExpTemplate):
             output.append(Exp(self.base, f))
         return output
 
-    def simplify(self, auto_factorise=True):
+    def simplify(self):
         """Simplifies the expression"""
-        power = self.power.simplify(auto_factorise)
-        base = self.base.simplify(auto_factorise)
+        power = self.power.simplify()
+        base = self.base.simplify()
         if isinstance(base, Exp):
-            return Exp(base.base, base.power * power).simplify(auto_factorise)
+            return Exp(base.base, base.power * power).simplify()
         if base == one or (base != one and base != zero and power == zero):
             return one
         if base == zero and power != zero:
@@ -544,8 +550,15 @@ class Exp(_CoreExpTemplate):
             return Undefined
         return base ** power
 
-    def to_prod(self):
-        return Prod(self.decomp())
+    def expand(self):
+        """Returns an expansion of the exponential"""
+        decomp = self.decomp()
+        if len(decomp) == 1:
+            return decomp[0]
+        return Prod(decomp).expand()
+
+    # def to_prod(self):
+    #     return Prod(self.decomp())
 
 
 class Eqn(_CoreEqnTemplate):
@@ -553,9 +566,9 @@ class Eqn(_CoreEqnTemplate):
         self.lhs = Num(lhs) if Num.isnum(lhs) else lhs
         self.rhs = Num(rhs) if Num.isnum(rhs) else rhs
 
-    def simplify(self, auto_factorise=True):
-        lhs = self.lhs.simplify(auto_factorise)
-        rhs = self.rhs.simplify(auto_factorise)
+    def simplify(self):
+        lhs = self.lhs.simplify()
+        rhs = self.rhs.simplify()
         return Eqn(lhs, rhs)
 
     def isequal(self):
@@ -571,16 +584,6 @@ NoRealSol = _NoRealSol()
 
 if __name__ == '__main__':
     x = Var('x')
-    p = (x+1) ** -1 * (x+1) ** -1
-    print(p.simplify())
-    # a = 3 * (x + 1) * (x + 2) * (x + 3)
-    # print(a)
-    # a = a.expand()
-    # print(a)
-    # a = a.group()
-    # print(a)
-    # b = a.simplify()
-    # print(b)
-    #
-    # f = (x / 2) / (x / 2)
-    # print(f.simplify())
+    expr = (x+1)**1 * (x+1) ** 1
+    expr = expr.expand().simplify()
+    print(expr)

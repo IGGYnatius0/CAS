@@ -41,7 +41,13 @@ class Num(_NumTemplate):
     def group(self):
         return self
 
-    def simplify(self, auto_factorise=True):
+    def simplify(self):
+        return self
+
+    def expand(self):
+        return self
+
+    def factorise(self, out=None):
         return self
 
     @classmethod
