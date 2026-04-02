@@ -1,6 +1,8 @@
 from decimal import Decimal
 from utils import pfactor
 
+__all__ = ['Num', 'neg_one', 'zero', 'one']
+
 # TODO force frac and exp of Nums to remain symbolic instead of getting evaluated
 
 def _num_check(func):

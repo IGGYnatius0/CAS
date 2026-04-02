@@ -1,8 +1,11 @@
 from itertools import product
 from core.num import *
 
+__all__ = ['Var', 'Sum', 'Prod', 'Frac', 'Exp', 'Eqn',
+           'Undefined', 'Indeterminate', 'NoRealSol']
+
 # TODO check sub for CoreTemplate and SumTemplate
-# TODO all classes must implement decomp, group, simplify, expand and factorise
+# TODO implement functions especially log/ln
 
 class _CoreTemplate:
     def __eq__(self, other):
@@ -21,12 +24,12 @@ class _CoreTemplate:
         return Sum([other, self])
 
     def __sub__(self, other):
-        # if isinstance(other, _CoreSumTemplate):
+        # if isinstance(other, CoreSumTemplate):
         #     return Sum([self] + (-other).terms)
         return Sum([self, -other])
 
     def __rsub__(self, other):
-        # if isinstance(other, _CoreSumTemplate):
+        # if isinstance(other, CoreSumTemplate):
         #     return Sum([-other).terms + [self])
         return Sum([-other, self])
 
@@ -120,12 +123,12 @@ class _CoreSumTemplate(_CoreTemplate):
         return self
 
     def __sub__(self, other):
-        # if isinstance(other, _CoreSumTemplate):
+        # if isinstance(other, CoreSumTemplate):
         #     return Sum(self.terms + (-other).terms)
         return Sum(self.terms + [-other])
 
     def __rsub__(self, other):
-        # if isinstance(other, _CoreSumTemplate):
+        # if isinstance(other, CoreSumTemplate):
         #     return Sum(other.terms + (-self).terms)
         return Sum([other + -self])
 
@@ -312,7 +315,7 @@ class Sum(_CoreSumTemplate):
         for term in decomp:
             # Multiplying constants in each term to get coefficient
             coeff = one
-            for i, factor in list(enumerate(term))[::-1]:
+            for i, factor in reversed(list(enumerate(term))):
                 if Num.isnum(factor):
                     coeff *= term.pop(i)
             # Accumulating coefficients of like terms
@@ -493,7 +496,7 @@ class Frac(_CoreFracTemplate):
         denom_decomp = denom_flat.decomp()
 
         # Removing common factors
-        for factor in numer_decomp[::-1]:
+        for factor in reversed(numer_decomp):
             if factor in denom_decomp:
                 numer_decomp.remove(factor)
                 denom_decomp.remove(factor)
