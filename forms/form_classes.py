@@ -1,5 +1,6 @@
 from decimal import Decimal
 from itertools import product, chain
+from copy import deepcopy
 
 from core.core_classes import *
 from core.num import *
@@ -293,42 +294,42 @@ class SingleConstraint:
         """Returns a generator of all possible combinations of constraints"""
         return [[self]]
 
-    def solve(self):
+    def simplify(self):
         prev_form = None
         while self.form != prev_form:
-            if isinstance(self.form, FormSum):
-                self.solve_sum()
-            if isinstance(self.form, FormProd):
-                self.solve_prod()
-            if isinstance(self.form, FormFrac):
-                self.solve_frac()
-            if isinstance(self.form, FormExp):
-                self.solve_exp()
             prev_form = self.form
-        if isinstance(self.form, FormSum) and len(self.form.terms) == 1:
-            self.form = self.form.terms[0]
-        if isinstance(self.form, FormProd) and len(self.form.factors) == 1:
-            self.form = self.form.factors[0]
-        # if isinstance(self.form, FormFrac):
-        #     pass
-        # if isinstance(self.form, FormExp):
-        #     pass
+            if isinstance(self.form, FormSum):
+                self.simplify_sum()
+            elif isinstance(self.form, FormProd):
+                self.simplify_prod()
+            elif isinstance(self.form, FormFrac):
+                self.simplify_frac()
+            elif isinstance(self.form, FormExp):
+                self.simplify_exp()
+            if isinstance(self.form, FormSum) and len(self.form.terms) == 1:
+                self.form = self.form.terms[0]
+            elif isinstance(self.form, FormProd) and len(self.form.factors) == 1:
+                self.form = self.form.factors[0]
+            # if isinstance(self.form, FormFrac):
+            #     pass
+            # if isinstance(self.form, FormExp):
+            #     pass
 
-    def solve_sum(self):
+    def simplify_sum(self):
         for i, term in enumerate(self.form.terms):
             if isinstance(term, Decimal):
                 self.value -= Num(term)
                 self.form.terms.pop(i)
                 return
 
-    def solve_prod(self):
+    def simplify_prod(self):
         for i, factor in enumerate(self.form.factors):
             if isinstance(factor, Decimal):
-                self.value /= Num(factor)
+                self.value /= Num(factor) # FIXME possible division by zero
                 self.form.factors.pop(i)
                 return
 
-    def solve_frac(self):
+    def simplify_frac(self):
         if isinstance(self.form.numer, Decimal):
             self.value = Num(self.form.numer) / self.value
             self.form = self.form.denom
@@ -336,7 +337,7 @@ class SingleConstraint:
             self.value *= Num(self.form.denom)
             self.form = self.form.numer
 
-    def solve_exp(self):
+    def simplify_exp(self):
         if isinstance(self.form.base, Decimal):
             # TODO logarithm
             pass
@@ -408,7 +409,7 @@ class FormNum(_FormNumTemplate):
     def __init__(self, value, *args, **kwargs):
         Decimal.__init__(str(value), *args, **kwargs)
 
-    def match(self, expr, var_map={}):
+    def match(self, expr, var_map):
         if expr == self:
             return SingleConstraint(var_map=var_map)
         return False
@@ -437,10 +438,11 @@ class FormNum(_FormNumTemplate):
 
 
 class FormConst(_FormConstTemplate):
+    # TODO ranges eg FormConst('a', 'a>0')
     def __init__(self, sym):
         self.sym = sym
 
-    def match(self, expr, var_map={}):
+    def match(self, expr, var_map):
         if not isinstance(expr, Num):
             return False
         return SingleConstraint(self, expr, var_map)
@@ -464,13 +466,13 @@ class FormVar(_FormVarTemplate):
     def __init__(self, sym):
         self.sym = sym
 
-    def match(self, expr, var_map={}):
+    def match(self, expr, var_map):
         if not isinstance(expr, Var):
             return False
         if expr in var_map:
             match = var_map[expr] == self
             if match:
-                return SingleConstraint(self, expr, var_map=var_map)
+                return SingleConstraint(var_map=var_map)
             return False
         var_map[expr] = self
         return SingleConstraint(var_map=var_map)
@@ -503,13 +505,14 @@ class FormSum(_FormSumTemplate):
         if not self.terms:
             self.terms = [zero]
 
-    def match(self, expr, var_map={}):
+    def match(self, expr, var_map):
+        # TODO zero case
         if isinstance(expr, Num):
             if self.isconst():
                 return SingleConstraint(self, expr, var_map)
             return False
         if not isinstance(expr, Sum):
-            return self.match(Sum([expr, Num(0)]))
+            return self.match(Sum([expr, Num(0)]), var_map)
         matches = MultiConstraint(len(self.terms), len(expr.terms))
         for i, ft in enumerate(self.terms):
             for j, et in enumerate(expr.terms):
@@ -573,13 +576,14 @@ class FormProd(_FormProdTemplate):
         if not self.factors:
             self.factors = [one]
 
-    def match(self, expr, var_map={}):
+    def match(self, expr, var_map):
+        # TODO zero case
         if isinstance(expr, Num):
             if self.isconst():
                 return SingleConstraint(self, expr, var_map)
             return False
         if not isinstance(expr, Prod):
-            return self.match(Prod([expr, Num(1)]))
+            return self.match(Prod([expr, Num(1)]), var_map)
         matches = MultiConstraint(len(self.factors), len(expr.factors))
         for i, ff in enumerate(self.factors):
             for j, ef in enumerate(expr.factors):
@@ -632,29 +636,23 @@ class FormFrac(_FormFracTemplate):
         self.numer = FormNum(numer) if FormNum.isnum(numer) else numer
         self.denom = FormNum(denom) if FormNum.isnum(denom) else denom
 
-    def match(self, expr, var_map={}):
-        # TODO guard clauses for 0 and 1 case
+    def match(self, expr, var_map):
         if isinstance(expr, Num):
+            if expr == zero:
+                return self.numer.match(zero, var_map)
             if self.isconst():
                 return SingleConstraint(self, expr, var_map)
             return False
         if not isinstance(expr, Frac):
             return False
         matches = MultiConstraint(2, 2)
-        matches[0, 0] = self.numer.match(expr.numer)
-        matches[0, 1] = self.numer.match(expr.denom)
-        matches[1, 0] = self.denom.match(expr.numer)
-        matches[1, 1] = self.denom.match(expr.denom)
-        return matches
-        # # Non-Frac case
-        # if not isinstance(expr, Frac):
-        #     return self.match(expr / one, var_map)
-        # # Others
-        # if not self.numer.match(expr.numer, var_map):
-        #     return False
-        # if not self.denom.match(expr.denom, var_map):
-        #     return False
-        # return True
+        matches[0, 0] = self.numer.match(expr.numer, var_map)
+        matches[0, 1] = self.numer.match(expr.denom, var_map)
+        matches[1, 0] = self.denom.match(expr.numer, var_map)
+        matches[1, 1] = self.denom.match(expr.denom, var_map)
+        if matches.check_validity():
+            return matches
+        return False
 
     def isconst(self):
         if not self.numer.isconst():
@@ -682,20 +680,29 @@ class FormExp(_FormExpTemplate):
         self.base = FormNum(base) if FormNum.isnum(base) else base
         self.power = FormNum(power) if FormNum.isnum(power) else power
 
-    def match(self, expr, var_map={}):
-        # TODO guard clauses for 0 and 1 case
+    def match(self, expr, var_map):
         if isinstance(expr, Num):
+            if expr == zero or expr == one:
+                b1 = self.base.match(one, var_map)
+                if expr == one and b1:
+                    return b1
+                b0 = self.base.match(zero, var_map)
+                p0 = self.power.match(zero, var_map)
+                if expr == zero and b0 and not p0:
+                    return b0
             if self.isconst():
                 return SingleConstraint(self, expr, var_map)
             return False
         if not isinstance(expr, Exp):
             return False
         matches = MultiConstraint(2, 2)
-        matches[0, 0] = self.base.match(expr.base)
-        matches[0, 1] = self.base.match(expr.power)
-        matches[1, 0] = self.power.match(expr.base)
-        matches[1, 1] = self.power.match(expr.power)
-        return matches
+        matches[0, 0] = self.base.match(expr.base, var_map)
+        matches[0, 1] = self.base.match(expr.power, var_map)
+        matches[1, 0] = self.power.match(expr.base, var_map)
+        matches[1, 1] = self.power.match(expr.power, var_map)
+        if matches.check_validity():
+            return matches
+        return False
 
     def isconst(self):
         if not self.base.isconst():
@@ -723,51 +730,56 @@ class FormEqn(_FormEqnTemplate):
         self.lhs = FormNum(lhs) if FormNum.isnum(lhs) else lhs
         self.rhs = FormNum(rhs) if FormNum.isnum(rhs) else rhs
 
-    # def match(self, value, var_map={}):
+    # def match(self, value, var_map):
     #     if not isinstance(value, Eqn):
     #         return False
     #     return ((self.lhs.match(value.lhs, var_map) and self.rhs.match(value.rhs, var_map)) or
     #             (self.lhs.match(value.rhs, var_map) and self.rhs.match(value.lhs, var_map)))
 
 
-def solve_constraints(constrs):
+def solve_constraints(constrs, n):
     const_map = {}
-    # 1st pass: getting number of constants to solve for
-    consts = set.union(*[constr.form.get_consts() for constr in constrs])
-    n = len(consts)
     constrs = list(constrs)
     n_passes = len(constrs) - len(const_map)
     i = 0
     while len(const_map) < n and i < n_passes:
         # Getting all 'lone' constants
         for constr in constrs:
-            form = constr.form
-            if isinstance(form, FormConst):
-                if form in const_map:
+            if isinstance(constr.form, FormConst):
+                if constr.form in const_map:
                     return False
-                const_map[form] = constr.value
-        # Substitute
-        pass
+                const_map[constr.form] = constr.value
+        pass # breakpoint position
         for j, constr in enumerate(constrs):
-            constrs[j].form = constr.form.substitute(const_map)
-        # Simplify
-        pass
-        for j, constr in enumerate(constrs):
-            constr.solve()
-        pass
-        i += 1
-    return const_map
+            # Substitute
+            # Create new instance of SingleConstraint to prevent downstream SingleConstraints from getting modified
+            constr = SingleConstraint(form=constr.form.substitute(const_map),
+                                          value=constr.value)
+            # Simplify
+            constr.simplify() # FIXME change to out of place (inplace bad)
+            constrs[j] = constr
+        i += 1 # breakpoint position
+    if len(const_map) == n:
+        return const_map
+    return False
 
 
 def match(form, expr):
-    matches = form.match(expr)
-    matches.sort_matches()
+    var_map = {}
+    matches = form.match(expr, var_map)
+    if not matches:
+        return False
+    # matches.sort_matches() # fucking useless
     matches = matches.get_constraints()
-    # for i in matches:
-    #     print(list(i))
+    if not matches:
+        return False
+    # Calculating number of constants to solve for
+    n = len(form.get_consts())
     for constr in matches:
-        print(solve_constraints(constr))
-
+        const_map = solve_constraints(constr, n)
+        if const_map:
+            return {'consts': const_map, 'vars': var_map}
+    return False
 
 
 if __name__ == '__main__':
@@ -778,11 +790,14 @@ if __name__ == '__main__':
     c = FormConst('c')
     d = FormConst('d')
     e = FormConst('e')
-    # form = (a*b*y**3 + b*c*y**2 + c*d + d*y).group_consts()
-    # expr =  6*x**3   + 12*x**2  + 20  + 5*x
-    form = (a*y**2 + b*c*y + c).group_consts()
-    expr = 2*x**2 + 12*x + 4
+    form = (a*b*y**3 + b*c*y**2 + c*d*y + d).group_consts()
+    expr =  6*x**3   + 12*x**2  + 20*x  + 5
+    # form = (y**(a*b+c) + b*c*y - y/b).group_consts()
+    # expr = x**-5 - 2*y + y/2
+    # form = (y**(a*b+c) + b*c*y + b/y).group_consts()
+    # expr = x**7 + 2*x + 2/x
+    # form = a*y + a
+    # expr = 2*x + 3
     print(form)
     print(expr)
-    # TODO not fully working
-    match(form, expr)
+    print(match(form, expr))
