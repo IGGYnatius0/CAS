@@ -4,7 +4,7 @@ from core.num import *
 __all__ = ['Var', 'Sum', 'Prod', 'Frac', 'Exp', 'Eqn',
            'Undefined', 'Indeterminate', 'NoRealSol']
 
-# TODO check sub for CoreTemplate and SumTemplate
+# TODO check sub and rsub for CoreTemplate and SumTemplate
 # TODO implement functions especially log/ln
 
 class _CoreTemplate:
@@ -31,7 +31,7 @@ class _CoreTemplate:
     def __rsub__(self, other):
         # if isinstance(other, CoreSumTemplate):
         #     return Sum([-other).terms + [self])
-        return Sum([-other, self])
+        return Sum([other, -self])
 
     def __mul__(self, other):
         if isinstance(other, _CoreProdTemplate):
@@ -130,7 +130,7 @@ class _CoreSumTemplate(_CoreTemplate):
     def __rsub__(self, other):
         # if isinstance(other, CoreSumTemplate):
         #     return Sum(other.terms + (-self).terms)
-        return Sum([other + -self])
+        return Sum([other] + (-self).terms)
 
     def __isub__(self, other):
         self.terms.append(-other)
@@ -587,6 +587,9 @@ NoRealSol = _NoRealSol()
 
 if __name__ == '__main__':
     x = Var('x')
-    expr = (x+1)**1 * (x+1) ** 1
+    # expr = (x+1)**2 * (x+1)**3
+    # expr = expr.expand().simplify()
+    expr = neg_one * 17/x**2 * x
+    print(expr)
     expr = expr.expand().simplify()
     print(expr)

@@ -342,7 +342,7 @@ class SingleConstraint:
             # TODO logarithm
             pass
         elif isinstance(self.form.power, Decimal):
-            self.value **= 1 / Num(self.form.power)
+            self.value **= one / Num(self.form.power)
             self.form = self.form.base
 
     def __bool__(self):
@@ -507,12 +507,13 @@ class FormSum(_FormSumTemplate):
 
     def match(self, expr, var_map):
         # TODO zero case
+        # TODO padding by +0
         if isinstance(expr, Num):
             if self.isconst():
                 return SingleConstraint(self, expr, var_map)
             return False
         if not isinstance(expr, Sum):
-            return self.match(Sum([expr, Num(0)]), var_map)
+            return self.match(Sum([expr, zero]), var_map)
         matches = MultiConstraint(len(self.terms), len(expr.terms))
         for i, ft in enumerate(self.terms):
             for j, et in enumerate(expr.terms):
@@ -564,6 +565,7 @@ class FormSum(_FormSumTemplate):
 
 class FormProd(_FormProdTemplate):
     def __init__(self, factors):
+        # TODO functionality for products/large number of factors
         self.factors = []
         for factor in factors:
             if FormNum.isnum(factor):
@@ -578,12 +580,13 @@ class FormProd(_FormProdTemplate):
 
     def match(self, expr, var_map):
         # TODO zero case
+        # TODO padding by *1
         if isinstance(expr, Num):
             if self.isconst():
                 return SingleConstraint(self, expr, var_map)
             return False
         if not isinstance(expr, Prod):
-            return self.match(Prod([expr, Num(1)]), var_map)
+            return self.match(Prod([expr, one]), var_map)
         matches = MultiConstraint(len(self.factors), len(expr.factors))
         for i, ff in enumerate(self.factors):
             for j, ef in enumerate(expr.factors):
@@ -644,7 +647,7 @@ class FormFrac(_FormFracTemplate):
                 return SingleConstraint(self, expr, var_map)
             return False
         if not isinstance(expr, Frac):
-            return False
+            return self.match(Frac(expr, one), var_map)
         matches = MultiConstraint(2, 2)
         matches[0, 0] = self.numer.match(expr.numer, var_map)
         matches[0, 1] = self.numer.match(expr.denom, var_map)
@@ -694,7 +697,7 @@ class FormExp(_FormExpTemplate):
                 return SingleConstraint(self, expr, var_map)
             return False
         if not isinstance(expr, Exp):
-            return False
+            return self.match(Exp(expr, one), var_map)
         matches = MultiConstraint(2, 2)
         matches[0, 0] = self.base.match(expr.base, var_map)
         matches[0, 1] = self.base.match(expr.power, var_map)
@@ -725,16 +728,16 @@ class FormExp(_FormExpTemplate):
         return FormExp(base, power)
 
 
-class FormEqn(_FormEqnTemplate):
-    def __init__(self, lhs, rhs):
-        self.lhs = FormNum(lhs) if FormNum.isnum(lhs) else lhs
-        self.rhs = FormNum(rhs) if FormNum.isnum(rhs) else rhs
-
-    # def match(self, value, var_map):
-    #     if not isinstance(value, Eqn):
-    #         return False
-    #     return ((self.lhs.match(value.lhs, var_map) and self.rhs.match(value.rhs, var_map)) or
-    #             (self.lhs.match(value.rhs, var_map) and self.rhs.match(value.lhs, var_map)))
+# class FormEqn(_FormEqnTemplate):
+#     def __init__(self, lhs, rhs):
+#         self.lhs = FormNum(lhs) if FormNum.isnum(lhs) else lhs
+#         self.rhs = FormNum(rhs) if FormNum.isnum(rhs) else rhs
+#
+#     def match(self, value, var_map):
+#         if not isinstance(value, Eqn):
+#             return False
+#         return ((self.lhs.match(value.lhs, var_map) and self.rhs.match(value.rhs, var_map)) or
+#                 (self.lhs.match(value.rhs, var_map) and self.rhs.match(value.lhs, var_map)))
 
 
 def solve_constraints(constrs, n):
@@ -783,6 +786,7 @@ def match(form, expr):
 
 
 if __name__ == '__main__':
+    # TODO more advanced negative number matching, may be solved by padding by 0 and 1
     x = Var('x')
     y = FormVar('y')
     a = FormConst('a')
@@ -794,10 +798,8 @@ if __name__ == '__main__':
     expr =  6*x**3   + 12*x**2  + 20*x  + 5
     # form = (y**(a*b+c) + b*c*y - y/b).group_consts()
     # expr = x**-5 - 2*y + y/2
-    # form = (y**(a*b+c) + b*c*y + b/y).group_consts()
-    # expr = x**7 + 2*x + 2/x
-    # form = a*y + a
-    # expr = 2*x + 3
+    form = a*y**2 + b*y + c
+    expr = x**2 - x - 6
     print(form)
     print(expr)
     print(match(form, expr))
