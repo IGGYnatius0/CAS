@@ -8,7 +8,7 @@ quartic   = A * x ** 4 + B * x ** 3 + C * x ** 2 + D * x + E
 poly = [linear, quadratic, cubic, quartic]
 
 
-forms = [*poly]
+FORMS = [*poly]
 
-for i, form in enumerate(forms):
-    forms[i] = form.group_consts()
+for i, form in enumerate(FORMS):
+    FORMS[i] = form.group_consts()

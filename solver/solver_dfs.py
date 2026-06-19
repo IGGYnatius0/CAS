@@ -3,7 +3,7 @@ from itertools import product, compress
 from core.core_classes import *
 from core.core_classes import neg_one, one
 from core.abc import x
-from forms.known_forms import forms
+from forms.forms import forms
 
 # FIXME NOT WORKING YET!!!
 

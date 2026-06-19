@@ -1,7 +1,7 @@
 from decimal import Decimal
 from utils import pfactor
 
-__all__ = ['Num', 'neg_one', 'zero', 'one']
+__all__ = ['Num', 'neg_one', 'zero', 'one', 'inf', 'ninf']
 
 # TODO force frac and exp of Nums to remain symbolic instead of getting evaluated
 
@@ -52,6 +52,9 @@ class Num(_NumTemplate):
     def factorise(self, out=None):
         return self
 
+    def substitute(self, var_map):
+        return self
+
     @classmethod
     def isnum(cls, expr):
         return isinstance(expr, (int, float, Decimal, Num))
@@ -65,3 +68,5 @@ class Num(_NumTemplate):
 neg_one = Num(-1)
 zero = Num(0)
 one = Num(1)
+inf = Num('inf')
+ninf = -Num('inf')

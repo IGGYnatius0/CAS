@@ -1,8 +1,7 @@
 from itertools import product
 from core.num import *
 
-__all__ = ['Var', 'Sum', 'Prod', 'Frac', 'Exp', 'Eqn',
-           'Undefined', 'Indeterminate', 'NoRealSol']
+__all__ = ['Var', 'Sum', 'Prod', 'Frac', 'Exp', 'Eqn']
 
 # TODO check sub and rsub for CoreTemplate and SumTemplate
 # TODO implement functions especially log/ln
@@ -263,33 +262,14 @@ class _CoreEqnTemplate:
         return hash(('CoreEqn', self.lhs, self.rhs))
 
 
-class _UndefinedType:
-    def __str__(self):
-        return 'Undefined'
-
-    def __repr__(self):
-        return 'Undefined'
-
-
-class _IndeterminateType:
-    def __str__(self):
-        return 'Indeterminate'
-
-    def __repr__(self):
-        return 'Indeterminate'
-
-
-class _NoRealSol:
-    def __str__(self):
-        return 'No real solution'
-
-    def __repr__(self):
-        return 'No real solution'
-
-
 class Var(_CoreVarTemplate):
     def __init__(self, symbol):
         self.sym = symbol
+
+    def substitute(self, var_map):
+        if self in var_map:
+            return var_map[self]
+        return self
 
 
 class Sum(_CoreSumTemplate):
@@ -361,6 +341,9 @@ class Sum(_CoreSumTemplate):
         """Factorise helper method"""
         factorised = [term / out for term in self.terms]
         return out * Sum(factorised)
+
+    def substitute(self, var_map):
+        return Sum([term.substitute(var_map) for term in self.terms])
 
 
 class Prod(_CoreProdTemplate):
@@ -456,6 +439,9 @@ class Prod(_CoreProdTemplate):
     #             numers.append(factor)
     #     return Frac(Prod(numers), Prod(denoms))
 
+    def substitute(self, var_map):
+        return Prod([term.substitute(var_map) for term in self.factors])
+
 
 class Frac(_CoreFracTemplate):
     def __init__(self, numer, denom):
@@ -503,7 +489,7 @@ class Frac(_CoreFracTemplate):
         numer_out = Prod(numer_decomp).simplify()
         denom_out = Prod(denom_decomp).simplify()
         if denom_out == zero:
-            return Undefined
+            return None
         if numer_out == zero and denom_out != zero:
             return zero
         if numer_out != zero and denom_out == one:
@@ -519,6 +505,9 @@ class Frac(_CoreFracTemplate):
     #     denom_prod = self.denom.decomp()
     #     denom_prod = [Exp(factor, neg_one) for factor in denom_prod]
     #     return Prod(numer_prod + denom_prod)
+
+    def substitute(self, var_map):
+        return Frac(self.numer.substitute(var_map), self.denom.substitute(var_map))
 
 
 class Exp(_CoreExpTemplate):
@@ -550,7 +539,7 @@ class Exp(_CoreExpTemplate):
         if base != zero and base != one and power == one:
             return base
         if base == zero and power == zero:
-            return Undefined
+            return None
         return base ** power
 
     def expand(self):
@@ -562,6 +551,9 @@ class Exp(_CoreExpTemplate):
 
     # def to_prod(self):
     #     return Prod(self.decomp())
+
+    def substitute(self, var_map):
+        return Exp(self.base.substitute(var_map), self.power.substitute(var_map))
 
 
 class Eqn(_CoreEqnTemplate):
@@ -581,9 +573,10 @@ class Eqn(_CoreEqnTemplate):
         return Eqn(self.rhs, self.lhs)
 
 
-Undefined = _UndefinedType()
-Indeterminate = _IndeterminateType()
-NoRealSol = _NoRealSol()
+class Func: # TODO this has been on todo for the longest time
+    def __init__(self):
+        pass
+
 
 if __name__ == '__main__':
     x = Var('x')
