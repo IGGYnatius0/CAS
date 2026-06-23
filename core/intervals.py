@@ -14,6 +14,36 @@ def _int_typecheck(func):
     return cmp
 
 
+@_int_typecheck
+def cmp_lower(int1, int2):
+    """Returns -1, 0 or +1 depending on int2.lower relative to int1.lower"""
+    if int2.lower > int1.lower:
+        return 1
+    if int2.lower < int1.lower:
+        return -1
+    if int2.lo_inc == int1.lo_inc:
+        return 0
+    if int2.lo_inc:
+        return -1
+    else:
+        return 1
+    
+
+@_int_typecheck
+def cmp_upper(int1, int2):
+    """Returns -1, 0 or +1 depending on int2.upper relative to int1.upper"""
+    if int2.upper > int1.upper:
+        return 1
+    if int2.upper < int1.upper:
+        return -1
+    if int2.up_inc == int1.up_inc:
+        return 0
+    if int2.up_inc:
+        return -1
+    else:
+        return 1
+    
+
 class Interval(BaseInterval):
     def __init__(self, lower: Num = None, upper: Num = None,
                  lo_inc: bool = False, up_inc: bool = False):
@@ -26,7 +56,7 @@ class Interval(BaseInterval):
         self.up_inc = False if self.upper == inf else up_inc
 
     @_int_typecheck
-    def __and__(self, other): # TODO refactor using _cmp_lower and _cmp_upper
+    def __and__(self, other): # TODO refactor using cmp_lower and cmp_upper
         if other.lower < self.lower:
             return other & self
         if other <= self:
@@ -38,7 +68,7 @@ class Interval(BaseInterval):
         return None # empty interval
         
     @_int_typecheck
-    def __or__(self, other): # TODO refactor using _cmp_lower and _cmp_upper
+    def __or__(self, other): # TODO refactor using cmp_lower and _cmp_upper
         if other.lower < self.lower:
             return other | self
         if self.upper > other.lower:
@@ -61,34 +91,6 @@ class Interval(BaseInterval):
     def __hash__(self):
         return hash((self.lower, self.upper, self.lo_inc, self.up_inc))
     
-    @_int_typecheck
-    def _cmp_lower(self, other):
-        """Returns -1, 0 or +1 depending on other.lower relative to self.lower"""
-        if other.lower > self.lower:
-            return 1
-        if other.lower < self.lower:
-            return -1
-        if other.lo_inc == self.lo_inc:
-            return 0
-        if other.lo_inc:
-            return -1
-        else:
-            return 1
-        
-    @_int_typecheck
-    def _cmp_upper(self, other):
-        """Returns -1, 0 or +1 depending on other.upper relative to self.upper"""
-        if other.upper > self.upper:
-            return 1
-        if other.upper < self.upper:
-            return -1
-        if other.up_inc == self.up_inc:
-            return 0
-        if other.up_inc:
-            return -1
-        else:
-            return 1
-    
     def __eq__(self, other):
         return hash(self) == hash(other)
     
@@ -97,25 +99,23 @@ class Interval(BaseInterval):
 
     @_int_typecheck
     def __lt__(self, other):
-        lo = self._cmp_lower(other)
-        up = self._cmp_upper(other)
+        lo = cmp_lower(other)
+        up = cmp_upper(other)
         return lo in (0, -1) and up in (0, 1) and (lo != 0 and up != 0)
     
     @_int_typecheck
     def __le__(self, other):
-        return self._cmp_lower(other) in (0, -1) and \
-            self._cmp_upper(other) in (0, 1)
+        return cmp_lower(other) in (0, -1) and cmp_upper(other) in (0, 1)
     
     @_int_typecheck
     def __gt__(self, other):
-        lo = self._cmp_lower(other)
-        up = self._cmp_upper(other)
+        lo = cmp_lower(other)
+        up = cmp_upper(other)
         return lo in (0, 1) and up in (0, -1) and (lo != 0 and up != 0)
     
     @_int_typecheck
     def __ge__(self, other):
-        return self._cmp_lower(other) in (0, 11) and \
-            self._cmp_upper(other) in (0, -1)
+        return cmp_lower(other) in (0, 11) and cmp_upper(other) in (0, -1)
 
     def __str__(self):
         if self.lo_inc:
