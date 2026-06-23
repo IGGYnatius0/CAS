@@ -2,133 +2,125 @@ from core.core_classes import *
 from core.num import *
 
 
-"""
-########################################################################################################################
-##                                                                                                                    ##
-##                                           READ BEFORE PROCEEDING!!!                                                ##
-##                                                                                                                    ##
-########################################################################################################################
-
-For future reference when I come back from bookout and I cannot remember anything here:
-- Change Intervals constructor to use Bound objects instead of specifying using lo/hi (already added to TODO)
-- Currently implementing the 6 dunder rich comparison methods for bounds.
-- lt/gt/le/ge faces a problem in that InclusiveBound and ExclusiveBound do not know if they are an upper or lower bound
-- 2 options:
-
-1. Bounds use a flag to tell if it is upper or lower
-- When input to the __init__ in Interval, __init__ will set a flag in each Bound to mark it as higher or lower
-- In the comparison operators, check the flag of the self and other and return the result accordingly.
-
-2. Return 2 values
-- For every comparison, return 2 values in a list or wtv
-- One for if comparing lower bounds and the other for if comparing upper bounds
-
-- I think option 1 is better lol
-- Also implement inverting methods for bounds eg changing from InclusiveBound to ExclusiveBound and vice versa
-"""
-
 class BaseInterval:
     pass
 
 
-def typecheck(func):
-    def comparison(other):
-        if not isinstance(other, BaseBound):
-            raise TypeError('Can only compare with other intervals')
+def _int_typecheck(func):
+    def cmp(other):
+        if not isinstance(other, Interval):
+            return NotImplemented
         return func(other)
-    return comparison
-
-
-class BaseBound:
-    @typecheck
-    def __ne__(self, other):
-        return not (self == other)
-
-
-class InclusiveBound(BaseBound):
-    def __init__(self, value, ul):
-        self.value = Num(value) if Num.isnum(value) else value
-
-    @typecheck
-    def __eq__(self, other):
-        return isinstance(other, InclusiveBound) and self.value == other.value
-
-    @typecheck
-    def __lt__(self, other):
-        if self.value < other.value:
-            return True
-        if self.value > other.value:
-            return False
-        # self.value == other.value
-        if isinstance(other, InclusiveBound):
-            return False
-        # TODO not done!
-
-
-
-
-class ExclusiveBound(BaseBound):
-    def __init__(self, value):
-        self.value = Num(value) if Num.isnum(value) else value
-
-    def __eq__(self, other):
-        return isinstance(other, ExclusiveBound) and self.value == other.value
+    return cmp
 
 
 class Interval(BaseInterval):
-    def __init__(self, lower=ninf, upper=inf, lo=False, hi=False): # TODO accept Bounds as arguments instead of specifying the type of bound manually
-        if lower > upper:
+    def __init__(self, lower: Num = None, upper: Num = None,
+                 lo_inc: bool = False, up_inc: bool = False):
+        # lower and upper being inf will override lo_inc and up_inc
+        self.lower = ninf if lower is None else lower
+        self.upper = inf if upper is None else upper
+        if self.lower > self.upper:
             raise ValueError('Lower bound cannot be greater than upper bound')
-        if isinstance(lower, BaseBound):
-            self.lower = lower
-        else:
-            if lower == ninf:
-                self.lower = ExclusiveBound(lower)
-            else:
-                self.lower = InclusiveBound(lower) if lo else ExclusiveBound(lower)
-        if isinstance(upper, BaseBound):
-            self.upper = upper
-        else:
-            if upper == inf:
-                self.upper = ExclusiveBound(upper)
-            else:
-                self.upper = InclusiveBound(upper) if hi else ExclusiveBound(upper)
+        self.lo_inc = False if self.lower == ninf else lo_inc
+        self.up_inc = False if self.upper == inf else up_inc
+
+    @_int_typecheck
+    def __and__(self, other):
+        if other.lower < self.lower:
+            return other & self
+        if other <= self:
+            return other
+        if other.upper == self.upper:
+            return Interval(other.lower, self.upper, other.lo_inc, min(self.up_inc, other.up_inc))
+        if other.upper > self.upper:
+            return Interval(other.lower, self.upper, other.lo_inc, self.up_inc)
+        return None # empty interval
+        
+    @_int_typecheck
+    def __or__(self, other):
+        if other.lower < self.lower:
+            return other | self
+        if self.upper > other.lower:
+            return Interval(self.lower, other.upper, self.lo_inc, other.up_inc)
+        return MultiInterval((self, other))
 
     def __invert__(self):
-        if self.lower.value == ninf and self.upper.value != inf:
-            if isinstance(self.upper, InclusiveBound):
-                return Interval(lower=self.upper.value)
-            return Interval(lower=self.upper.value, lo=True)
-        if self.lower.value != ninf and self.upper.value == inf:
-            if isinstance(self.lower, InclusiveBound):
-                return Interval(upper=self.lower.value)
-            return Interval(upper=self.lower.value, hi=True)
-        if self.lower.value == ninf and self.upper.value == inf:
-            return None # Empty set
+        if self.lower == ninf and self.upper == inf:
+            return None # empty interval
+        if self.lower == ninf and self.upper != inf:
+            return Interval(self.upper, inf, not self.up_inc, False)
+        if self.lower != ninf and self.upper == inf:
+            return Interval(ninf, self.lower, False, not self.lo_inc)
+        return MultiInterval((Interval(ninf, self.lower, False, not self.lo_inc),
+                              Interval(self.upper, inf, not self.upper_inc, False)))
+    
+    def __hash__(self):
+        return hash((self.lower, self.upper, self.lo_inc, self.up_inc))
+    
+    @_int_typecheck
+    def _cmp_lower(self, other):
+        """Returns -1, 0 or +1 depending on other.lower relative to self.lower"""
+        if other.lower > self.lower:
+            return 1
+        if other.lower < self.lower:
+            return -1
+        if other.lo_inc == self.lo_inc:
+            return 0
+        if other.lo_inc:
+            return -1
+        else:
+            return 1
+        
+    @_int_typecheck
+    def _cmp_upper(self, other):
+        """Returns -1, 0 or +1 depending on other.upper relative to self.upper"""
+        if other.upper > self.upper:
+            return 1
+        if other.upper < self.upper:
+            return -1
+        if other.up_inc == self.up_inc:
+            return 0
+        if other.up_inc:
+            return -1
+        else:
+            return 1
+    
+    def __eq__(self, other):
+        return hash(self) == hash(other)
+    
+    def __neq__(self, other):
+        return hash(self) != hash(other)
 
-        hi = not isinstance(self.lower, InclusiveBound)
-        lo = not isinstance(self.upper, InclusiveBound)
-        return Interval(upper=self.lower.value, hi=hi) | Interval(lower=self.upper.value, lo=lo)
-
-    def __and__(self, other):
-        if other.lower.value < self.lower.value:
-            return other & self
-
-        if other.upper.value < self.upper.value:
-            return other
-        if other.upper.value > self.upper.value:
-            return Interval(other.lower, self.upper)
-
-    def __or__(self, other):
-        pass
+    @_int_typecheck
+    def __lt__(self, other):
+        lo = self._cmp_lower(other)
+        up = self._cmp_upper(other)
+        return lo in (0, -1) and up in (0, 1) and (lo != 0 and up != 0)
+    
+    @_int_typecheck
+    def __le__(self, other):
+        return self._cmp_lower(other) in (0, -1) and \
+            self._cmp_upper(other) in (0, 1)
+    
+    @_int_typecheck
+    def __gt__(self, other):
+        lo = self._cmp_lower(other)
+        up = self._cmp_upper(other)
+        return lo in (0, 1) and up in (0, -1) and (lo != 0 and up != 0)
+    
+    @_int_typecheck
+    def __ge__(self, other):
+        return self._cmp_lower(other) in (0, 11) and \
+            self._cmp_upper(other) in (0, -1)
 
     def __str__(self):
-        if isinstance(self.lower, InclusiveBound):
+        if self.lo_inc:
             s = '['
         else:
             s = '('
-        s += f'{self.lower.value}, {self.upper.value}'
-        if isinstance(self.upper, InclusiveBound):
+        s += f'{self.lower}, {self.upper}'
+        if self.up_inc:
             s += ']'
         else:
             s += ')'
@@ -136,20 +128,44 @@ class Interval(BaseInterval):
 
 
 class MultiInterval(BaseInterval):
-    def __init__(self):
-        pass
-
-    # TODO all set methods
-
-    def __invert__(self):
-        pass
-
+    def __init__(self, intervals):
+        self.intervals = intervals
+    
     def __and__(self, other):
         pass
 
     def __or__(self, other):
         pass
 
+    def __invert__(self):
+        pass
+
+    def __hash__(self):
+        pass
+
+    def __eq__(self):
+        pass
+
+    def __neq__(self):
+        pass
+
+    def __lt__(self, other):
+        pass
+
+    def __le__(self, other):
+        pass
+
+    def __gt__(self, other):
+        pass
+
+    def __ge__(self, other):
+        pass
+
+    def __str__(self):
+        pass
+
 
 if __name__ == '__main__':
+    # TODO go and ask AI to generate test cases
+    # There may be some problems with Interval and/or due to not checking the inclusiveness of the bounds...
     print(Interval())
