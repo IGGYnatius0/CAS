@@ -26,23 +26,26 @@ class Interval(BaseInterval):
         self.up_inc = False if self.upper == inf else up_inc
 
     @_int_typecheck
-    def __and__(self, other):
+    def __and__(self, other): # TODO refactor using _cmp_lower and _cmp_upper
         if other.lower < self.lower:
             return other & self
         if other <= self:
             return other
-        if other.upper == self.upper:
-            return Interval(other.lower, self.upper, other.lo_inc, min(self.up_inc, other.up_inc))
         if other.upper > self.upper:
             return Interval(other.lower, self.upper, other.lo_inc, self.up_inc)
+        if other.upper == self.upper: # TODO check this
+            return Interval(other.lower, self.upper, other.lo_inc, min(self.up_inc, other.up_inc))
         return None # empty interval
         
     @_int_typecheck
-    def __or__(self, other):
+    def __or__(self, other): # TODO refactor using _cmp_lower and _cmp_upper
         if other.lower < self.lower:
             return other | self
         if self.upper > other.lower:
             return Interval(self.lower, other.upper, self.lo_inc, other.up_inc)
+        if self.upper == other.lower:
+            if self.up_inc or other.lo_inc:
+                return Interval(self.lower, other.upper, self.lo_inc, other.up_inc)
         return MultiInterval((self, other))
 
     def __invert__(self):
@@ -153,7 +156,7 @@ class MultiInterval(BaseInterval):
         pass
 
     def __le__(self, other):
-        pass
+        pass    
 
     def __gt__(self, other):
         pass
