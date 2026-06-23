@@ -7,14 +7,13 @@ class BaseInterval:
 
 
 def _int_typecheck(func):
-    def cmp(other):
+    def cmp(self, other):
         if not isinstance(other, Interval):
             return NotImplemented
-        return func(other)
+        return func(self, other)
     return cmp
 
 
-@_int_typecheck
 def cmp_lower(int1, int2):
     """Returns -1, 0 or +1 depending on int2.lower relative to int1.lower"""
     if int2.lower > int1.lower:
@@ -29,7 +28,6 @@ def cmp_lower(int1, int2):
         return 1
     
 
-@_int_typecheck
 def cmp_upper(int1, int2):
     """Returns -1, 0 or +1 depending on int2.upper relative to int1.upper"""
     if int2.upper > int1.upper:
@@ -39,9 +37,9 @@ def cmp_upper(int1, int2):
     if int2.up_inc == int1.up_inc:
         return 0
     if int2.up_inc:
-        return -1
-    else:
         return 1
+    else:
+        return -1
     
 
 class Interval(BaseInterval):
@@ -85,16 +83,13 @@ class Interval(BaseInterval):
         if self.lower != ninf and self.upper == inf:
             return Interval(ninf, self.lower, False, not self.lo_inc)
         return MultiInterval((Interval(ninf, self.lower, False, not self.lo_inc),
-                              Interval(self.upper, inf, not self.upper_inc, False)))
+                              Interval(self.upper, inf, not self.up_inc, False)))
     
     def __hash__(self):
         return hash((self.lower, self.upper, self.lo_inc, self.up_inc))
     
     def __eq__(self, other):
         return hash(self) == hash(other)
-    
-    def __neq__(self, other):
-        return hash(self) != hash(other)
 
     @_int_typecheck
     def __lt__(self, other):
@@ -114,7 +109,7 @@ class Interval(BaseInterval):
     
     @_int_typecheck
     def __ge__(self, other):
-        return cmp_lower(self, other) in (0, 11) and cmp_upper(self, other) in (0, -1)
+        return cmp_lower(self, other) in (0, 1) and cmp_upper(self, other) in (0, -1)
 
     def __str__(self):
         if self.lo_inc:
@@ -132,7 +127,7 @@ class Interval(BaseInterval):
 class MultiInterval(BaseInterval):
     def __init__(self, intervals):
         self.intervals = intervals
-    
+
     def __and__(self, other):
         pass
 
@@ -170,4 +165,4 @@ class MultiInterval(BaseInterval):
 if __name__ == '__main__':
     # TODO go and ask AI to generate test cases
     # There may be some problems with Interval and/or due to not checking the inclusiveness of the bounds...
-    print(Interval())
+    print(Interval(1, 2, True, False) | Interval(1, 2, True, True))
