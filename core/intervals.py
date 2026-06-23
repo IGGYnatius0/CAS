@@ -42,6 +42,21 @@ def cmp_upper(int1, int2):
         return -1
     
 
+def from_str(s):
+    if s[0] not in '([':
+        raise ValueError("Invalid interval string")
+    if s[-1] not in ')]':
+        raise ValueError("Invalid interval string")
+    if ',' not in s or s.count(',') != 1:
+        raise ValueError("Invalid interval string")
+    bounds = s[1:-1].split(',')
+    lower = Num(bounds[0].strip())
+    upper = Num(bounds[1].strip())
+    lo_inc = s[0] == '['
+    up_inc = s[-1] == ']'
+    return Interval(lower, upper, lo_inc, up_inc)
+
+
 class Interval(BaseInterval):
     def __init__(self, lower: Num = None, upper: Num = None,
                  lo_inc: bool = False, up_inc: bool = False):
