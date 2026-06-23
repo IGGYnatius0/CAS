@@ -174,7 +174,10 @@ class MultiInterval(BaseInterval):
         pass
 
     def __str__(self):
-        pass
+        out = []
+        for i in self.intervals:
+            out.append(str(i))
+        return ', '.join(out)
 
 
 if __name__ == '__main__':
