@@ -6,14 +6,6 @@ class BaseInterval:
     pass
 
 
-def _interval_typecheck(func):
-    def cmp(self, other):
-        if not isinstance(other, Interval):
-            return NotImplemented
-        return func(self, other)
-    return cmp
-
-
 def cmp_lower(int1, int2):
     """Returns -1, 0 or +1 depending on int2.lower relative to int1.lower"""
     if int2.lower > int1.lower:
@@ -55,6 +47,16 @@ def from_str(s):
     lo_inc = s[0] == '['
     up_inc = s[-1] == ']'
     return Interval(lower, upper, lo_inc, up_inc)
+
+
+def _interval_typecheck(func):
+    def cmp(self, other):
+        if isinstance(other, Num):
+            other = Interval(other, other, True, True)
+        if not isinstance(other, Interval):
+            return NotImplemented
+        return func(self, other)
+    return cmp
 
 
 class Interval(BaseInterval):
@@ -102,10 +104,15 @@ class Interval(BaseInterval):
                               Interval(self.upper, inf, not self.up_inc, False)))
     
     def __hash__(self):
-        return hash((self.lower, self.upper, self.lo_inc, self.up_inc))
-    
+        return hash((hash((self.lower, self.upper, self.lo_inc, self.up_inc)),))
+
+    @_interval_typecheck
     def __eq__(self, other):
         return hash(self) == hash(other)
+    
+    @_interval_typecheck
+    def __contains__(self, other):
+        return other <= self
 
     @_interval_typecheck
     def __lt__(self, other):
@@ -140,10 +147,21 @@ class Interval(BaseInterval):
         return s
 
 
+def _multiinterval_typecheck(func):
+    def cmp(self, other):
+        if isinstance(other, Num):
+            other = Interval(other, other, True, True)
+        if not isinstance(other, (Interval, MultiInterval)):
+            return NotImplemented
+        return func(self, other)
+    return cmp
+
+
 class MultiInterval(BaseInterval):
     def __init__(self, intervals): # TODO ensure intervals are sorted
         self.intervals = tuple(intervals)
 
+    @_multiinterval_typecheck
     def __and__(self, other):
         if isinstance(other, Interval):
             other = MultiInterval((other,))
@@ -173,9 +191,11 @@ class MultiInterval(BaseInterval):
             return result[0]
         return MultiInterval(result)
 
+    @_multiinterval_typecheck
     def __rand__(self, other):
         return self.__and__(other)
 
+    @_multiinterval_typecheck
     def __or__(self, other):
         if isinstance(other, Interval):
             other = MultiInterval((other,))
@@ -208,10 +228,12 @@ class MultiInterval(BaseInterval):
         if len(result) == 1:
             return result[0]
         return MultiInterval(result)
-    
+
+    @_multiinterval_typecheck
     def __ror__(self, other):
         return self.__or__(other)
 
+    @_multiinterval_typecheck
     def __invert__(self):
         # TODO optimize this by going through self.intervals and directly
         # creating new intervals in between the existing ones instead of
@@ -222,25 +244,31 @@ class MultiInterval(BaseInterval):
         return result
 
     def __hash__(self):
-        pass
+        return hash(self.intervals)
+    
+    @_multiinterval_typecheck
+    def __eq__(self, other):
+        return hash(self) == hash(other)
+    
+    @_multiinterval_typecheck
+    def __contains__(self, other):
+        return other <= self
 
-    def __eq__(self):
-        pass
-
-    def __neq__(self):
-        pass
-
+    @_multiinterval_typecheck
     def __lt__(self, other):
-        pass
+        return self & other == self and self != other
 
+    @_multiinterval_typecheck
     def __le__(self, other):
-        pass    
+        return self & other == self
 
+    @_multiinterval_typecheck
     def __gt__(self, other):
-        pass
+        return self & other == other and self != other
 
+    @_multiinterval_typecheck
     def __ge__(self, other):
-        pass
+        return self & other == other
 
     def __str__(self):
         out = []
@@ -257,3 +285,4 @@ if __name__ == '__main__':
     s4 = (s1 | s2) & s3
     print(s4)
     print(~s4)
+    print(Num(1) in s1)
