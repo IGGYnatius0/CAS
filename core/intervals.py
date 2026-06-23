@@ -150,7 +150,7 @@ class MultiInterval(BaseInterval):
         if not isinstance(other, MultiInterval):
             return NotImplemented
         
-        # Interval 
+        # Interval intersection algorithm
         A, B = self.intervals, other.intervals
         result = []
         i = j = 0
@@ -166,12 +166,45 @@ class MultiInterval(BaseInterval):
             else:
                 i += 1
                 j += 1
-        if result:
-            return MultiInterval(result)
-        return None
+        
+        if len(result) == 0:
+            return None
+        if len(result) == 1:
+            return result[0]
+        return MultiInterval(result)
 
     def __or__(self, other):
-        pass
+        if isinstance(other, Interval):
+            other = MultiInterval((other,))
+        if not isinstance(other, MultiInterval):
+            return NotImplemented
+        A, B = list(self.intervals), list(other.intervals)
+
+        # Merging intervals based on lower bound like mergesort
+        merged = []
+        while A and B:
+            if cmp_lower(A[0], B[0]) != 1: # A[0] >= B[0]
+                merged.append(A.pop(0))
+            else:
+                merged.append(B.pop(0))
+        merged.extend(A)
+        merged.extend(B)
+
+        # Combining intervals
+        last = merged[0]
+        result = []
+        for interval in merged[1:]:
+            last |= interval
+            if isinstance(last, MultiInterval):
+                result.append(last.intervals[0])
+                last = last.intervals[1]
+        result.append(last)
+        
+        if len(result) == 0:
+            return None
+        if len(result) == 1:
+            return result[0]
+        return MultiInterval(result)
 
     def __invert__(self):
         pass
@@ -207,6 +240,6 @@ class MultiInterval(BaseInterval):
 if __name__ == '__main__':
     # TODO test cases
     s1 = from_str('(-1, 3)')
-    s2 = from_str('(6, 10]')
+    s2 = from_str('[5, 10]')
     s3 = from_str('[2, 7)')
-    print((s1 | s2) & s3)
+    print((s1 | s2) | s3)
