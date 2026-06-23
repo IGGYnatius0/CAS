@@ -140,11 +140,32 @@ class Interval(BaseInterval):
 
 
 class MultiInterval(BaseInterval):
-    def __init__(self, intervals):
-        self.intervals = intervals
+    def __init__(self, intervals): # TODO ensure intervals are sorted
+        self.intervals = tuple(intervals)
 
     def __and__(self, other):
-        pass
+        if isinstance(other, Interval):
+            other = MultiInterval((other,))
+        if not isinstance(other, MultiInterval):
+            return NotImplemented
+        A, B = self.intervals, other.intervals
+        result = []
+        i = j = 0
+        while i < len(A) and j < len(B):
+            overlap = A[i] & B[j]
+            if overlap is not None:
+                result.append(overlap)
+            cmp = cmp_upper(A[i], B[j])
+            if cmp == 1:
+                i += 1
+            elif cmp == -1:
+                j += 1
+            else:
+                i += 1
+                j += 1
+        if result:
+            return MultiInterval(result)
+        return None
 
     def __or__(self, other):
         pass
@@ -181,6 +202,8 @@ class MultiInterval(BaseInterval):
 
 
 if __name__ == '__main__':
-    # TODO go and ask AI to generate test cases
-    # There may be some problems with Interval and/or due to not checking the inclusiveness of the bounds...
-    print(Interval(1, 2, True, False) | Interval(1, 2, True, True))
+    # TODO test cases
+    s1 = from_str('(-1, 3)')
+    s2 = from_str('(6, 10]')
+    s3 = from_str('[2, 7)')
+    print((s1 | s2) & s3)
