@@ -6,7 +6,7 @@ class BaseInterval:
     pass
 
 
-def _int_typecheck(func):
+def _interval_typecheck(func):
     def cmp(self, other):
         if not isinstance(other, Interval):
             return NotImplemented
@@ -68,7 +68,7 @@ class Interval(BaseInterval):
         self.lo_inc = False if self.lower == ninf else lo_inc
         self.up_inc = False if self.upper == inf else up_inc
 
-    @_int_typecheck
+    @_interval_typecheck
     def __and__(self, other):
         if cmp_lower(self, other) == -1:
             return other & self
@@ -79,7 +79,7 @@ class Interval(BaseInterval):
             return Interval(other.lower, self.upper, other.lo_inc, self.up_inc)
         return None # empty interval
         
-    @_int_typecheck
+    @_interval_typecheck
     def __or__(self, other):
         if cmp_lower(self, other) == -1:
             return other | self
@@ -106,23 +106,23 @@ class Interval(BaseInterval):
     def __eq__(self, other):
         return hash(self) == hash(other)
 
-    @_int_typecheck
+    @_interval_typecheck
     def __lt__(self, other):
         lo = cmp_lower(self, other)
         up = cmp_upper(self, other)
         return lo in (0, -1) and up in (0, 1) and (lo != 0 and up != 0)
     
-    @_int_typecheck
+    @_interval_typecheck
     def __le__(self, other):
         return cmp_lower(self, other) in (0, -1) and cmp_upper(self, other) in (0, 1)
     
-    @_int_typecheck
+    @_interval_typecheck
     def __gt__(self, other):
         lo = cmp_lower(self, other)
         up = cmp_upper(self, other)
         return lo in (0, 1) and up in (0, -1) and (lo != 0 and up != 0)
     
-    @_int_typecheck
+    @_interval_typecheck
     def __ge__(self, other):
         return cmp_lower(self, other) in (0, 1) and cmp_upper(self, other) in (0, -1)
 
