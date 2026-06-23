@@ -86,7 +86,8 @@ class Interval(BaseInterval):
         if cmp_upper(self, other) != 1:
             return self
         if other.lower < self.upper or \
-            (other.lower == self.upper and other.lo_inc == self.up_inc == True):
+            (other.lower == self.upper and \
+             not (other.lo_inc == self.up_inc == False)):
             return Interval(self.lower, other.upper, self.lo_inc, other.up_inc)
         return MultiInterval((self, other))
 
@@ -148,6 +149,8 @@ class MultiInterval(BaseInterval):
             other = MultiInterval((other,))
         if not isinstance(other, MultiInterval):
             return NotImplemented
+        
+        # Interval 
         A, B = self.intervals, other.intervals
         result = []
         i = j = 0
