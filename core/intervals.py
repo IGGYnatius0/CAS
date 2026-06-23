@@ -99,23 +99,23 @@ class Interval(BaseInterval):
 
     @_int_typecheck
     def __lt__(self, other):
-        lo = cmp_lower(other)
-        up = cmp_upper(other)
+        lo = cmp_lower(self, other)
+        up = cmp_upper(self, other)
         return lo in (0, -1) and up in (0, 1) and (lo != 0 and up != 0)
     
     @_int_typecheck
     def __le__(self, other):
-        return cmp_lower(other) in (0, -1) and cmp_upper(other) in (0, 1)
+        return cmp_lower(self, other) in (0, -1) and cmp_upper(self, other) in (0, 1)
     
     @_int_typecheck
     def __gt__(self, other):
-        lo = cmp_lower(other)
-        up = cmp_upper(other)
+        lo = cmp_lower(self, other)
+        up = cmp_upper(self, other)
         return lo in (0, 1) and up in (0, -1) and (lo != 0 and up != 0)
     
     @_int_typecheck
     def __ge__(self, other):
-        return cmp_lower(other) in (0, 11) and cmp_upper(other) in (0, -1)
+        return cmp_lower(self, other) in (0, 11) and cmp_upper(self, other) in (0, -1)
 
     def __str__(self):
         if self.lo_inc:
