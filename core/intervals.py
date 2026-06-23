@@ -173,6 +173,9 @@ class MultiInterval(BaseInterval):
             return result[0]
         return MultiInterval(result)
 
+    def __rand__(self, other):
+        return self.__and__(other)
+
     def __or__(self, other):
         if isinstance(other, Interval):
             other = MultiInterval((other,))
@@ -205,9 +208,18 @@ class MultiInterval(BaseInterval):
         if len(result) == 1:
             return result[0]
         return MultiInterval(result)
+    
+    def __ror__(self, other):
+        return self.__or__(other)
 
     def __invert__(self):
-        pass
+        # TODO optimize this by going through self.intervals and directly
+        # creating new intervals in between the existing ones instead of
+        # and'ing the complement of every interval together
+        result = Interval()
+        for interval in self.intervals:
+            result &= ~interval
+        return result
 
     def __hash__(self):
         pass
@@ -242,4 +254,6 @@ if __name__ == '__main__':
     s1 = from_str('(-1, 3)')
     s2 = from_str('[5, 10]')
     s3 = from_str('[2, 7)')
-    print((s1 | s2) | s3)
+    s4 = (s1 | s2) & s3
+    print(s4)
+    print(~s4)
