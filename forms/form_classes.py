@@ -1,6 +1,5 @@
 from decimal import Decimal
 from itertools import product, chain
-from copy import deepcopy
 
 from core.core_classes import *
 from core.num import *
@@ -513,14 +512,10 @@ class FormSum(_FormSumTemplate):
         if isinstance(expr, Num):
             if self.isconst():
                 return SingleConstraint(self, expr, var_map)
-            # TODO this
-            # if expr == zero:
-            #     # If expr is zero, still can be matched if any of the factors match with zero
-            #     # since a zero in FormProd will make the whole thing zero
-            #     consts = [f for f in self.factors if f.isconst()]
-            #     if not consts:
-            #         return False
-            #     return FormProd(consts).match(zero, var_map)
+            if expr == zero:
+                # FormSum can match zero if all terms can match zero
+                zeros = [zero] * len(self.terms)
+                return self.match(Sum(zeros), var_map)
             return False
         if isinstance(expr, Sum) and len(self.terms) != len(expr.terms):
             # Padding by +0
@@ -607,10 +602,6 @@ class FormProd(_FormProdTemplate):
                     return False
                 return FormProd(consts).match(zero, var_map)
             return False
-        # if isinstance(expr, Prod):
-        #     pass
-        # if not isinstance(expr, Prod):
-        #     return self.match(Prod([expr, one]), var_map)
         if isinstance(expr, Prod) and len(self.factors) != len(expr.factors):
             # Padding by *1
             ones = [one] * (len(self.factors) - len(expr.factors))
@@ -831,7 +822,7 @@ if __name__ == '__main__':
     # form = (y**(a*b+c) + b*c*y - y/b).group_consts()
     # expr = x**-5 - 2*y + y/2
     form = a*y**2 + b*y + c
-    expr = x**2 - x
+    expr = 0
     print(form)
     print(expr)
     print(match(form, expr))
