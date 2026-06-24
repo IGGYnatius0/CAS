@@ -236,7 +236,6 @@ class MultiInterval(BaseInterval):
     def __ror__(self, other):
         return self.__or__(other)
 
-    @_multiinterval_typecheck
     def __invert__(self):
         # TODO optimize this by going through self.intervals and directly
         # creating new intervals in between the existing ones instead of
