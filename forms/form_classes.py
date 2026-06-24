@@ -510,14 +510,27 @@ class FormSum(_FormSumTemplate):
             self.terms = [zero]
 
     def match(self, expr, var_map):
-        # TODO zero case
-        # TODO padding by +0
         if isinstance(expr, Num):
             if self.isconst():
                 return SingleConstraint(self, expr, var_map)
+            # TODO this
+            # if expr == zero:
+            #     # If expr is zero, still can be matched if any of the factors match with zero
+            #     # since a zero in FormProd will make the whole thing zero
+            #     consts = [f for f in self.factors if f.isconst()]
+            #     if not consts:
+            #         return False
+            #     return FormProd(consts).match(zero, var_map)
             return False
+        if isinstance(expr, Sum) and len(self.terms) != len(expr.terms):
+            # Padding by +0
+            zeros = [zero] * (len(self.terms) - len(expr.terms))
+            terms = expr.terms + zeros
+            return self.match(Sum(terms), var_map)
         if not isinstance(expr, Sum):
-            return self.match(Sum([expr, zero]), var_map)
+            # Padding by +0
+            zeros = [zero] * (len(self.terms)-1)
+            return self.match(Sum([expr] + zeros), var_map)
         matches = MultiConstraint(len(self.terms), len(expr.terms))
         for i, ft in enumerate(self.terms):
             for j, et in enumerate(expr.terms):
@@ -583,14 +596,30 @@ class FormProd(_FormProdTemplate):
             self.factors = [one]
 
     def match(self, expr, var_map):
-        # TODO zero case
-        # TODO padding by *1
         if isinstance(expr, Num):
             if self.isconst():
                 return SingleConstraint(self, expr, var_map)
+            if expr == zero:
+                # If expr is zero, still can be matched if any of the factors match with zero
+                # since a zero in FormProd will make the whole thing zero
+                consts = [f for f in self.factors if f.isconst()]
+                if not consts:
+                    return False
+                return FormProd(consts).match(zero, var_map)
             return False
+        # if isinstance(expr, Prod):
+        #     pass
+        # if not isinstance(expr, Prod):
+        #     return self.match(Prod([expr, one]), var_map)
+        if isinstance(expr, Prod) and len(self.factors) != len(expr.factors):
+            # Padding by *1
+            ones = [one] * (len(self.factors) - len(expr.factors))
+            factors = expr.factors + ones
+            return self.match(Prod(factors), var_map)
         if not isinstance(expr, Prod):
-            return self.match(Prod([expr, one]), var_map)
+            # Padding by *1
+            ones = [one] * (len(self.factors)-1)
+            return self.match(Prod([expr] + ones), var_map)
         matches = MultiConstraint(len(self.factors), len(expr.factors))
         for i, ff in enumerate(self.factors):
             for j, ef in enumerate(expr.factors):
@@ -790,7 +819,6 @@ def match(form, expr):
 
 
 if __name__ == '__main__':
-    # TODO more advanced negative number matching, may be solved by padding by 0 and 1
     x = Var('x')
     y = FormVar('y')
     a = FormConst('a')
@@ -798,12 +826,12 @@ if __name__ == '__main__':
     c = FormConst('c')
     d = FormConst('d')
     e = FormConst('e')
-    form = (a*b*y**3 + b*c*y**2 + c*d*y + d).group_consts()
-    expr =  6*x**3   + 12*x**2  + 20*x  + 5
-    form = (y**(a*b+c) + b*c*y - y/b).group_consts()
-    expr = x**-5 - 2*y + y/2
-    # form = a*y**2 + b*y + c
-    # expr = x**2 - x - 6
+    # form = (a*b*y**3 + b*c*y**2 + c*d*y + d).group_consts()
+    # expr =  6*x**3   + 12*x**2  + 20*x  + 5
+    # form = (y**(a*b+c) + b*c*y - y/b).group_consts()
+    # expr = x**-5 - 2*y + y/2
+    form = a*y**2 + b*y + c
+    expr = x**2 - x
     print(form)
     print(expr)
     print(match(form, expr))
