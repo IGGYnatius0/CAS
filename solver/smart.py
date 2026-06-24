@@ -14,6 +14,7 @@ def match_form(expr):
 
 
 def replace_denoms(expr):
+    """Returns a new expr with denominators removed, also returns the removed denominators"""
     if isinstance(expr, Sum):
         muls = []
         while True:
