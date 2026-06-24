@@ -517,7 +517,7 @@ class FormSum(_FormSumTemplate):
                 zeros = [zero] * len(self.terms)
                 return self.match(Sum(zeros), var_map)
             return False
-        if isinstance(expr, Sum) and len(self.terms) != len(expr.terms):
+        if isinstance(expr, Sum) and len(self.terms) > len(expr.terms):
             # Padding by +0
             zeros = [zero] * (len(self.terms) - len(expr.terms))
             terms = expr.terms + zeros
