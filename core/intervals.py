@@ -2,6 +2,9 @@ from core.core_classes import *
 from core.num import *
 
 
+__all__ = ['Interval', 'MultiInterval']
+
+
 class BaseInterval:
     pass
 
