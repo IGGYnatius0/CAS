@@ -5,6 +5,8 @@ from core.core_classes import *
 from core.num import *
 
 
+# TODO add FormExp that can match anything, important for rewrite!!
+
 __all__ = ['FormNum', 'FormConst', 'FormVar', 'FormSum', 'FormProd', 'FormFrac', 'FormExp', 'match']
 
 
