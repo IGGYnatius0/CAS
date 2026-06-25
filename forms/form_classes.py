@@ -688,7 +688,23 @@ class FormExp(_FormExpTemplate):
 
 
 class FormExpr(_FormExprTemplate):
-    pass
+    def __init__(self, sym):
+        self.sym = sym
+
+    def match(self, expr, var_map):
+        return SingleConstraint(var_map=var_map)
+
+    def isconst(self):
+        return False
+
+    def group_consts(self):
+        return self
+
+    def get_consts(self):
+        return set()
+
+    def substitute(self, const_map):
+        return self
 
 
 def solve_constraints(constrs, n):
