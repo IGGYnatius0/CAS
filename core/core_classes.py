@@ -452,7 +452,7 @@ class Frac(_CoreFracTemplate):
         """Decomposes the expression into its constituent factors"""
         numers = self.numer.decomp()
         denoms = self.denom.decomp()
-        denoms = [Exp(denom, neg_one) for denom in denoms]
+        denoms = [denom ** neg_one for denom in denoms]
         return numers + denoms
 
     def simplify(self):
@@ -507,7 +507,7 @@ class Frac(_CoreFracTemplate):
     #     return Prod(numer_prod + denom_prod)
 
     def substitute(self, var_map):
-        return Frac(self.numer.substitute(var_map), self.denom.substitute(var_map))
+        return self.numer.substitute(var_map) / self.denom.substitute(var_map)
 
 
 class Exp(_CoreExpTemplate):
@@ -521,9 +521,9 @@ class Exp(_CoreExpTemplate):
         if i > zero:
             output = [self.base for _ in range(int(i))]
         else:
-            output = [Exp(self.base, neg_one) for _ in range(-int(i))]
+            output = [self.base ** neg_one for _ in range(-int(i))]
         if f != zero:
-            output.append(Exp(self.base, f))
+            output.append(self.base ** f)
         return output
 
     def simplify(self):
@@ -531,7 +531,7 @@ class Exp(_CoreExpTemplate):
         power = self.power.simplify()
         base = self.base.simplify()
         if isinstance(base, Exp):
-            return Exp(base.base, base.power * power).simplify()
+            return (base.base ** (base.power * power)).simplify()
         if base == one or (base != one and base != zero and power == zero):
             return one
         if base == zero and power != zero:
@@ -553,7 +553,7 @@ class Exp(_CoreExpTemplate):
     #     return Prod(self.decomp())
 
     def substitute(self, var_map):
-        return Exp(self.base.substitute(var_map), self.power.substitute(var_map))
+        return self.base.substitute(var_map) ** self.power.substitute(var_map)
 
 
 class Eqn(_CoreEqnTemplate):
