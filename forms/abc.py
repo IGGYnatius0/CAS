@@ -1,4 +1,4 @@
-from forms.form_classes import FormVar, FormConst
+from forms.form_classes import FormVar, FormConst, FormExpr
 
 # Variables are lowercase
 a = FormVar('a')
@@ -55,3 +55,15 @@ W = FormConst('W')
 X = FormConst('X')
 Y = FormConst('Y')
 Z = FormConst('Z')
+
+# Arbitrary expressions are "a"+number
+a1 = FormExpr('a1')
+a2 = FormExpr('a2')
+a3 = FormExpr('a3')
+a4 = FormExpr('a4')
+a5 = FormExpr('a5')
+a6 = FormExpr('a6')
+a7 = FormExpr('a7')
+a8 = FormExpr('a8')
+a9 = FormExpr('a9')
+a10 = FormExpr('a10')
