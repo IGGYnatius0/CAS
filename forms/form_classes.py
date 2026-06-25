@@ -4,6 +4,9 @@ from itertools import product, chain
 from core.core_classes import *
 from core.num import *
 
+# READ BEFORE ADDING!!
+# Every form class has to implement the following methods: (might use ABCs next time)
+# __hash__, match, isconst, group_consts, get_consts, substitute
 
 # TODO add FormExp that can match anything, important for rewrite!!
 
