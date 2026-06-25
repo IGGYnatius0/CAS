@@ -211,78 +211,8 @@ class _FormExpTemplate(_FormTemplate):
         return hash(('FormExp', self.base, self.power))
 
 
-# class _FormEqnTemplate:
-#     def __eq__(self, other):
-#         if not isinstance(other, _FormEqnTemplate):
-#             return False
-#         return ((self.lhs == other.lhs and self.rhs == other.rhs) or
-#                 (self.lhs == other.rhs and self.rhs == other.lhs))
-#
-#     def __add__(self, other):
-#         return FormEqn(self.lhs + other.lhs, self.rhs + other.rhs)
-#
-#     def __radd__(self, other):
-#         return FormEqn(other.lhs + self.lhs, other.rhs + self.rhs)
-#
-#     def __iadd__(self, other):
-#         self.rhs += other.rhs
-#         self.lhs += other.lhs
-#         return self
-#
-#     def __sub__(self, other):
-#         return FormEqn(self.lhs - other.lhs, self.rhs - other.rhs)
-#
-#     def __rsub__(self, other):
-#         return FormEqn(other.lhs - self.lhs, other.rhs - self.rhs)
-#
-#     def __isub__(self, other):
-#         self.rhs -= other.rhs
-#         self.lhs -= other.lhs
-#         return self
-#
-#     def __mul__(self, other):
-#         return FormEqn(self.lhs * other.lhs, self.rhs * other.rhs)
-#
-#     def __rmul__(self, other):
-#         return FormEqn(other.lhs * self.lhs, other.rhs * self.rhs)
-#
-#     def __imul__(self, other):
-#         self.rhs *= other.rhs
-#         self.lhs *= other.lhs
-#         return self
-#
-#     def __truediv__(self, other):
-#         return FormEqn(self.lhs / other.lhs, self.rhs / other.rhs)
-#
-#     def __rtruediv__(self, other):
-#         return FormEqn(other.lhs / self.lhs, other.rhs / self.rhs)
-#
-#     def __itruediv__(self, other):
-#         self.rhs /= other.rhs
-#         self.lhs /= other.lhs
-#         return self
-#
-#     def __pow__(self, power, modulo=None):
-#         if modulo is not None:
-#             raise NotImplementedError("Modulo functionality is not available")
-#         return FormEqn(self.lhs ** power.lhs, self.rhs ** power.rhs)
-#
-#     def __rpow__(self, other):
-#         return FormEqn(other.lhs ** self.lhs, other.rhs ** self.rhs)
-#
-#     def __ipow__(self, other):
-#         self.rhs **= other.rhs
-#         self.lhs **= other.lhs
-#         return self
-#
-#     def __str__(self):
-#         return f'{str(self.lhs)} = {str(self.rhs)}'
-#
-#     def __repr__(self):
-#         return f'FormEqn({repr(self.lhs)}, {repr(self.rhs)})'
-#
-#     def __hash__(self):
-#         return hash(('FormEqn', self.lhs, self.rhs))
+class _FormExprTemplate(_FormTemplate):
+    pass
 
 
 class SingleConstraint:
@@ -754,16 +684,8 @@ class FormExp(_FormExpTemplate):
         return FormExp(base, power)
 
 
-# class FormEqn(_FormEqnTemplate):
-#     def __init__(self, lhs, rhs):
-#         self.lhs = FormNum(lhs) if FormNum.isnum(lhs) else lhs
-#         self.rhs = FormNum(rhs) if FormNum.isnum(rhs) else rhs
-#
-#     def match(self, value, var_map):
-#         if not isinstance(value, Eqn):
-#             return False
-#         return ((self.lhs.match(value.lhs, var_map) and self.rhs.match(value.rhs, var_map)) or
-#                 (self.lhs.match(value.rhs, var_map) and self.rhs.match(value.lhs, var_map)))
+class FormExpr(_FormExprTemplate):
+    pass
 
 
 def solve_constraints(constrs, n):
