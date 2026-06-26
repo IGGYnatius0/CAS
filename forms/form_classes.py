@@ -697,12 +697,13 @@ class FormExpr(_FormExprTemplate):
 
     def match(self, expr, var_map):
         if self in var_map.keys():
-            match = var_map[self] == expr
-            if match:
-                return SingleConstraint(var_map=var_map)
+            if var_map[self] == expr:
+                return SingleConstraint(self, expr, var_map)
             return False
+        # if expr in var_map.values():
+        #     return False
         var_map[self] = expr
-        return SingleConstraint(var_map=var_map)
+        return SingleConstraint(self, expr, var_map)
 
     def isconst(self):
         return False
@@ -726,6 +727,7 @@ def solve_constraints(constrs, n):
         if constr.var_map is None:
             continue
         for form, var in constr.var_map.items():
+            print(form, var)
             if form in var_map.keys() or var in var_map.values():
                 return False
             var_map[form] = var
@@ -793,18 +795,18 @@ if __name__ == '__main__':
     # form = y + 2
     # expr = x + 2
 
-    # a1 = FormExpr('a1')
-    # a2 = FormExpr('a2')
-    # a3 = FormExpr('a3')
-    # form = a1**a2 * a1**a3
-    # expr = x**2 * x**3
+    a1 = FormExpr('a1')
+    a2 = FormExpr('a2')
+    a3 = FormExpr('a3')
+    form = a1**a2 * a1**a3
+    expr = x**2 * x**3
 
-    a = FormVar('a')
-    b = FormVar('b')
-    x = Var('x')
-    y = Var('y')
-    form = a + a
-    expr = x + y
+    # x = Var('x')
+    # y = Var('y')
+    # a = FormVar('a')
+    # b = FormVar('b')
+    # form = a + a
+    # expr = x + y
 
     print(form)
     print(expr)
