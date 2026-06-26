@@ -332,6 +332,8 @@ class MultiConstraint:
             temp = []
             for match in form_matches:
                 if isinstance(match, MultiConstraint) or (isinstance(match, SingleConstraint) and match.form is not None):
+                    # Since there is a 'is not None' check this part will catch all SingleConstraints
+                    # except those matching FormNum to Num
                     temp.extend(chain(*match.get_constraints()))
             if len(temp) > 0:
                 matches.append(temp)
@@ -412,15 +414,16 @@ class FormVar(_FormVarTemplate):
         self.sym = sym
 
     def match(self, expr, var_map):
+        # TODO make the check 2 way so that the same FormVar cannot match 2 Vars
         if not isinstance(expr, Var):
             return False
         if expr in var_map:
             match = var_map[expr] == self
             if match:
-                return SingleConstraint(var_map=var_map)
+                return SingleConstraint(self, expr, var_map)
             return False
         var_map[expr] = self
-        return SingleConstraint(var_map=var_map)
+        return SingleConstraint(self, expr, var_map)
 
     def isconst(self):
         return False
@@ -471,7 +474,8 @@ class FormSum(_FormSumTemplate):
         matches = MultiConstraint(len(self.terms), len(expr.terms))
         for i, ft in enumerate(self.terms):
             for j, et in enumerate(expr.terms):
-                match = ft.match(et, var_map)
+                match = ft.match(et, var_map.copy())
+                print(ft, et)
                 if match:
                     matches[i, j] = match
         if matches.check_validity():
@@ -556,7 +560,7 @@ class FormProd(_FormProdTemplate):
         matches = MultiConstraint(len(self.factors), len(expr.factors))
         for i, ff in enumerate(self.factors):
             for j, ef in enumerate(expr.factors):
-                matches[i, j] = ff.match(ef, var_map)
+                matches[i, j] = ff.match(ef, var_map.copy())
         if matches.check_validity():
             return matches
         return False
@@ -615,8 +619,8 @@ class FormFrac(_FormFracTemplate):
         if not isinstance(expr, Frac):
             return self.match(Frac(expr, one), var_map)
         matches = MultiConstraint(1, 2)
-        matches[0, 0] = self.numer.match(expr.numer, var_map)
-        matches[0, 1] = self.denom.match(expr.denom, var_map)
+        matches[0, 0] = self.numer.match(expr.numer, var_map.copy())
+        matches[0, 1] = self.denom.match(expr.denom, var_map.copy())
         if matches.check_validity():
             return matches
         return False
@@ -663,8 +667,8 @@ class FormExp(_FormExpTemplate):
         if not isinstance(expr, Exp):
             return self.match(Exp(expr, one), var_map)
         matches = MultiConstraint(1, 2)
-        matches[0, 0] = self.base.match(expr.base, var_map)
-        matches[0, 1] = self.power.match(expr.power, var_map)
+        matches[0, 0] = self.base.match(expr.base, var_map.copy())
+        matches[0, 1] = self.power.match(expr.power, var_map.copy())
         if matches.check_validity():
             return matches
         return False
@@ -717,8 +721,24 @@ class FormExpr(_FormExprTemplate):
 
 
 def solve_constraints(constrs, n):
-    const_map = {}
     constrs = list(constrs)
+
+    # Constructing a merged var_map from all the var_maps from the SingleConstraints
+    var_map = {}
+    for constr in constrs:
+        if constr.var_map is None:
+            continue
+        for expr, form in constr.var_map.items():
+            if expr in var_map and var_map[expr] != form:
+                return False
+            var_map[expr] = form
+
+    # There are no constants to solve for
+    if n == 0:
+        return {}, var_map
+
+    # Solving const_map from all the SingleConstraint.exprs and SingleConstraint.forms
+    const_map = {}
     n_passes = len(constrs) - len(const_map)
     i = 0
     while len(const_map) < n and i < n_passes:
@@ -728,7 +748,6 @@ def solve_constraints(constrs, n):
                 if constr.form in const_map:
                     return False
                 const_map[constr.form] = constr.value
-        pass # breakpoint position
         for j, constr in enumerate(constrs):
             # Substitute
             # Create new instance of SingleConstraint to prevent downstream SingleConstraints from getting modified
@@ -737,9 +756,9 @@ def solve_constraints(constrs, n):
             # Simplify
             constr.simplify() # FIXME change to out of place (inplace bad)
             constrs[j] = constr
-        i += 1 # breakpoint position
+        i += 1
     if len(const_map) == n:
-        return const_map
+        return const_map, var_map
     return False
 
 
@@ -755,8 +774,9 @@ def match(form, expr):
     # Calculating number of constants to solve for
     n = len(form.get_consts())
     for constr in matches:
-        const_map = solve_constraints(constr, n)
-        if const_map:
+        result = solve_constraints(constr, n)
+        if result:
+            const_map, var_map = result
             return {'consts': const_map, 'vars': var_map}
     return False
 
@@ -773,10 +793,21 @@ if __name__ == '__main__':
     # expr =  6*x**3   + 12*x**2  + 20*x  + 5
     # form = (y**(a*b+c) + b*c*y - y/b).group_consts()
     # expr = x**-5 - 2*y + y/2
-    # form = a*y**2 + b*y + c
-    # expr = 0
+    # form = y + 2
+    # expr = x + 2
 
+    # a1 = FormExpr('a1')
+    # a2 = FormExpr('a2')
+    # a3 = FormExpr('a3')
+    # form = a1**a2 * a1**a3
+    # expr = x**2 * x**3
 
+    a = FormVar('a')
+    b = FormVar('b')
+    x = Var('x')
+    y = Var('y')
+    form = a + b
+    expr = x + y
 
     print(form)
     print(expr)
