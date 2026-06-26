@@ -8,8 +8,6 @@ from core.num import *
 # Every form class has to implement the following methods: (might use ABCs next time)
 # __hash__, match, isconst, group_consts, get_consts, substitute
 
-# TODO add FormExp that can match anything, important for rewrite!!
-
 __all__ = ['FormNum', 'FormConst', 'FormVar', 'FormSum', 'FormProd', 'FormFrac', 'FormExp', 'match']
 
 
@@ -414,15 +412,15 @@ class FormVar(_FormVarTemplate):
         self.sym = sym
 
     def match(self, expr, var_map):
-        # TODO make the check 2 way so that the same FormVar cannot match 2 Vars
         if not isinstance(expr, Var):
             return False
-        if expr in var_map:
-            match = var_map[expr] == self
-            if match:
+        if self in var_map.keys():
+            if var_map[self] == expr:
                 return SingleConstraint(self, expr, var_map)
             return False
-        var_map[expr] = self
+        if expr in var_map.values():
+            return False
+        var_map[self] = expr
         return SingleConstraint(self, expr, var_map)
 
     def isconst(self):
@@ -475,7 +473,6 @@ class FormSum(_FormSumTemplate):
         for i, ft in enumerate(self.terms):
             for j, et in enumerate(expr.terms):
                 match = ft.match(et, var_map.copy())
-                print(ft, et)
                 if match:
                     matches[i, j] = match
         if matches.check_validity():
@@ -699,12 +696,12 @@ class FormExpr(_FormExprTemplate):
         self.sym = sym
 
     def match(self, expr, var_map):
-        if expr in var_map:
-            match = var_map[expr] == self
+        if self in var_map.keys():
+            match = var_map[self] == expr
             if match:
                 return SingleConstraint(var_map=var_map)
             return False
-        var_map[expr] = self
+        var_map[self] = expr
         return SingleConstraint(var_map=var_map)
 
     def isconst(self):
@@ -728,10 +725,10 @@ def solve_constraints(constrs, n):
     for constr in constrs:
         if constr.var_map is None:
             continue
-        for expr, form in constr.var_map.items():
-            if expr in var_map and var_map[expr] != form:
+        for form, var in constr.var_map.items():
+            if form in var_map.keys() or var in var_map.values():
                 return False
-            var_map[expr] = form
+            var_map[form] = var
 
     # There are no constants to solve for
     if n == 0:
@@ -806,7 +803,7 @@ if __name__ == '__main__':
     b = FormVar('b')
     x = Var('x')
     y = Var('y')
-    form = a + b
+    form = a + a
     expr = x + y
 
     print(form)
