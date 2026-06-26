@@ -454,21 +454,21 @@ class FormSum(_FormSumTemplate):
     def match(self, expr, var_map):
         if isinstance(expr, Num):
             if self.isconst():
-                return SingleConstraint(self, expr, var_map)
+                return SingleConstraint(self, expr, var_map.copy())
             if expr == zero:
                 # FormSum can match zero if all terms can match zero
                 zeros = [zero] * len(self.terms)
-                return self.match(Sum(zeros), var_map)
+                return self.match(Sum(zeros), var_map.copy())
             return False
         if isinstance(expr, Sum) and len(self.terms) > len(expr.terms):
             # Padding by +0
             zeros = [zero] * (len(self.terms) - len(expr.terms))
             terms = expr.terms + zeros
-            return self.match(Sum(terms), var_map)
+            return self.match(Sum(terms), var_map.copy())
         if not isinstance(expr, Sum):
             # Padding by +0
             zeros = [zero] * (len(self.terms)-1)
-            return self.match(Sum([expr] + zeros), var_map)
+            return self.match(Sum([expr] + zeros), var_map.copy())
         matches = MultiConstraint(len(self.terms), len(expr.terms))
         for i, ft in enumerate(self.terms):
             for j, et in enumerate(expr.terms):
@@ -536,24 +536,24 @@ class FormProd(_FormProdTemplate):
     def match(self, expr, var_map):
         if isinstance(expr, Num):
             if self.isconst():
-                return SingleConstraint(self, expr, var_map)
+                return SingleConstraint(self, expr, var_map.copy())
             if expr == zero:
                 # If expr is zero, still can be matched if any of the factors match with zero
                 # since a zero in FormProd will make the whole thing zero
                 consts = [f for f in self.factors if f.isconst()]
                 if not consts:
                     return False
-                return FormProd(consts).match(zero, var_map)
+                return FormProd(consts).match(zero, var_map.copy())
             return False
         if isinstance(expr, Prod) and len(self.factors) != len(expr.factors):
             # Padding by *1
             ones = [one] * (len(self.factors) - len(expr.factors))
             factors = expr.factors + ones
-            return self.match(Prod(factors), var_map)
+            return self.match(Prod(factors), var_map.copy())
         if not isinstance(expr, Prod):
             # Padding by *1
             ones = [one] * (len(self.factors)-1)
-            return self.match(Prod([expr] + ones), var_map)
+            return self.match(Prod([expr] + ones), var_map.copy())
         matches = MultiConstraint(len(self.factors), len(expr.factors))
         for i, ff in enumerate(self.factors):
             for j, ef in enumerate(expr.factors):
@@ -609,12 +609,12 @@ class FormFrac(_FormFracTemplate):
     def match(self, expr, var_map):
         if isinstance(expr, Num):
             if expr == zero:
-                return self.numer.match(zero, var_map)
+                return self.numer.match(zero, var_map.copy())
             if self.isconst():
-                return SingleConstraint(self, expr, var_map)
+                return SingleConstraint(self, expr, var_map.copy())
             return False
         if not isinstance(expr, Frac):
-            return self.match(Frac(expr, one), var_map)
+            return self.match(Frac(expr, one), var_map.copy())
         matches = MultiConstraint(1, 2)
         matches[0, 0] = self.numer.match(expr.numer, var_map.copy())
         matches[0, 1] = self.denom.match(expr.denom, var_map.copy())
@@ -651,18 +651,18 @@ class FormExp(_FormExpTemplate):
     def match(self, expr, var_map):
         if isinstance(expr, Num):
             if expr == zero or expr == one:
-                b1 = self.base.match(one, var_map)
+                b1 = self.base.match(one, var_map.copy())
                 if expr == one and b1:
                     return b1
-                b0 = self.base.match(zero, var_map)
-                p0 = self.power.match(zero, var_map)
+                b0 = self.base.match(zero, var_map.copy())
+                p0 = self.power.match(zero, var_map.copy())
                 if expr == zero and b0 and not p0:
                     return b0
             if self.isconst():
-                return SingleConstraint(self, expr, var_map)
+                return SingleConstraint(self, expr, var_map.copy())
             return False
         if not isinstance(expr, Exp):
-            return self.match(Exp(expr, one), var_map)
+            return self.match(Exp(expr, one), var_map.copy())
         matches = MultiConstraint(1, 2)
         matches[0, 0] = self.base.match(expr.base, var_map.copy())
         matches[0, 1] = self.power.match(expr.power, var_map.copy())
