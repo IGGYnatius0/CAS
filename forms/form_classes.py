@@ -215,7 +215,14 @@ class _FormExpTemplate(_FormTemplate):
 
 
 class _FormExprTemplate(_FormTemplate):
-    pass
+    def __str__(self):
+        return self.sym
+
+    def __repr__(self):
+        return f"FormExpr({self.sym})"
+
+    def __hash__(self):
+        return hash(('FormExpr', self.sym))
 
 
 class SingleConstraint:
