@@ -695,6 +695,12 @@ class FormExpr(_FormExprTemplate):
         self.sym = sym
 
     def match(self, expr, var_map):
+        if expr in var_map:
+            match = var_map[expr] == self
+            if match:
+                return SingleConstraint(var_map=var_map)
+            return False
+        var_map[expr] = self
         return SingleConstraint(var_map=var_map)
 
     def isconst(self):
@@ -769,8 +775,9 @@ if __name__ == '__main__':
     # expr = x**-5 - 2*y + y/2
     # form = a*y**2 + b*y + c
     # expr = 0
-    form = a / y
-    expr = 3 / x
+
+
+
     print(form)
     print(expr)
     print(match(form, expr))
