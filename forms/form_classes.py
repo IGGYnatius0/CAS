@@ -672,11 +672,9 @@ class FormFrac(_FormFracTemplate):
             return False
         if not isinstance(expr, Frac):
             return self.match(Frac(expr, one), var_map)
-        matches = MultiConstraint(2, 2)
+        matches = MultiConstraint(1, 2)
         matches[0, 0] = self.numer.match(expr.numer, var_map)
-        matches[0, 1] = self.numer.match(expr.denom, var_map)
-        matches[1, 0] = self.denom.match(expr.numer, var_map)
-        matches[1, 1] = self.denom.match(expr.denom, var_map)
+        matches[0, 1] = self.denom.match(expr.denom, var_map)
         if matches.check_validity():
             return matches
         return False
@@ -722,11 +720,9 @@ class FormExp(_FormExpTemplate):
             return False
         if not isinstance(expr, Exp):
             return self.match(Exp(expr, one), var_map)
-        matches = MultiConstraint(2, 2)
+        matches = MultiConstraint(1, 2)
         matches[0, 0] = self.base.match(expr.base, var_map)
-        matches[0, 1] = self.base.match(expr.power, var_map)
-        matches[1, 0] = self.power.match(expr.base, var_map)
-        matches[1, 1] = self.power.match(expr.power, var_map)
+        matches[0, 1] = self.power.match(expr.power, var_map)
         if matches.check_validity():
             return matches
         return False
@@ -821,8 +817,10 @@ if __name__ == '__main__':
     # expr =  6*x**3   + 12*x**2  + 20*x  + 5
     # form = (y**(a*b+c) + b*c*y - y/b).group_consts()
     # expr = x**-5 - 2*y + y/2
-    form = a*y**2 + b*y + c
-    expr = 0
+    # form = a*y**2 + b*y + c
+    # expr = 0
+    form = a / y
+    expr = 3 / x
     print(form)
     print(expr)
     print(match(form, expr))
