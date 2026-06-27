@@ -2,29 +2,31 @@ from core.core_classes import *
 from forms.form_classes import *
 
 
-__all__ = ['RewriteRule']
+__all__ = ['RewriteSet']
 
 
-class RewriteRule:
-    def __init__(self, form, news):
-        self.form = form
-        self.news = news
+class RewriteSet:
+    def __init__(self, *forms):
+        self.forms = forms
 
     def rewrite(self, expr, simplify=False):
         # TODO change to generator?
-        result = match(self.form, expr)
-        if result:
-            const_map, var_map = result['consts'], result['vars']
+        # Finding which form exr matches, if any
+        for i, form in enumerate(self.forms):
+            result = match(form, expr)
+            if result:
+                const_map, var_map = result['consts'], result['vars']
+                idx = i
         else:
             return []
-        news = []
-        if simplify:
-            for new in self.news:
-                news.append(substitute(new, const_map, var_map).simplify())
-        else:
-            for new in self.news:
-                news.append(substitute(new, const_map, var_map))
-        return news
+        # Transform to the rest of the forms
+        new = []
+        for i, form in enumerate(self.forms):
+            if simplify:
+                new.append(substitute(form, const_map, var_map).simplify())
+            else:
+                new.append(substitute(form, const_map, var_map))
+        return new
 
 
 def substitute(form, const_map, var_map):

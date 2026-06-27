@@ -1,14 +1,14 @@
-from solver.rewrite.base import RewriteRule
+from solver.rewrite.base import RewriteSet
 from forms.abc import *
 
 
-prod_exp = RewriteRule(
+prod_exp = RewriteSet(
     a1**a2 * a1**a3,
-    [a1 ** (a2+a3)]
+    a1 ** (a2+a3)
 )
-quot_exp = RewriteRule(
+quot_exp = RewriteSet(
     a1**a2 / a1**a3,
-    [a1 ** (a2-a3)]
+    a1 ** (a2-a3)
 )
 
 
