@@ -10,16 +10,20 @@ class RewriteRule:
         self.form = form
         self.news = news
 
-    def rewrite(self, expr):
+    def rewrite(self, expr, simplify=False):
         # TODO change to generator?
-        match = self.form.match(expr)
-        if match:
-            const_map, var_map = match['consts'], match['vars']
+        result = match(self.form, expr)
+        if result:
+            const_map, var_map = result['consts'], result['vars']
         else:
             return []
         news = []
-        for new in self.news:
-            news.append(substitute(new, const_map, var_map))
+        if simplify:
+            for new in self.news:
+                news.append(substitute(new, const_map, var_map).simplify())
+        else:
+            for new in self.news:
+                news.append(substitute(new, const_map, var_map))
         return news
 
 
