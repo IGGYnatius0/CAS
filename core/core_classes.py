@@ -327,6 +327,7 @@ class Sum(_CoreSumTemplate):
         decomp = [term.decomp() for term in self.terms]
         gcd = one
         decomp0 = decomp[0].copy()
+        # TODO use collections.Counter to optimise
         for factor in decomp0:
             if all([factor in factors for factors in decomp]):
                 for factors in decomp:
@@ -475,6 +476,7 @@ class Frac(_CoreFracTemplate):
         denom_decomp = denom_flat.decomp()
 
         # Removing common factors
+        # TODO use collections.Counter to optimise
         for factor in reversed(numer_decomp):
             if factor in denom_decomp:
                 numer_decomp.remove(factor)
