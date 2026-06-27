@@ -369,7 +369,7 @@ class Prod(_CoreProdTemplate):
 
     def group(self):
         """Collects like factors into exponents"""
-        unique = {}
+        unique = defaultdict(int)
         const = 1
         for factor in self.factors:
             # Multiplying to get constant
@@ -378,15 +378,10 @@ class Prod(_CoreProdTemplate):
                 continue
             # Accumulating powers of like factors
             if isinstance(factor, Exp):
-                if factor.base in unique.keys():
-                    unique[factor.base] += factor.power
-                else:
-                    unique[factor.base] = factor.power
+                base, power = factor.base, factor.power
             else:
-                if factor in unique.keys():
-                    unique[factor] += 1
-                else:
-                    unique[factor] = 1
+                base, power = factor, 1
+            unique[base] += power
         output = [base ** power for base, power in unique.items()]
         return const * Prod(output)
 
