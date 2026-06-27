@@ -217,7 +217,7 @@ class _FormExprTemplate(_FormTemplate):
         return self.sym
 
     def __repr__(self):
-        return f"FormExpr({self.sym})"
+        return f"FormExpr('{self.sym}')"
 
     def __hash__(self):
         return hash(('FormExpr', self.sym))
