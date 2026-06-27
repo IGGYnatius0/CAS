@@ -1,3 +1,4 @@
+from collections import defaultdict
 from itertools import product
 from core.num import *
 
@@ -291,7 +292,7 @@ class Sum(_CoreSumTemplate):
     def group(self):
         """Collects like terms"""
         decomp = [term.group().decomp() for term in self.terms]
-        unique = {}
+        unique = defaultdict(int)
         for term in decomp:
             # Multiplying constants in each term to get coefficient
             coeff = one
@@ -300,10 +301,7 @@ class Sum(_CoreSumTemplate):
                     coeff *= term.pop(i)
             # Accumulating coefficients of like terms
             term = Prod(term) # term was a list
-            if term in unique.keys():
-                unique[term] += coeff
-            else:
-                unique[term] = coeff
+            unique[term] += coeff
         output = [coeff * term for term, coeff in unique.items()]
         return Sum(output)
 
