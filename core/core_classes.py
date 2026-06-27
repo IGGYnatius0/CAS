@@ -1,3 +1,4 @@
+from collections import defaultdict
 from itertools import product
 from core.num import *
 
@@ -291,7 +292,7 @@ class Sum(_CoreSumTemplate):
     def group(self):
         """Collects like terms"""
         decomp = [term.group().decomp() for term in self.terms]
-        unique = {}
+        unique = defaultdict(int)
         for term in decomp:
             # Multiplying constants in each term to get coefficient
             coeff = one
@@ -300,10 +301,7 @@ class Sum(_CoreSumTemplate):
                     coeff *= term.pop(i)
             # Accumulating coefficients of like terms
             term = Prod(term) # term was a list
-            if term in unique.keys():
-                unique[term] += coeff
-            else:
-                unique[term] = coeff
+            unique[term] += coeff
         output = [coeff * term for term, coeff in unique.items()]
         return Sum(output)
 
@@ -329,6 +327,7 @@ class Sum(_CoreSumTemplate):
         decomp = [term.decomp() for term in self.terms]
         gcd = one
         decomp0 = decomp[0].copy()
+        # TODO use collections.Counter to optimise
         for factor in decomp0:
             if all([factor in factors for factors in decomp]):
                 for factors in decomp:
@@ -371,7 +370,7 @@ class Prod(_CoreProdTemplate):
 
     def group(self):
         """Collects like factors into exponents"""
-        unique = {}
+        unique = defaultdict(int)
         const = 1
         for factor in self.factors:
             # Multiplying to get constant
@@ -380,15 +379,10 @@ class Prod(_CoreProdTemplate):
                 continue
             # Accumulating powers of like factors
             if isinstance(factor, Exp):
-                if factor.base in unique.keys():
-                    unique[factor.base] += factor.power
-                else:
-                    unique[factor.base] = factor.power
+                base, power = factor.base, factor.power
             else:
-                if factor in unique.keys():
-                    unique[factor] += 1
-                else:
-                    unique[factor] = 1
+                base, power = factor, 1
+            unique[base] += power
         output = [base ** power for base, power in unique.items()]
         return const * Prod(output)
 
@@ -482,6 +476,7 @@ class Frac(_CoreFracTemplate):
         denom_decomp = denom_flat.decomp()
 
         # Removing common factors
+        # TODO use collections.Counter to optimise
         for factor in reversed(numer_decomp):
             if factor in denom_decomp:
                 numer_decomp.remove(factor)

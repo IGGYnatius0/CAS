@@ -1,6 +1,6 @@
 from decimal import Decimal
 from itertools import product, chain, permutations
-from collections import Counter
+from collections import defaultdict, Counter
 
 from core.core_classes import *
 from core.num import *
