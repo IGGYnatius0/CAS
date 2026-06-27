@@ -1,5 +1,5 @@
 from decimal import Decimal
-from itertools import product, chain
+from itertools import product, chain, permutations
 
 from core.core_classes import *
 from core.num import *
@@ -492,7 +492,9 @@ class FormSum(_FormSumTemplate):
                 zeros = [zero] * len(self.terms)
                 return self.match(Sum(zeros), var_map.copy())
             return False
-        if isinstance(expr, Sum) and len(self.terms) > len(expr.terms):
+        if isinstance(expr, Sum) and len(self.terms) != len(expr.terms):
+            if len(expr.terms) > len(self.terms):
+                return False
             # Padding by +0
             zeros = [zero] * (len(self.terms) - len(expr.terms))
             terms = expr.terms + zeros
@@ -578,6 +580,8 @@ class FormProd(_FormProdTemplate):
                 return FormProd(consts).match(zero, var_map.copy())
             return False
         if isinstance(expr, Prod) and len(self.factors) != len(expr.factors):
+            if len(expr.factors) > len(self.factors):
+                return False
             # Padding by *1
             ones = [one] * (len(self.factors) - len(expr.factors))
             factors = expr.factors + ones
@@ -827,18 +831,20 @@ if __name__ == '__main__':
     # form = y + 2
     # expr = x + 2
 
-    a1 = FormExpr('a1')
-    a2 = FormExpr('a2')
-    a3 = FormExpr('a3')
-    form = a1**a2 * a1**a3
-    expr = x**2 * x**3
+    # a1 = FormExpr('a1')
+    # a2 = FormExpr('a2')
+    # a3 = FormExpr('a3')
+    # form = a1**a2 * a1**a3
+    # expr = x**2 * x**3
 
-    # x = Var('x')
-    # y = Var('y')
-    # a = FormVar('a')
-    # b = FormVar('b')
-    # form = a + a
-    # expr = x + y
+    x = Var('x')
+    y = Var('y')
+    z = Var('z')
+    a = FormVar('a')
+    b = FormVar('b')
+    c = FormVar('c')
+    form = a*b + c
+    expr = x*y + z
 
     print(form)
     print(expr)
