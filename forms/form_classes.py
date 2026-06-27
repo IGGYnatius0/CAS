@@ -1,5 +1,6 @@
 from decimal import Decimal
 from itertools import product, chain, permutations
+from collections import Counter
 
 from core.core_classes import *
 from core.num import *
@@ -446,7 +447,7 @@ class FormVar(_FormVarTemplate):
     def match(self, expr, var_map):
         if not isinstance(expr, Var):
             return False
-        if self in var_map.keys():
+        if self in var_map:
             if var_map[self] == expr:
                 return SingleConstraint(self, expr, var_map)
             return False
@@ -651,9 +652,11 @@ class FormFrac(_FormFracTemplate):
             return False
         if not isinstance(expr, Frac):
             return self.match(Frac(expr, one), var_map.copy())
-        matches = MultiConstraint(1, 2)
+        matches = MultiConstraint(2, 2)
         matches[0, 0] = self.numer.match(expr.numer, var_map.copy())
-        matches[0, 1] = self.denom.match(expr.denom, var_map.copy())
+        matches[1, 1] = self.denom.match(expr.denom, var_map.copy())
+        matches[0, 1] = False
+        matches[1, 0] = False
         if matches.check_validity():
             return matches
         return False
@@ -699,9 +702,11 @@ class FormExp(_FormExpTemplate):
             return False
         if not isinstance(expr, Exp):
             return self.match(Exp(expr, one), var_map.copy())
-        matches = MultiConstraint(1, 2)
+        matches = MultiConstraint(2, 2)
         matches[0, 0] = self.base.match(expr.base, var_map.copy())
-        matches[0, 1] = self.power.match(expr.power, var_map.copy())
+        matches[1, 1] = self.power.match(expr.power, var_map.copy())
+        matches[0, 1] = False
+        matches[1, 0] = False
         if matches.check_validity():
             return matches
         return False
@@ -732,12 +737,10 @@ class FormExpr(_FormExprTemplate):
         self.sym = sym
 
     def match(self, expr, var_map):
-        if self in var_map.keys():
+        if self in var_map:
             if var_map[self] == expr:
                 return SingleConstraint(self, expr, var_map)
             return False
-        # if expr in var_map.values():
-        #     return False
         var_map[self] = expr
         return SingleConstraint(self, expr, var_map)
 
@@ -764,7 +767,10 @@ def solve_constraints(constrs, n):
             continue
         for form, var in constr.var_map.items():
             print(form, var)
-            if form in var_map.keys() or var in var_map.values():
+            if form in var_map:
+                if var_map[form] != var:
+                    return False
+            if isinstance(form, FormVar) and Counter(var_map.values())[var] != 1:
                 return False
             var_map[form] = var
 
@@ -831,20 +837,20 @@ if __name__ == '__main__':
     # form = y + 2
     # expr = x + 2
 
-    # a1 = FormExpr('a1')
-    # a2 = FormExpr('a2')
-    # a3 = FormExpr('a3')
-    # form = a1**a2 * a1**a3
-    # expr = x**2 * x**3
+    a1 = FormExpr('a1')
+    a2 = FormExpr('a2')
+    a3 = FormExpr('a3')
+    form = a1**a2 * a1**a3
+    expr = x**2 * x**2
 
-    x = Var('x')
-    y = Var('y')
-    z = Var('z')
-    a = FormVar('a')
-    b = FormVar('b')
-    c = FormVar('c')
-    form = a*b + c
-    expr = x*y + z
+    # x = Var('x')
+    # y = Var('y')
+    # z = Var('z')
+    # a = FormVar('a')
+    # b = FormVar('b')
+    # c = FormVar('c')
+    # form = a*b + c
+    # expr = x*y + z
 
     print(form)
     print(expr)
