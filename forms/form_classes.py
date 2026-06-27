@@ -117,6 +117,17 @@ class _FormVarTemplate(_FormTemplate):
         return hash(('FormVar', self.sym))
 
 
+class _FormExprTemplate(_FormTemplate):
+    def __str__(self):
+        return self.sym
+
+    def __repr__(self):
+        return f"FormExpr('{self.sym}')"
+
+    def __hash__(self):
+        return hash(('FormExpr', self.sym))
+
+
 class _FormSumTemplate(_FormTemplate):
     def __str__(self):
         terms = [str(term) for term in self.terms]
@@ -211,17 +222,6 @@ class _FormExpTemplate(_FormTemplate):
 
     def __hash__(self):
         return hash(('FormExp', self.base, self.power))
-
-
-class _FormExprTemplate(_FormTemplate):
-    def __str__(self):
-        return self.sym
-
-    def __repr__(self):
-        return f"FormExpr('{self.sym}')"
-
-    def __hash__(self):
-        return hash(('FormExpr', self.sym))
 
 
 class SingleConstraint:
@@ -455,6 +455,31 @@ class FormVar(_FormVarTemplate):
             return False
         var_map[self] = expr
         return SingleConstraint(self, expr, var_map)
+
+
+class FormExpr(_FormExprTemplate):
+    def __init__(self, sym):
+        self.sym = sym
+
+    def match(self, expr, var_map):
+        if self in var_map:
+            if var_map[self] == expr:
+                return SingleConstraint(self, expr, var_map)
+            return False
+        var_map[self] = expr
+        return SingleConstraint(self, expr, var_map)
+
+    def isconst(self):
+        return False
+
+    def group_consts(self):
+        return self
+
+    def get_consts(self):
+        return set()
+
+    def substitute(self, const_map):
+        return self
 
     def isconst(self):
         return False
@@ -730,31 +755,6 @@ class FormExp(_FormExpTemplate):
         if isinstance(base, FormNum) and isinstance(power, FormNum):
             return base ** power
         return FormExp(base, power)
-
-
-class FormExpr(_FormExprTemplate):
-    def __init__(self, sym):
-        self.sym = sym
-
-    def match(self, expr, var_map):
-        if self in var_map:
-            if var_map[self] == expr:
-                return SingleConstraint(self, expr, var_map)
-            return False
-        var_map[self] = expr
-        return SingleConstraint(self, expr, var_map)
-
-    def isconst(self):
-        return False
-
-    def group_consts(self):
-        return self
-
-    def get_consts(self):
-        return set()
-
-    def substitute(self, const_map):
-        return self
 
 
 def solve_constraints(constrs, n):
