@@ -766,7 +766,6 @@ def solve_constraints(constrs, n):
         if constr.var_map is None:
             continue
         for form, var in constr.var_map.items():
-            print(form, var)
             if form in var_map:
                 if var_map[form] != var:
                     return False
