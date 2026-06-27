@@ -9,7 +9,7 @@ from core.num import *
 # Every form class has to implement the following methods: (might use ABCs next time)
 # __hash__, match, isconst, group_consts, get_consts, substitute
 
-__all__ = ['FormNum', 'FormConst', 'FormVar', 'FormSum', 'FormProd', 'FormFrac', 'FormExp', 'match']
+__all__ = ['FormNum', 'FormConst', 'FormVar', 'FormSum', 'FormProd', 'FormFrac', 'FormExp', 'FormExpr', 'match']
 
 
 class _FormTemplate:
