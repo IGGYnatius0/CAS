@@ -17,11 +17,14 @@ class RewriteSet:
             if result:
                 const_map, var_map = result['consts'], result['vars']
                 idx = i
+                break
         else:
             return []
         # Transform to the rest of the forms
         new = []
         for i, form in enumerate(self.forms):
+            if i == idx:
+                continue
             if simplify:
                 new.append(substitute(form, const_map, var_map).simplify())
             else:
@@ -45,7 +48,6 @@ def substitute(form, const_map, var_map):
     if isinstance(form, FormExp):
         return sub_exp(form, const_map, var_map)
     return form
-
 
 
 def sub_const(form: FormConst, const_map: dict, var_map: dict):
