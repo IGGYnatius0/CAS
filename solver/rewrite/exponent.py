@@ -1,14 +1,31 @@
 from solver.rewrite.base import RewriteSet
 from forms.abc import *
+from core.num import *
 
 
-prod_exp = RewriteSet(
+pow_add = RewriteSet(
     a1**a2 * a1**a3,
     a1 ** (a2+a3)
 )
-quot_exp = RewriteSet(
+pow_sub = RewriteSet(
     a1**a2 / a1**a3,
     a1 ** (a2-a3)
+)
+prod_exp = RewriteSet(
+    a1**32 * a2**a3,
+    (a1*a2) ** a3
+)
+frac_exp = RewriteSet(
+    a1**a3 / a2**a3,
+    (a1/a2) ** a3
+)
+pow_exp = RewriteSet(
+    (a1**a2) ** a3,
+    a1 ** (a2*a3)
+)
+neg_pow = RewriteSet(
+    a1**a2,
+    one / a1**-a2
 )
 
 
