@@ -1,5 +1,5 @@
 from decimal import Decimal
-from itertools import product, chain, permutations
+from itertools import product, chain
 from collections import defaultdict, Counter
 
 from core.core_classes import *
@@ -389,9 +389,10 @@ class SingleConstraint:
 
 
 class MultiConstraint:
-    def __init__(self, fsize, esize):
-        self.matches = [[False] * esize for _ in range(fsize)]
-        self.nmatches = [0] * fsize
+    def __init__(self, size):
+        self.size = size
+        self.matches = [[False] * size for _ in range(size)]
+        self.nmatches = [0] * size
 
     def check_validity(self):
         """Checks if every row and column of self.matches has at least 1 constraint"""
