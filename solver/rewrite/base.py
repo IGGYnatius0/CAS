@@ -67,7 +67,10 @@ class RewriteRule:
     def rewrite(self, expr, simplify=False):
         result = match(self.form, expr)
         if result:
-            new = substitute(self.target, *result)
+            const_map, var_map = result['consts'], result['vars']
+            new = substitute(self.target, const_map, var_map)
+            if simplify:
+                new = new.simplify()
             return [new]
         else:
             return []
