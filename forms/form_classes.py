@@ -619,7 +619,7 @@ class FormSum(_FormSumTemplate):
             # Padding by +0
             zeros = [zero] * (len(self.terms)-1)
             return self.match(Sum([expr] + zeros), var_map.copy())
-        matches = MultiConstraint(len(self.terms), len(expr.terms))
+        matches = MultiConstraint(len(self.terms))
         for i, ft in enumerate(self.terms):
             for j, et in enumerate(expr.terms):
                 match = ft.match(et, var_map.copy())
@@ -706,7 +706,7 @@ class FormProd(_FormProdTemplate):
             # Padding by *1
             ones = [one] * (len(self.factors)-1)
             return self.match(Prod([expr] + ones), var_map.copy())
-        matches = MultiConstraint(len(self.factors), len(expr.factors))
+        matches = MultiConstraint(len(self.factors))
         for i, ff in enumerate(self.factors):
             for j, ef in enumerate(expr.factors):
                 matches[i, j] = ff.match(ef, var_map.copy())
@@ -770,8 +770,6 @@ class FormFrac(_FormFracTemplate):
         matches = MultiConstraint(2, 2)
         matches[0, 0] = self.numer.match(expr.numer, var_map.copy())
         matches[1, 1] = self.denom.match(expr.denom, var_map.copy())
-        matches[0, 1] = False
-        matches[1, 0] = False
         if matches.check_validity():
             return matches
         return False
@@ -820,8 +818,6 @@ class FormExp(_FormExpTemplate):
         matches = MultiConstraint(2, 2)
         matches[0, 0] = self.base.match(expr.base, var_map.copy())
         matches[1, 1] = self.power.match(expr.power, var_map.copy())
-        matches[0, 1] = False
-        matches[1, 0] = False
         if matches.check_validity():
             return matches
         return False
