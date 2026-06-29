@@ -61,7 +61,7 @@ def sub_exp(form: FormExp, const_map: dict, var_map: dict):
 
 class RewriteRule:
     def __init__(self, form, target):
-        self.match = form
+        self.form = form
         self.target = target
 
     def rewrite(self, expr, simplify=False):
