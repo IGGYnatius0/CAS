@@ -3,30 +3,30 @@ from forms.abc import *
 from core.num import *
 
 
-pow_add = RewriteSet((
-    a1**a2 * a1**a3,
-    a1 ** (a2+a3)
-))
-pow_sub = RewriteSet((
-    a1**a2 / a1**a3,
-    a1 ** (a2-a3)
-))
-prod_exp = RewriteSet((
-    a1**32 * a2**a3,
-    (a1*a2) ** a3
-))
-frac_exp = RewriteSet((
-    a1**a3 / a2**a3,
-    (a1/a2) ** a3
-))
-pow_exp = RewriteSet((
-    (a1**a2) ** a3,
-    a1 ** (a2*a3)
-))
-neg_pow = RewriteSet((
-    a1**a2,
-    one / a1**-a2
-))
+pow_add = RewriteRule(
+    form=a1**a2 * a1**a3,
+    target=a1 ** (a2+a3)
+)
+pow_sub = RewriteRule(
+    form=a1**a2 / a1**a3,
+    target=a1 ** (a2-a3)
+)
+prod_exp = RewriteRule(
+    form=a1**a3 * a2**a3,
+    target=(a1*a2) ** a3
+)
+frac_exp = RewriteRule(
+    form=a1**a3 / a2**a3,
+    target=(a1/a2) ** a3
+)
+pow_exp = RewriteRule(
+    form=(a1**a2) ** a3,
+    target=a1 ** (a2*a3)
+)
+neg_pow = RewriteRule(
+    form=a1**a2,
+    target=one / a1**-a2
+)
 exp_rules = RewriteGroup((
     pow_add, pow_sub, prod_exp, frac_exp, pow_exp, neg_pow
 ))
