@@ -2,7 +2,7 @@ from core.core_classes import *
 from forms.form_classes import *
 
 
-__all__ = ['RewriteSet', 'RewriteGroup']
+__all__ = ['RewriteRule', 'RewriteSet', 'RewriteGroup']
 
 
 def substitute(form, const_map, var_map):
