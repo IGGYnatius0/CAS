@@ -2,34 +2,7 @@ from core.core_classes import *
 from forms.form_classes import *
 
 
-__all__ = ['RewriteSet']
-
-
-class RewriteSet:
-    def __init__(self, *forms):
-        self.forms = forms
-
-    def rewrite(self, expr, simplify=False):
-        # TODO change to generator?
-        # Finding which form exr matches, if any
-        for i, form in enumerate(self.forms):
-            result = match(form, expr)
-            if result:
-                const_map, var_map = result['consts'], result['vars']
-                idx = i
-                break
-        else:
-            return []
-        # Transform to the rest of the forms
-        new = []
-        for i, form in enumerate(self.forms):
-            if i == idx:
-                continue
-            if simplify:
-                new.append(substitute(form, const_map, var_map).simplify())
-            else:
-                new.append(substitute(form, const_map, var_map))
-        return new
+__all__ = ['RewriteSet', 'RewriteGroup']
 
 
 def substitute(form, const_map, var_map):
@@ -84,3 +57,41 @@ def sub_frac(form: FormFrac, const_map: dict, var_map: dict):
 def sub_exp(form: FormExp, const_map: dict, var_map: dict):
     return Exp(substitute(form.base, const_map, var_map),
                substitute(form.power, const_map, var_map))
+
+
+class RewriteSet:
+    def __init__(self, forms):
+        self.forms = forms
+
+    def rewrite(self, expr, simplify=False):
+        # TODO change to generator?
+        # Finding which form exr matches, if any
+        for i, form in enumerate(self.forms):
+            result = match(form, expr)
+            if result:
+                const_map, var_map = result['consts'], result['vars']
+                idx = i
+                break
+        else:
+            return []
+        # Transform to the rest of the forms
+        new = []
+        for i, form in enumerate(self.forms):
+            if i == idx:
+                continue
+            if simplify:
+                new.append(substitute(form, const_map, var_map).simplify())
+            else:
+                new.append(substitute(form, const_map, var_map))
+        return new
+
+
+class RewriteGroup:
+    def __init__(self, rules):
+        self.rules = rules
+
+    def rewrite(self, expr, simplify=False):
+        new = []
+        for rule in self.rules:
+            new.extend(rule.rewrite(expr, simplify))
+        return new
