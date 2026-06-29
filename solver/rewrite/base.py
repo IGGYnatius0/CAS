@@ -64,7 +64,7 @@ class RewriteRule:
         self.form = form
         self.target = target
 
-    def rewrite(self, expr, simplify=False):
+    def rewrite(self, expr, simplify=True):
         result = match(self.form, expr)
         if result:
             const_map, var_map = result['consts'], result['vars']
@@ -82,7 +82,7 @@ class RewriteSet:
     def __init__(self, forms):
         self.forms = forms
 
-    def rewrite(self, expr, simplify=False):
+    def rewrite(self, expr, simplify=True):
         # TODO change to generator?
         # Finding which form exr matches, if any
         for i, form in enumerate(self.forms):
@@ -110,7 +110,7 @@ class RewriteGroup:
     def __init__(self, rules):
         self.rules = rules
 
-    def rewrite(self, expr, simplify=False):
+    def rewrite(self, expr, simplify=True):
         new = []
         for rule in self.rules:
             new.extend(rule.rewrite(expr, simplify))
