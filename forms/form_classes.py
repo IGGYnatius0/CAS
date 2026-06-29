@@ -846,6 +846,40 @@ class FormExp(_FormExpTemplate):
         return FormExp(base, power)
 
 
+class FormEqn(_FormEqnTemplate):
+    def __init__(self, lhs, rhs):
+        self.lhs = lhs
+        self.rhs = rhs
+    
+    def match(self, expr, var_map):
+        if not isinstance(expr, Eqn):
+            return False
+        matches = MultiConstraint(2, 2)
+        matches[0, 0] = self.lhs.match(expr.lhs, var_map.copy())
+        matches[0, 1] = self.lhs.match(expr.rhs, var_map.copy())
+        matches[1, 0] = self.rhs.match(expr.lhs, var_map.copy())
+        matches[1, 1] = self.rhs.match(expr.rhs, var_map.copy())
+        if matches.check_validity():
+            return matches
+        return False
+
+    def isconst(self):
+        if not self.lhs.isconst():
+            return False
+        if not self.rhs.isconst():
+            return False
+        return True
+    
+    def group_consts(self):
+        return FormEqn(self.lhs.group_consts(), self.rhs.group_consts())
+
+    def get_consts(self):
+        return self.lhs.get_consts() | self.rhs.get_consts()
+
+    def substitute(self, const_map):
+        return FormEqn(self.lhs.substitute(const_map), self.rhs.substitute(const_map))
+
+
 def solve_constraints(constrs, n):
     constrs = list(constrs)
 
