@@ -71,6 +71,8 @@ class RewriteRule:
             new = substitute(self.target, const_map, var_map)
             if simplify:
                 new = new.simplify()
+            if new == expr: # Dont return the same thing
+                return []
             return [new]
         else:
             return []
@@ -96,10 +98,11 @@ class RewriteSet:
         for i, form in enumerate(self.forms):
             if i == idx:
                 continue
+            temp = substitute(form, const_map, var_map)
             if simplify:
-                new.append(substitute(form, const_map, var_map).simplify())
-            else:
-                new.append(substitute(form, const_map, var_map))
+                temp = temp.simplify()
+            if temp != expr: # Dont return the same thing
+                new.append(temp)
         return new
 
 
