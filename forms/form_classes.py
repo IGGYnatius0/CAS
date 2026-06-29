@@ -545,6 +545,18 @@ class FormVar(_FormVarTemplate):
         var_map[self] = expr
         return SingleConstraint(self, expr, var_map)
 
+    def isconst(self):
+        return False
+
+    def group_consts(self):
+        return self
+
+    def get_consts(self):
+        return set()
+
+    def substitute(self, const_map):
+        return self
+
 
 class FormExpr(_FormExprTemplate):
     def __init__(self, sym):
@@ -557,18 +569,6 @@ class FormExpr(_FormExprTemplate):
             return False
         var_map[self] = expr
         return SingleConstraint(self, expr, var_map)
-
-    def isconst(self):
-        return False
-
-    def group_consts(self):
-        return self
-
-    def get_consts(self):
-        return set()
-
-    def substitute(self, const_map):
-        return self
 
     def isconst(self):
         return False
