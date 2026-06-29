@@ -561,8 +561,8 @@ class Eqn(_CoreEqnTemplate):
         rhs = self.rhs.simplify()
         return Eqn(lhs, rhs)
 
-    def isequal(self):
-        return self.lhs == self.rhs
+    # def isequal(self):
+    #     return self.lhs == self.rhs
 
     def swap(self):
         return Eqn(self.rhs, self.lhs)
