@@ -767,7 +767,7 @@ class FormFrac(_FormFracTemplate):
             return False
         if not isinstance(expr, Frac):
             return self.match(Frac(expr, one), var_map.copy())
-        matches = MultiConstraint(2, 2)
+        matches = MultiConstraint(2)
         matches[0, 0] = self.numer.match(expr.numer, var_map.copy())
         matches[1, 1] = self.denom.match(expr.denom, var_map.copy())
         if matches.check_validity():
@@ -815,7 +815,7 @@ class FormExp(_FormExpTemplate):
             return False
         if not isinstance(expr, Exp):
             return self.match(Exp(expr, one), var_map.copy())
-        matches = MultiConstraint(2, 2)
+        matches = MultiConstraint(2)
         matches[0, 0] = self.base.match(expr.base, var_map.copy())
         matches[1, 1] = self.power.match(expr.power, var_map.copy())
         if matches.check_validity():
