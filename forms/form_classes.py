@@ -817,7 +817,7 @@ class FormEqn(_FormEqnTemplate):
     def match(self, expr, var_map):
         if not isinstance(expr, Eqn):
             return False
-        matches = MultiConstraint(2, 2)
+        matches = MultiConstraint(2)
         matches[0, 0] = self.lhs.match(expr.lhs, var_map.copy())
         matches[0, 1] = self.lhs.match(expr.rhs, var_map.copy())
         matches[1, 0] = self.rhs.match(expr.lhs, var_map.copy())
@@ -845,17 +845,25 @@ class FormEqn(_FormEqnTemplate):
 
 def solve_constraints(constrs, n):
     constrs = list(constrs)
-
     # Constructing a merged var_map from all the var_maps from the SingleConstraints
     var_map = {}
     for constr in constrs:
         if constr.var_map is None:
             continue
         for form, var in constr.var_map.items():
-            if form in var_map:
-                if var_map[form] != var:
+            if isinstance(form, FormVar):
+                if not (var_map[form] == var and Counter(var_map.values())[var] == 1):
                     return False
-            if isinstance(form, FormVar) and Counter(var_map.values())[var] != 1:
+            elif isinstance(form, FormExpr):
+                if 
+
+            if form in var_map:
+                if not (var_map[form] == var and Counter(var_map.values())[var] == 1):
+                    print('ddd')
+                    return False
+            elif isinstance(form, FormVar) and Counter(var_map.values())[var] != 0:
+                print(form, var, var_map)
+                print('eee')
                 return False
             var_map[form] = var
 
@@ -877,6 +885,8 @@ def solve_constraints(constrs, n):
         for j, constr in enumerate(constrs):
             # Substitute
             # Create new instance of SingleConstraint to prevent downstream SingleConstraints from getting modified
+            if constr.form is None:
+                continue
             constr = SingleConstraint(form=constr.form.substitute(const_map),
                                           value=constr.value)
             # Simplify
@@ -889,13 +899,15 @@ def solve_constraints(constrs, n):
 
 
 def match(form, expr):
-    var_map = {}
+    var_map = defaultdict(int)
     matches = form.match(expr, var_map)
     if not matches:
+        print('aaa')
         return False
     # matches.sort_matches() # fucking useless
     matches = matches.get_constraints()
     if not matches:
+        print('bbb')
         return False
     # Calculating number of constants to solve for
     n = len(form.get_consts())
@@ -904,6 +916,7 @@ def match(form, expr):
         if result:
             const_map, var_map = result
             return {'consts': const_map, 'vars': var_map}
+    print('ccc')
     return False
 
 
@@ -928,14 +941,9 @@ if __name__ == '__main__':
     form = a1**a2 * a1**a3
     expr = x**2 * x**2
 
-    # x = Var('x')
-    # y = Var('y')
-    # z = Var('z')
-    # a = FormVar('a')
-    # b = FormVar('b')
-    # c = FormVar('c')
-    # form = a*b + c
-    # expr = x*y + z
+    # form = a*y**2+b*y+c
+    # expr = 3*x**2-5*x-3
+    # expr = expr.simplify()
 
     print(form)
     print(expr)
