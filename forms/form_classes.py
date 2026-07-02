@@ -858,7 +858,7 @@ def solve_constraints(constrs, n):
                         return False
                 else:
                     return False
-            if isinstance(form, FormVar) and \
+            elif isinstance(form, FormVar) and \
                 Counter(var_map.values())[var] != 0:
                 return False
             var_map[form] = var 
