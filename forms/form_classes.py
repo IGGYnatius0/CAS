@@ -406,6 +406,7 @@ class MultiConstraint:
 
     def sort_matches(self):
         """Sorts self.matches by increasing number of constraints"""
+        # TODO change to out-of-place
         for form_matches in self.matches:
             for match in form_matches:
                 if match:
@@ -420,10 +421,12 @@ class MultiConstraint:
         matches = []
         for form_matches in self.matches:
             matches_ = [expr_match.get_constraints() for expr_match in form_matches if expr_match]
+            print(matches_)
             if matches_:
-                matches_ = [chain.from_iterable(match_) for match_ in product(*matches_)]
+                matches_ = [tuple(chain.from_iterable(match_)) for match_ in product(*matches_)]
                 matches.append(matches_)
-        matches = [chain.from_iterable(match_) for match_ in product(*matches)]
+        matches = [tuple(chain.from_iterable(match_)) for match_ in product(*matches)]
+        print(matches)
         return matches
 
     def __setitem__(self, idx, item):
@@ -851,15 +854,19 @@ def solve_constraints(constrs, n):
         if constr.var_map is None:
             continue
         for form, var in constr.var_map.items():
+            print(var_map, (form, var))
             if form in var_map:
                 if var_map[form] == var:
                     if isinstance(form, FormVar) and \
                         Counter(var_map.values())[var] != 1:
+                        print('a')
                         return False
                 else:
+                    print('b')
                     return False
             elif isinstance(form, FormVar) and \
                 Counter(var_map.values())[var] != 0:
+                print('c')
                 return False
             var_map[form] = var 
 
@@ -876,6 +883,7 @@ def solve_constraints(constrs, n):
         for constr in constrs:
             if isinstance(constr.form, FormConst):
                 if constr.form in const_map:
+                    print('a')
                     return False
                 const_map[constr.form] = constr.value
         for j, constr in enumerate(constrs):
@@ -895,15 +903,13 @@ def solve_constraints(constrs, n):
 
 
 def match(form, expr):
-    var_map = defaultdict(int)
+    var_map = {}
     matches = form.match(expr, var_map)
     if not matches:
-        print('aaa')
         return False
     # matches.sort_matches() # fucking useless
     matches = matches.get_constraints()
     if not matches:
-        print('bbb')
         return False
     # Calculating number of constants to solve for
     n = len(form.get_consts())
@@ -935,7 +941,7 @@ if __name__ == '__main__':
     a2 = FormExpr('a2')
     a3 = FormExpr('a3')
     form = a1**a2 * a1**a3
-    expr = x**2 * x**2
+    expr = x**2 * x**3
 
     # form = a*y**2+b*y+c
     # expr = 3*x**2-5*x-3
