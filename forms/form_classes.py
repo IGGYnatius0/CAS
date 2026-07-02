@@ -321,11 +321,11 @@ class SingleConstraint:
 
     def sort_matches(self):
         """Sorts self.matches by increasing number of constraints"""
-        return [[self]]
+        return [(self,)]
 
     def get_constraints(self):
         """Returns a generator of all possible combinations of constraints"""
-        return [[self]]
+        return [(self,)]
 
     def simplify(self):
         prev_form = None
