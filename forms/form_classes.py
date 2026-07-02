@@ -851,21 +851,17 @@ def solve_constraints(constrs, n):
         if constr.var_map is None:
             continue
         for form, var in constr.var_map.items():
-            if isinstance(form, FormVar):
-                if not (var_map[form] == var and Counter(var_map.values())[var] == 1):
-                    return False
-            elif isinstance(form, FormExpr):
-                if 
-
             if form in var_map:
-                if not (var_map[form] == var and Counter(var_map.values())[var] == 1):
-                    print('ddd')
+                if var_map[form] == var:
+                    if isinstance(form, FormVar) and \
+                        Counter(var_map.values())[var] != 1:
+                        return False
+                else:
                     return False
-            elif isinstance(form, FormVar) and Counter(var_map.values())[var] != 0:
-                print(form, var, var_map)
-                print('eee')
+            if isinstance(form, FormVar) and \
+                Counter(var_map.values())[var] != 0:
                 return False
-            var_map[form] = var
+            var_map[form] = var 
 
     # There are no constants to solve for
     if n == 0:
