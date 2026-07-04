@@ -951,6 +951,7 @@ def match(form, expr):
         return False
     # matches.sort_matches() # fucking useless
     matches = matches.get_constraints()
+    print(matches)
     if not matches:
         return False
     # Calculating number of constants to solve for
@@ -972,18 +973,18 @@ if __name__ == '__main__':
     c = FormConst('c')
     d = FormConst('d')
     e = FormConst('e')
-    # form = (a*b*y**3 + b*c*y**2 + c*d*y + d).group_consts()
-    # expr =  6*x**3   + 12*x**2  + 20*x  + 5
-    # form = (y**(a*b+c) + b*c*y - y/b).group_consts()
-    # expr = x**-5 - 2*y + y/2
+    # form = ((a*b+c)*y**3 + b*c*y**2 + c*d*y + d).group_consts()
+    # expr =  10*x**3   + 12*x**2  + 20*x  + 5
+    form = (y**(a*b+c) + b*c*y + b/y).group_consts()
+    expr = (x**-5 + 2*x + 2/x)
     # form = y + 2
     # expr = x + 2
 
-    a1 = FormExpr('a1')
-    a2 = FormExpr('a2')
-    a3 = FormExpr('a3')
-    form = a1**a2 * a1**a3
-    expr = x**2 * x**3
+    # a1 = FormExpr('a1')
+    # a2 = FormExpr('a2')
+    # a3 = FormExpr('a3')
+    # form = a1**a2 * a2**a3
+    # expr = x**2 * x**3
 
     # form = a*y**2+b*y+c
     # expr = 3*x**2-5*x-3
