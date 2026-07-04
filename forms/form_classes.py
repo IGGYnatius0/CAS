@@ -415,20 +415,6 @@ class MultiConstraint:
         self.matches = [match[1] for match in sorted_matches]
         return self.matches
 
-    # def get_constraints(self):
-    #     """Returns a generator of all possible combinations of constraints"""
-    #     # TODO change to generator
-    #     matches = []
-    #     for form_matches in self.matches:
-    #         matches_ = [expr_match.get_constraints() for expr_match in form_matches if expr_match]
-    #         print(matches_)
-    #         if matches_:
-    #             matches_ = [tuple(chain.from_iterable(match_)) for match_ in product(*matches_)]
-    #             matches.append(matches_)
-    #     matches = [tuple(chain.from_iterable(match_)) for match_ in product(*matches)]
-    #     print(matches)
-    #     return matches
-
     def get_constraints(self):
         if not self.check_validity():
             return [()]
