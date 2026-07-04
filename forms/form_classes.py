@@ -882,19 +882,15 @@ def solve_constraints(constrs, n):
         if constr.var_map is None:
             continue
         for form, var in constr.var_map.items():
-            print(var_map, (form, var))
             if form in var_map:
                 if var_map[form] == var:
                     if isinstance(form, FormVar) and \
                         Counter(var_map.values())[var] != 1:
-                        print('a')
                         return False
                 else:
-                    print('b')
                     return False
             elif isinstance(form, FormVar) and \
                 Counter(var_map.values())[var] != 0:
-                print('c')
                 return False
             var_map[form] = var 
 
@@ -911,7 +907,6 @@ def solve_constraints(constrs, n):
         for constr in constrs:
             if isinstance(constr.form, FormConst):
                 if constr.form in const_map:
-                    print('a')
                     return False
                 const_map[constr.form] = constr.value
         for j, constr in enumerate(constrs):
@@ -937,7 +932,6 @@ def match(form, expr):
         return False
     # matches.sort_matches() # fucking useless
     matches = matches.get_constraints()
-    print(matches)
     if not matches:
         return False
     # Calculating number of constants to solve for
@@ -947,7 +941,6 @@ def match(form, expr):
         if result:
             const_map, var_map = result
             return {'consts': const_map, 'vars': var_map}
-    print('ccc')
     return False
 
 
