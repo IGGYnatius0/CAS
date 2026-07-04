@@ -415,19 +415,61 @@ class MultiConstraint:
         self.matches = [match[1] for match in sorted_matches]
         return self.matches
 
+    # def get_constraints(self):
+    #     """Returns a generator of all possible combinations of constraints"""
+    #     # TODO change to generator
+    #     matches = []
+    #     for form_matches in self.matches:
+    #         matches_ = [expr_match.get_constraints() for expr_match in form_matches if expr_match]
+    #         print(matches_)
+    #         if matches_:
+    #             matches_ = [tuple(chain.from_iterable(match_)) for match_ in product(*matches_)]
+    #             matches.append(matches_)
+    #     matches = [tuple(chain.from_iterable(match_)) for match_ in product(*matches)]
+    #     print(matches)
+    #     return matches
+
     def get_constraints(self):
-        """Returns a generator of all possible combinations of constraints"""
-        # TODO change to generator
-        matches = []
-        for form_matches in self.matches:
-            matches_ = [expr_match.get_constraints() for expr_match in form_matches if expr_match]
-            print(matches_)
-            if matches_:
-                matches_ = [tuple(chain.from_iterable(match_)) for match_ in product(*matches_)]
-                matches.append(matches_)
-        matches = [tuple(chain.from_iterable(match_)) for match_ in product(*matches)]
-        print(matches)
-        return matches
+        if not self.check_validity():
+            return [()]
+
+        if self.size == 1:
+            return self.matches[0][0].get_constraints()
+
+        # Getting all valid constraints in the first row
+        idxs = []
+        for i, constr in enumerate(self.matches[0]):
+            if not constr or \
+                    (isinstance(constr, SingleConstraint) and constr.form is None):
+                continue
+            idxs.append(i)
+
+        # Remove the column where each constraint identified above is
+        new_mcs = []
+        for idx in idxs:
+            new_matches = []
+            for row in self.matches[1:]:
+                new_row = []
+                for i, constr in enumerate(row):
+                    if i == idx:
+                        continue
+                    new_row.append(constr)
+                new_matches.append(new_row)
+
+            new_mc = MultiConstraint(0)
+            new_mc.size = self.size - 1
+            new_mc.matches = new_matches
+            new_mc.nmatches = [n - 1 for n in self.nmatches[1:]]
+            new_mcs.append(new_mc)
+
+        combs = []
+        for i, (idx, mc) in enumerate(zip(idxs, new_mcs)):
+            constrs1 = self.matches[0][idx].get_constraints()
+            constrs2 = mc.get_constraints()
+            prod = product(constrs1, constrs2)
+            combs.extend([chain.from_iterable(i) for i in prod])
+        return combs
+
 
     def __setitem__(self, idx, item):
         self.matches[idx[0]][idx[1]] = item
