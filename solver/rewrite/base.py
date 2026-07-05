@@ -60,7 +60,8 @@ def sub_exp(form: FormExp, const_map: dict, var_map: dict):
 
 
 class RewriteRule:
-    def __init__(self, form, target):
+    def __init__(self, form=None, target=None):
+        # If rule does not specify form and target, I am expected to supply the rewrite function myself
         self.form = form
         self.target = target
 
