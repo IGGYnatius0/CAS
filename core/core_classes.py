@@ -432,53 +432,15 @@ class Frac(_CoreFracTemplate):
         return numers + denoms
 
     def simplify(self):
-        """Returns the fraction in its simplest form"""
-        # Resolving nested fractions
-        numer = self.numer.simplify()
-        denom = self.denom.simplify()
-        if isinstance(numer, Frac) and isinstance(denom, Frac):
-            numer_flat = numer.numer * denom.denom
-            denom_flat = numer.denom * denom.numer
-        elif isinstance(numer, Frac) and not isinstance(denom, Frac):
-            numer_flat = numer.numer
-            denom_flat = numer.denom * denom
-        elif not isinstance(numer, Frac) and isinstance(denom, Frac):
-            numer_flat = numer * denom.denom
-            denom_flat = denom.numer
-        else:
-            numer_flat = numer
-            denom_flat = denom
-
-        # Decomposing numerator and denominator (always factorising)
-        if isinstance(numer_flat, Sum):
-            numer_flat = numer_flat.factorise()
-        if isinstance(denom_flat, Sum):
-            denom_flat = denom_flat.factorise()
-        numer_decomp = numer_flat.decomp()
-        denom_decomp = denom_flat.decomp()
-
-        # Removing common factors
-        # TODO use collections.Counter to optimise
-        for factor in reversed(numer_decomp):
-            if factor in denom_decomp:
-                numer_decomp.remove(factor)
-                denom_decomp.remove(factor)
-        numer_out = Prod(numer_decomp).simplify()
-        denom_out = Prod(denom_decomp).simplify()
-        if denom_out == zero:
-            return None
-        if numer_out == zero and denom_out != zero:
-            return zero
-        if numer_out != zero and denom_out == one:
-            return numer_out
-        return numer_out / denom_out
+        """Returns the fraction with simplified numerator and denominator"""
+        return Frac(self.numer.simplify(), self.denom.simplify())
 
     def expand(self):
         """Returns an expansion of the numerator and denominator"""
-        return self.numer.expand() / self.denom.expand()
+        return Frac(self.numer.expand(), self.denom.expand())
 
     def substitute(self, var_map):
-        return self.numer.substitute(var_map) / self.denom.substitute(var_map)
+        return Frac(self.numer.substitute(var_map), self.denom.substitute(var_map))
 
 
 class Exp(_CoreExpTemplate):
@@ -499,19 +461,7 @@ class Exp(_CoreExpTemplate):
 
     def simplify(self):
         """Simplifies the expression"""
-        power = self.power.simplify()
-        base = self.base.simplify()
-        if isinstance(base, Exp):
-            return (base.base ** (base.power * power)).simplify()
-        if base == one or (base != one and base != zero and power == zero):
-            return one
-        if base == zero and power != zero:
-            return zero
-        if base != zero and base != one and power == one:
-            return base
-        if base == zero and power == zero:
-            return None
-        return base ** power
+        return self.base.simplify() ** self.power.simplify()
 
     def expand(self):
         """Returns an expansion of the exponential"""
