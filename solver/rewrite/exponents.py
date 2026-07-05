@@ -35,7 +35,7 @@ zero_pow = RewriteRule(
     form=a1 ** zero,
     target=one
 )
-exp_rules = RewriteGroup((
+rules = RewriteGroup((
     pow_add, pow_sub, prod_exp, frac_exp, pow_exp, neg_pow1, neg_pow2, zero_pow
 ))
 
@@ -45,6 +45,6 @@ if __name__ == '__main__':
     x = Var('x')
     expr = (x**2+3/x-8*x)**0
     print(expr)
-    new = exp_rules.rewrite(expr)
+    new = rules.rewrite(expr)
     for i in new:
         print(str(i))
