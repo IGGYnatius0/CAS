@@ -559,6 +559,7 @@ class FormVar(_FormVarTemplate):
 
 
 class FormExpr(_FormExprTemplate):
+    # TODO type restrictions
     def __init__(self, sym):
         self.sym = sym
 
