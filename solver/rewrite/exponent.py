@@ -36,7 +36,7 @@ zero_pow = RewriteRule(
     target=one
 )
 exp_rules = RewriteGroup((
-    pow_add, pow_sub, prod_exp, frac_exp, pow_exp, neg_pow1, neg_pow2
+    pow_add, pow_sub, prod_exp, frac_exp, pow_exp, neg_pow1, neg_pow2, zero_pow
 ))
 
 
