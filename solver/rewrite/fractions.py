@@ -5,9 +5,13 @@ from core.num import *
 
 rules = RewriteGroup((
     RewriteSet((
+        a1*(one/a2),
+        a1/a2
+    )),
+    RewriteRule(
         a1*(a2/a3),
         (a1*a2)/a3
-    )),
+    ),
     RewriteSet((
         one/(a1/a2),
         a2/a1
