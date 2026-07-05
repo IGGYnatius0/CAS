@@ -415,24 +415,6 @@ class Prod(_CoreProdTemplate):
         output = [Prod(list(term)) for term in new_terms]
         return Sum(output)
 
-    # def to_frac(self):
-    #     numers, denoms = [], []
-    #     for factor in self.factors:
-    #         if isinstance(factor, Frac):
-    #             numers.append(factor.numer)
-    #             denoms.append(factor.denom)
-    #         elif isinstance(factor, Exp):
-    #             if Num.isnum(factor.power):
-    #                 if factor.power < 0:
-    #                     denoms.append(Exp(factor.base, -factor.power))
-    #                 else:
-    #                     numers.append(factor)
-    #             else:
-    #                 numers.append(factor)
-    #         else:
-    #             numers.append(factor)
-    #     return Frac(Prod(numers), Prod(denoms))
-
     def substitute(self, var_map):
         return Prod([term.substitute(var_map) for term in self.factors])
 
@@ -495,12 +477,6 @@ class Frac(_CoreFracTemplate):
         """Returns an expansion of the numerator and denominator"""
         return self.numer.expand() / self.denom.expand()
 
-    # def to_prod(self):
-    #     numer_prod = self.numer.decomp()
-    #     denom_prod = self.denom.decomp()
-    #     denom_prod = [Exp(factor, neg_one) for factor in denom_prod]
-    #     return Prod(numer_prod + denom_prod)
-
     def substitute(self, var_map):
         return self.numer.substitute(var_map) / self.denom.substitute(var_map)
 
@@ -543,9 +519,6 @@ class Exp(_CoreExpTemplate):
         if len(decomp) == 1:
             return decomp[0]
         return Prod(decomp).expand()
-
-    # def to_prod(self):
-    #     return Prod(self.decomp())
 
     def substitute(self, var_map):
         return self.base.substitute(var_map) ** self.power.substitute(var_map)
