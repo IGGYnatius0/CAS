@@ -589,7 +589,7 @@ class FormExpr(_FormExprTemplate):
     def get_consts(self):
         return set()
 
-    def get_consts(self):
+    def get_vars(self):
         return {self}
     
     def substitute_consts(self, const_map):
