@@ -897,11 +897,14 @@ class FormEqn(_FormEqnTemplate):
     def get_consts(self):
         return self.lhs.get_consts() | self.rhs.get_consts()
 
+    def get_vars(self):
+        return self.lhs.get_vars() | self.rhs.get_vars()
+
     def substitute_consts(self, const_map):
         return FormEqn(self.lhs.substitute_consts(const_map), self.rhs.substitute_consts(const_map))
 
 
-def solve_constraints(constrs, n):
+def solve_constraints(constrs, n_consts, n_vars):
     constrs = list(constrs)
     # Constructing a merged var_map from all the var_maps from the SingleConstraints
     var_map = {}
@@ -919,17 +922,21 @@ def solve_constraints(constrs, n):
             elif isinstance(form, FormVar) and \
                 Counter(var_map.values())[var] != 0:
                 return False
-            var_map[form] = var 
+            var_map[form] = var
+
+    # Var map cannot be fully accurately reconstructed
+    if len(var_map) != n_vars:
+        return False
 
     # There are no constants to solve for
-    if n == 0:
+    if n_consts == 0:
         return {}, var_map
 
     # Solving const_map from all the SingleConstraint.exprs and SingleConstraint.forms
     const_map = {}
     n_passes = len(constrs) - len(const_map)
     i = 0
-    while len(const_map) < n and i < n_passes:
+    while len(const_map) < n_consts and i < n_passes:
         # Getting all 'lone' constants
         for constr in constrs:
             if isinstance(constr.form, FormConst):
@@ -947,7 +954,7 @@ def solve_constraints(constrs, n):
             constr.simplify() # FIXME change to out of place (inplace bad)
             constrs[j] = constr
         i += 1
-    if len(const_map) == n:
+    if len(const_map) == n_consts:
         return const_map, var_map
     return False
 
