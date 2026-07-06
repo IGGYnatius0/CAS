@@ -4,6 +4,10 @@ from core.num import *
 from core.core_classes import Var
 
 rules = RewriteGroup((
+    RewriteRule(
+        form=a1/a1,
+        target=one
+    ),
     RewriteSet((
         a1*(one/a2),
         a1/a2
