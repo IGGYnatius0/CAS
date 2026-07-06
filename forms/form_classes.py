@@ -1,6 +1,7 @@
 from decimal import Decimal
 from itertools import product, chain
-from collections import defaultdict, Counter
+from functools import cached_property
+from collections import Counter
 
 from core.core_classes import *
 from core.num import *
@@ -641,6 +642,7 @@ class FormSum(_FormSumTemplate):
             return matches
         return False
 
+    @cached_property
     def isconst(self):
         for term in self.terms:
             if not term.isconst():
@@ -663,9 +665,11 @@ class FormSum(_FormSumTemplate):
             terms.append(FormSum(consts))
         return FormSum(terms)
 
+    @cached_property
     def get_consts(self):
         return set.union(*[term.get_consts() for term in self.terms])
 
+    @cached_property
     def get_vars(self):
         return set.union(*[term.get_vars() for term in self.terms])
     
@@ -729,6 +733,7 @@ class FormProd(_FormProdTemplate):
             return matches
         return False
 
+    @cached_property
     def isconst(self):
         for factor in self.factors:
             if not factor.isconst():
@@ -751,9 +756,11 @@ class FormProd(_FormProdTemplate):
             factors.append(FormProd(consts))
         return FormProd(factors)
 
+    @cached_property
     def get_consts(self):
         return set.union(*[factor.get_consts() for factor in self.factors])
 
+    @cached_property
     def get_vars(self):
         return set.union(*[factor.get_vars() for factor in self.factors])
     
@@ -792,6 +799,7 @@ class FormFrac(_FormFracTemplate):
             return matches
         return False
 
+    @cached_property
     def isconst(self):
         if not self.numer.isconst():
             return False
@@ -802,9 +810,11 @@ class FormFrac(_FormFracTemplate):
     def group_consts(self):
         return FormFrac(self.numer.group_consts(), self.denom.group_consts())
 
+    @cached_property
     def get_consts(self):
         return self.numer.get_consts() | self.denom.get_consts()
 
+    @cached_property
     def get_vars(self):
         return self.numer.get_vars() | self.denom.get_vars()
 
@@ -843,6 +853,7 @@ class FormExp(_FormExpTemplate):
             return matches
         return False
 
+    @cached_property
     def isconst(self):
         if not self.base.isconst():
             return False
@@ -853,9 +864,11 @@ class FormExp(_FormExpTemplate):
     def group_consts(self):
         return FormExp(self.base.group_consts(), self.power.group_consts())
 
+    @cached_property
     def get_consts(self):
         return self.base.get_consts() | self.power.get_consts()
 
+    @cached_property
     def get_vars(self):
         return self.base.get_vars() | self.power.get_vars()
 
@@ -884,6 +897,7 @@ class FormEqn(_FormEqnTemplate):
             return matches
         return False
 
+    @cached_property
     def isconst(self):
         if not self.lhs.isconst():
             return False
@@ -894,9 +908,11 @@ class FormEqn(_FormEqnTemplate):
     def group_consts(self):
         return FormEqn(self.lhs.group_consts(), self.rhs.group_consts())
 
+    @cached_property
     def get_consts(self):
         return self.lhs.get_consts() | self.rhs.get_consts()
 
+    @cached_property
     def get_vars(self):
         return self.lhs.get_vars() | self.rhs.get_vars()
 
