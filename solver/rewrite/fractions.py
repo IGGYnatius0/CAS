@@ -3,6 +3,7 @@ from forms.abc import *
 from core.num import *
 from core.core_classes import Var
 
+
 rules = RewriteGroup((
     RewriteRule(
         form=a1/a1,

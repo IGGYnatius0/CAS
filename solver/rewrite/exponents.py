@@ -3,7 +3,7 @@ from forms.abc import *
 from core.num import *
 
 
-pow_add = RewriteSet((
+pow_add = RewriteSet(( # TODO generalised version
     a1**a2 * a1**a3,
     a1 ** (a2+a3)
 ))
@@ -11,7 +11,7 @@ pow_sub = RewriteSet((
     a1**a2 / a1**a3,
     a1 ** (a2-a3)
 ))
-prod_exp = RewriteSet((
+prod_exp = RewriteSet(( # TODO generalised version
     a1**a3 * a2**a3,
     (a1*a2) ** a3
 ))
