@@ -62,7 +62,7 @@ def sub_exp(form: FormExp, const_map: dict, var_map: dict):
 class RewriteRule:
     def __init__(self, form=None, target=None):
         # If rule does not specify form and target, I am expected to supply the rewrite function myself
-        self.form = form
+        self.form = form.group_consts()
         self.target = target
 
     def rewrite(self, expr, simplify=True):
@@ -81,7 +81,7 @@ class RewriteRule:
 
 class RewriteSet:
     def __init__(self, forms):
-        self.forms = forms
+        self.forms = [form.group_consts() for form in forms]
 
     def rewrite(self, expr, simplify=True):
         # TODO change to generator?
