@@ -7,7 +7,7 @@ from core.num import *
 
 # READ BEFORE ADDING!!
 # Every form class has to implement the following methods: (might use ABCs next time)
-# __hash__, match, isconst, group_consts, get_consts, substitute
+# __hash__, match, isconst, group_consts, get_consts, get_vars, substitute
 
 # TODO remove check_validity in match?
 
@@ -490,6 +490,9 @@ class FormNum(_FormNumTemplate):
     def get_consts(self):
         return set()
 
+    def get_vars(self):
+        return set()
+
     def substitute_consts(self, const_map):
         return self
 
@@ -523,6 +526,9 @@ class FormConst(_FormConstTemplate):
     def get_consts(self):
         return {self}
 
+    def get_vars(self):
+        return set()
+
     def substitute_consts(self, const_map):
         if self in const_map:
             return FormNum(const_map[self])
@@ -554,6 +560,9 @@ class FormVar(_FormVarTemplate):
     def get_consts(self):
         return set()
 
+    def get_vars(self):
+        return {self}
+
     def substitute_consts(self, const_map):
         return self
 
@@ -579,6 +588,9 @@ class FormExpr(_FormExprTemplate):
 
     def get_consts(self):
         return set()
+
+    def get_consts(self):
+        return {self}
     
     def substitute_consts(self, const_map):
         return self
@@ -653,6 +665,9 @@ class FormSum(_FormSumTemplate):
 
     def get_consts(self):
         return set.union(*[term.get_consts() for term in self.terms])
+
+    def get_vars(self):
+        return set.union(*[term.get_vars() for term in self.terms])
     
     def substitute_consts(self, const_map):
         terms = []
@@ -738,6 +753,9 @@ class FormProd(_FormProdTemplate):
 
     def get_consts(self):
         return set.union(*[factor.get_consts() for factor in self.factors])
+
+    def get_vars(self):
+        return set.union(*[factor.get_vars() for factor in self.factors])
     
     def substitute_consts(self, const_map):
         factors = []
@@ -787,6 +805,9 @@ class FormFrac(_FormFracTemplate):
     def get_consts(self):
         return self.numer.get_consts() | self.denom.get_consts()
 
+    def get_vars(self):
+        return self.numer.get_vars() | self.denom.get_vars()
+
     def substitute_consts(self, const_map):
         numer = self.numer.substitute_consts(const_map)
         denom = self.denom.substitute_consts(const_map)
@@ -834,6 +855,9 @@ class FormExp(_FormExpTemplate):
 
     def get_consts(self):
         return self.base.get_consts() | self.power.get_consts()
+
+    def get_vars(self):
+        return self.base.get_vars() | self.power.get_vars()
 
     def substitute_consts(self, const_map):
         base = self.base.substitute_consts(const_map)
@@ -938,9 +962,10 @@ def match(form, expr):
     if not matches:
         return False
     # Calculating number of constants to solve for
-    n = len(form.get_consts())
+    n_consts = len(form.get_consts())
+    n_vars = len(form.get_vars())
     for constr in matches:
-        result = solve_constraints(constr, n)
+        result = solve_constraints(constr, n_consts, n_vars)
         if result:
             const_map, var_map = result
             return {'consts': const_map, 'vars': var_map}
