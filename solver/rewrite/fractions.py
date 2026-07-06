@@ -1,7 +1,7 @@
 from solver.rewrite.base import *
 from forms.abc import *
 from core.num import *
-
+from core.core_classes import Var
 
 rules = RewriteGroup((
     RewriteSet((
@@ -37,3 +37,11 @@ rules = RewriteGroup((
         (a1/a2)*(a4/a3)
     ))
 ))
+
+if __name__ == '__main__':
+    x = Var('x')
+    expr = 6 - 17 / x + 12 / (x ** 2)
+    print(expr)
+    new = rules.rewrite(expr)
+    for i in new:
+        print(i)
