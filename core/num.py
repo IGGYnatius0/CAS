@@ -55,6 +55,9 @@ class Num(_NumTemplate):
     def substitute(self, var_map):
         return self
 
+    def get_vars(self):
+        return set()
+
     @classmethod
     def isnum(cls, expr):
         return isinstance(expr, (int, float, Decimal, Num))

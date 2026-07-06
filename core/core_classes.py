@@ -1,8 +1,15 @@
 from collections import defaultdict
 from itertools import product
+from functools import cached_property
+
 from core.num import *
 
 __all__ = ['Var', 'Sum', 'Prod', 'Frac', 'Exp', 'Eqn']
+
+# READ BEFORE ADDING!!
+# Every core class has to implement the following methods:
+# __hash__, decomp, group, simplify, expand, factorise, substitute
+
 
 # TODO check sub and rsub for CoreTemplate and SumTemplate
 # TODO implement functions especially log/ln
@@ -272,6 +279,10 @@ class Var(_CoreVarTemplate):
             return var_map[self]
         return self
 
+    @cached_property
+    def get_vars(self):
+        return {self}
+
 
 class Sum(_CoreSumTemplate):
     def __init__(self, terms):
@@ -343,6 +354,10 @@ class Sum(_CoreSumTemplate):
 
     def substitute(self, var_map):
         return Sum([term.substitute(var_map) for term in self.terms])
+
+    @cached_property
+    def get_vars(self):
+        return set.union(*[term.get_vars() for term in self.terms])
 
 
 class Prod(_CoreProdTemplate):
@@ -418,6 +433,10 @@ class Prod(_CoreProdTemplate):
     def substitute(self, var_map):
         return Prod([term.substitute(var_map) for term in self.factors])
 
+    @cached_property
+    def get_vars(self):
+        return set.union(*[factor.get_vars() for factor in self.factors])
+
 
 class Frac(_CoreFracTemplate):
     def __init__(self, numer, denom):
@@ -441,6 +460,10 @@ class Frac(_CoreFracTemplate):
 
     def substitute(self, var_map):
         return Frac(self.numer.substitute(var_map), self.denom.substitute(var_map))
+
+    @cached_property
+    def get_vars(self):
+        return self.numer.get_vars() | self.denom.get_vars()
 
 
 class Exp(_CoreExpTemplate):
@@ -473,6 +496,10 @@ class Exp(_CoreExpTemplate):
     def substitute(self, var_map):
         return self.base.substitute(var_map) ** self.power.substitute(var_map)
 
+    @cached_property
+    def get_vars(self):
+        return self.base.get_vars() | self.power.get_vars
+
 
 class Eqn(_CoreEqnTemplate):
     def __init__(self, lhs, rhs):
@@ -489,6 +516,12 @@ class Eqn(_CoreEqnTemplate):
 
     def swap(self):
         return Eqn(self.rhs, self.lhs)
+
+    def substitute(self):
+        pass
+
+    def get_vars(self):
+        return self.lhs.get_vars() | self.rhs.get_vars()
 
 
 class Func: # TODO this has been on todo for the longest time
