@@ -490,7 +490,7 @@ class FormNum(_FormNumTemplate):
     def get_consts(self):
         return set()
 
-    def substitute(self, const_map):
+    def substitute_consts(self, const_map):
         return self
 
     @classmethod
@@ -523,7 +523,7 @@ class FormConst(_FormConstTemplate):
     def get_consts(self):
         return {self}
 
-    def substitute(self, const_map):
+    def substitute_consts(self, const_map):
         if self in const_map:
             return FormNum(const_map[self])
         return self
@@ -554,7 +554,7 @@ class FormVar(_FormVarTemplate):
     def get_consts(self):
         return set()
 
-    def substitute(self, const_map):
+    def substitute_consts(self, const_map):
         return self
 
 
@@ -580,7 +580,7 @@ class FormExpr(_FormExprTemplate):
     def get_consts(self):
         return set()
     
-    def substitute(self, const_map):
+    def substitute_consts(self, const_map):
         return self
 
 
@@ -654,11 +654,11 @@ class FormSum(_FormSumTemplate):
     def get_consts(self):
         return set.union(*[term.get_consts() for term in self.terms])
     
-    def substitute(self, const_map):
+    def substitute_consts(self, const_map):
         terms = []
         num = zero
         for term in self.terms:
-            sub = term.substitute(const_map)
+            sub = term.substitute_consts(const_map)
             if isinstance(sub, FormNum):
                 num += sub
             else:
@@ -739,11 +739,11 @@ class FormProd(_FormProdTemplate):
     def get_consts(self):
         return set.union(*[factor.get_consts() for factor in self.factors])
     
-    def substitute(self, const_map):
+    def substitute_consts(self, const_map):
         factors = []
         num = zero
         for factor in self.factors:
-            sub = factor.substitute(const_map)
+            sub = factor.substitute_consts(const_map)
             if isinstance(sub, FormNum):
                 num += sub
             else:
@@ -787,9 +787,9 @@ class FormFrac(_FormFracTemplate):
     def get_consts(self):
         return self.numer.get_consts() | self.denom.get_consts()
 
-    def substitute(self, const_map):
-        numer = self.numer.substitute(const_map)
-        denom = self.denom.substitute(const_map)
+    def substitute_consts(self, const_map):
+        numer = self.numer.substitute_consts(const_map)
+        denom = self.denom.substitute_consts(const_map)
         if isinstance(numer, FormNum) and isinstance(denom, FormNum):
             return numer / denom
         return FormFrac(numer, denom)
@@ -835,9 +835,9 @@ class FormExp(_FormExpTemplate):
     def get_consts(self):
         return self.base.get_consts() | self.power.get_consts()
 
-    def substitute(self, const_map):
-        base = self.base.substitute(const_map)
-        power = self.power.substitute(const_map)
+    def substitute_consts(self, const_map):
+        base = self.base.substitute_consts(const_map)
+        power = self.power.substitute_consts(const_map)
         if isinstance(base, FormNum) and isinstance(power, FormNum):
             return base ** power
         return FormExp(base, power)
@@ -873,8 +873,8 @@ class FormEqn(_FormEqnTemplate):
     def get_consts(self):
         return self.lhs.get_consts() | self.rhs.get_consts()
 
-    def substitute(self, const_map):
-        return FormEqn(self.lhs.substitute(const_map), self.rhs.substitute(const_map))
+    def substitute_consts(self, const_map):
+        return FormEqn(self.lhs.substitute_consts(const_map), self.rhs.substitute_consts(const_map))
 
 
 def solve_constraints(constrs, n):
@@ -917,7 +917,7 @@ def solve_constraints(constrs, n):
             # Create new instance of SingleConstraint to prevent downstream SingleConstraints from getting modified
             if constr.form is None:
                 continue
-            constr = SingleConstraint(form=constr.form.substitute(const_map),
+            constr = SingleConstraint(form=constr.form.substitute_consts(const_map),
                                           value=constr.value)
             # Simplify
             constr.simplify() # FIXME change to out of place (inplace bad)
