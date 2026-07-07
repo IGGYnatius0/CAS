@@ -95,8 +95,11 @@ def rewrite_exp(expr: Exp):
 
 if __name__ == '__main__':
     x = Var('x')
-    expr = x**2 + 1/x
+    expr = x**2 + 1/x + x
     print(expr)
     new = rewrite(expr)
+    print(len(new))
+    # new = list(dict.fromkeys(new))
+    # print(len(new))
     for i in new:
         print(i)
