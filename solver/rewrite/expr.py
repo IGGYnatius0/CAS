@@ -23,25 +23,27 @@ def rewrite(expr):
     return [expr] # Num
 
 
-# Modified from itertools docs :)
+# Copied from itertools docs :)
 def powerset(iterable):
     """Subsequences of the iterable from shortest to longest."""
     # powerset([1,2,3]) → () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)
     s = list(iterable)
-    # Skip first entry which is empty set
-    return chain.from_iterable(combinations(s, r) for r in range(1, len(s) + 1))
+    return chain.from_iterable(combinations(s, r) for r in range(len(s) + 1))
 
 
 def rewrite_sum(expr: Sum):
     # Rewrites of subsets of expr.terms
-    # FIXME only selected terms are getting rewritten, terms not in the power set are not included back into the sum
-    subset_terms = powerset(expr.terms)
+    subset_terms = tuple(powerset(expr.terms))
+    subset_terms_reversed = reversed(subset_terms)
+    zipped = zip(subset_terms, subset_terms_reversed)
+    next(zipped) # skip first entry
     new_expr = []
-    for terms in subset_terms:
+    for terms, others in zipped:
         if len(terms) == 1:
-            new_expr.extend(RULES.rewrite(terms[0]))
+            new_terms = RULES.rewrite(terms[0])
         else:
-            new_expr.extend(RULES.rewrite(Sum(terms)))
+            new_terms = RULES.rewrite(Sum(terms))
+        new_expr.extend([Sum((new_term,) + others) for new_term in new_terms])
     # Rewrites of each expr.term, recursive
     for i, term in enumerate(expr.terms):
         for new_term in rewrite(term):
@@ -53,13 +55,17 @@ def rewrite_sum(expr: Sum):
 
 def rewrite_prod(expr: Prod):
     # Rewrites of subsets of expr.factors
-    subset_factors = powerset(expr.factors)
+    subset_factors = tuple(powerset(expr.factors))
+    subset_factors_reversed = reversed(subset_factors)
+    zipped = zip(subset_factors, subset_factors_reversed)
+    next(zipped) # skip first entry
     new_expr = []
-    for factors in subset_factors:
+    for factors, others in zipped:
         if len(factors) == 1:
-            new_expr.extend(RULES.rewrite(factors[0]))
+            new_factors = RULES.rewrite(factors[0])
         else:
-            new_expr.extend(RULES.rewrite(Prod(factors)))
+            new_factors = RULES.rewrite(Prod(factors))
+        new_expr.extend([Sum((new_factor,) + others) for new_factor in new_factors])
     # Rewrites of each expr.factor, recursive
     for i, factor in enumerate(expr.factors):
         for new_factor in rewrite(factor):
@@ -89,7 +95,7 @@ def rewrite_exp(expr: Exp):
 
 if __name__ == '__main__':
     x = Var('x')
-    expr = x**2 + 1
+    expr = x**2 + 1/x
     print(expr)
     new = rewrite(expr)
     for i in new:
