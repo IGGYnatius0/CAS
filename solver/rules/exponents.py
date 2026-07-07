@@ -1,4 +1,4 @@
-from solver.rewrite.base import *
+from solver.rules.base import *
 from forms.abc import *
 from core.num import *
 
