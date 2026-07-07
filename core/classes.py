@@ -520,6 +520,7 @@ class Eqn(_CoreEqnTemplate):
     def substitute(self):
         pass
 
+    @cached_property
     def get_vars(self):
         return self.lhs.get_vars | self.rhs.get_vars
 
