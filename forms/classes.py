@@ -451,7 +451,7 @@ class MultiConstraint:
             new_mc.nmatches = [n - 1 for n in self.nmatches[1:]]
             new_mcs.append(new_mc)
 
-        combs = []
+        combs = [] # TODO convert to generator?
         for i, (idx, mc) in enumerate(zip(idxs, new_mcs)):
             constrs1 = self.matches[0][idx].get_constraints()
             constrs2 = mc.get_constraints()
