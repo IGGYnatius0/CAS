@@ -3,7 +3,7 @@ from itertools import product, chain
 from functools import cached_property
 from collections import Counter
 
-from core.core_classes import *
+from core.classes import *
 from core.num import *
 
 # READ BEFORE ADDING!!

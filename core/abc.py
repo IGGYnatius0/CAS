@@ -1,4 +1,4 @@
-from core.core_classes import Var
+from core.classes import Var
 
 a = Var('a')
 b = Var('b')

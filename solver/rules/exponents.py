@@ -41,7 +41,7 @@ rules = RewriteGroup((
 
 
 if __name__ == '__main__':
-    from core.core_classes import *
+    from core.classes import *
     x = Var('x')
     expr = (x**2+3/x-8*x)**0
     print(expr)

@@ -1,4 +1,4 @@
-from core.core_classes import *
+from core.classes import *
 
 def diff_sum(expr):
     return Sum([diff(term) for term in expr.terms])

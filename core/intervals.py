@@ -1,4 +1,4 @@
-from core.core_classes import *
+from core.classes import *
 from core.num import *
 
 
