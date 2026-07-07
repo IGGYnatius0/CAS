@@ -1,4 +1,6 @@
 from decimal import Decimal
+from functools import cached_property
+
 from utils import pfactor
 
 __all__ = ['Num', 'neg_one', 'zero', 'one', 'inf', 'ninf']
@@ -55,6 +57,7 @@ class Num(_NumTemplate):
     def substitute(self, var_map):
         return self
 
+    @cached_property
     def get_vars(self):
         return set()
 
