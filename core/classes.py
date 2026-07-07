@@ -8,7 +8,7 @@ __all__ = ['Var', 'Sum', 'Prod', 'Frac', 'Exp', 'Eqn']
 
 # READ BEFORE ADDING!!
 # Every core class has to implement the following methods:
-# __hash__, decomp, group, simplify, expand, factorise, substitute
+# __hash__, decomp, group, simplify, expand, factorise, substitute, get_vars, copy
 
 
 # TODO check sub and rsub for CoreTemplate and SumTemplate
@@ -86,6 +86,12 @@ class _CoreTemplate:
         return self
 
     def factorise(self, out=None):
+        return self
+
+    def substitute(self, var_map):
+        return self
+
+    def copy(self):
         return self
 
 
@@ -283,6 +289,9 @@ class Var(_CoreVarTemplate):
     def get_vars(self):
         return {self}
 
+    def copy(self):
+        return Var(self.sym)
+
 
 class Sum(_CoreSumTemplate):
     def __init__(self, terms):
@@ -358,6 +367,9 @@ class Sum(_CoreSumTemplate):
     @cached_property
     def get_vars(self):
         return set.union(*[term.get_vars for term in self.terms])
+
+    def copy(self):
+        return Sum([term.copy() for term in self.terms])
 
 
 class Prod(_CoreProdTemplate):
@@ -437,6 +449,9 @@ class Prod(_CoreProdTemplate):
     def get_vars(self):
         return set.union(*[factor.get_vars for factor in self.factors])
 
+    def copy(self):
+        return Prod([factor.copy() for factor in self.factors])
+
 
 class Frac(_CoreFracTemplate):
     def __init__(self, numer, denom):
@@ -452,7 +467,7 @@ class Frac(_CoreFracTemplate):
 
     def simplify(self):
         """Returns the fraction with simplified numerator and denominator"""
-        return Frac(self.numer.simplify(), self.denom.simplify())
+        return self.numer.simplify() / self.denom.simplify()
 
     def expand(self):
         """Returns an expansion of the numerator and denominator"""
@@ -464,6 +479,9 @@ class Frac(_CoreFracTemplate):
     @cached_property
     def get_vars(self):
         return self.numer.get_vars | self.denom.get_vars
+
+    def copy(self):
+        return Frac(self.numer.copy(), self.denom.copy())
 
 
 class Exp(_CoreExpTemplate):
@@ -500,6 +518,9 @@ class Exp(_CoreExpTemplate):
     def get_vars(self):
         return self.base.get_vars | self.power.get_vars
 
+    def copy(self):
+        return Exp(self.base.copy(), self.power.copy())
+
 
 class Eqn(_CoreEqnTemplate):
     def __init__(self, lhs, rhs):
@@ -523,6 +544,9 @@ class Eqn(_CoreEqnTemplate):
     @cached_property
     def get_vars(self):
         return self.lhs.get_vars | self.rhs.get_vars
+
+    def copy(self):
+        return Eqn(self.lhs.copy, self.rhs.copy)
 
 
 class Func: # TODO this has been on todo for the longest time
