@@ -5,6 +5,7 @@ from forms.classes import *
 __all__ = ['RewriteRule', 'RewriteSet', 'RewriteGroup']
 
 
+# TODO use functools.singledispatch?
 def substitute(form, const_map, var_map):
     if isinstance(form, FormConst):
         return sub_const(form, const_map, var_map)
