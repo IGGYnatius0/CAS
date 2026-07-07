@@ -614,7 +614,7 @@ class FormSum(_FormSumTemplate):
 
     def match(self, expr, var_map):
         if isinstance(expr, Num):
-            if self.isconst():
+            if self.isconst:
                 return SingleConstraint(self, expr, var_map.copy())
             if expr == zero:
                 # FormSum can match zero if all terms can match zero
@@ -645,7 +645,7 @@ class FormSum(_FormSumTemplate):
     @cached_property
     def isconst(self):
         for term in self.terms:
-            if not term.isconst():
+            if not term.isconst:
                 return False
         return True
 
@@ -653,11 +653,11 @@ class FormSum(_FormSumTemplate):
         """Groups all constants in this FormSum into a single FormSum"""
         terms = [term.group_consts() for term in self.terms]
         temp = FormSum(terms)
-        if temp.isconst():
+        if temp.isconst:
             return temp
         consts = []
         for i, term in reversed(list(enumerate(terms))):
-            if term.isconst():
+            if term.isconst:
                 consts.append(terms.pop(i))
         if len(consts) == 1:
             terms.append(consts[0])
@@ -667,11 +667,11 @@ class FormSum(_FormSumTemplate):
 
     @cached_property
     def get_consts(self):
-        return set.union(*[term.get_consts() for term in self.terms])
+        return set.union(*[term.get_consts for term in self.terms])
 
     @cached_property
     def get_vars(self):
-        return set.union(*[term.get_vars() for term in self.terms])
+        return set.union(*[term.get_vars for term in self.terms])
     
     def substitute_consts(self, const_map):
         terms = []
@@ -704,12 +704,12 @@ class FormProd(_FormProdTemplate):
 
     def match(self, expr, var_map):
         if isinstance(expr, Num):
-            if self.isconst():
+            if self.isconst:
                 return SingleConstraint(self, expr, var_map.copy())
             if expr == zero:
                 # If expr is zero, still can be matched if any of the factors match with zero
                 # since a zero in FormProd will make the whole thing zero
-                consts = [f for f in self.factors if f.isconst()]
+                consts = [f for f in self.factors if f.isconst]
                 if not consts:
                     return False
                 return FormProd(consts).match(zero, var_map.copy())
@@ -736,7 +736,7 @@ class FormProd(_FormProdTemplate):
     @cached_property
     def isconst(self):
         for factor in self.factors:
-            if not factor.isconst():
+            if not factor.isconst:
                 return False
         return True
 
@@ -744,11 +744,11 @@ class FormProd(_FormProdTemplate):
         """Groups all constants in this FormProd into a single FormProd"""
         factors = [factor.group_consts() for factor in self.factors]
         temp = FormProd(factors)
-        if temp.isconst():
+        if temp.isconst:
             return temp
         consts = []
         for i, factor in reversed(list(enumerate(factors))):
-            if factor.isconst():
+            if factor.isconst:
                 consts.append(factors.pop(i))
         if len(consts) == 1:
             factors.append(consts[0])
@@ -758,11 +758,11 @@ class FormProd(_FormProdTemplate):
 
     @cached_property
     def get_consts(self):
-        return set.union(*[factor.get_consts() for factor in self.factors])
+        return set.union(*[factor.get_consts for factor in self.factors])
 
     @cached_property
     def get_vars(self):
-        return set.union(*[factor.get_vars() for factor in self.factors])
+        return set.union(*[factor.get_vars for factor in self.factors])
     
     def substitute_consts(self, const_map):
         factors = []
@@ -787,7 +787,7 @@ class FormFrac(_FormFracTemplate):
         if isinstance(expr, Num):
             if expr == zero:
                 return self.numer.match(zero, var_map.copy())
-            if self.isconst():
+            if self.isconst:
                 return SingleConstraint(self, expr, var_map.copy())
             return False
         if not isinstance(expr, Frac):
@@ -801,9 +801,9 @@ class FormFrac(_FormFracTemplate):
 
     @cached_property
     def isconst(self):
-        if not self.numer.isconst():
+        if not self.numer.isconst:
             return False
-        if not self.denom.isconst():
+        if not self.denom.isconst:
             return False
         return True
 
@@ -812,11 +812,11 @@ class FormFrac(_FormFracTemplate):
 
     @cached_property
     def get_consts(self):
-        return self.numer.get_consts() | self.denom.get_consts()
+        return self.numer.get_consts | self.denom.get_consts
 
     @cached_property
     def get_vars(self):
-        return self.numer.get_vars() | self.denom.get_vars()
+        return self.numer.get_vars | self.denom.get_vars
 
     def substitute_consts(self, const_map):
         numer = self.numer.substitute_consts(const_map)
@@ -841,7 +841,7 @@ class FormExp(_FormExpTemplate):
                 p0 = self.power.match(zero, var_map.copy())
                 if expr == zero and b0 and not p0:
                     return b0
-            if self.isconst():
+            if self.isconst:
                 return SingleConstraint(self, expr, var_map.copy())
             return False
         if not isinstance(expr, Exp):
@@ -855,9 +855,9 @@ class FormExp(_FormExpTemplate):
 
     @cached_property
     def isconst(self):
-        if not self.base.isconst():
+        if not self.base.isconst:
             return False
-        if not self.power.isconst():
+        if not self.power.isconst:
             return False
         return True
 
@@ -866,11 +866,11 @@ class FormExp(_FormExpTemplate):
 
     @cached_property
     def get_consts(self):
-        return self.base.get_consts() | self.power.get_consts()
+        return self.base.get_consts | self.power.get_consts
 
     @cached_property
     def get_vars(self):
-        return self.base.get_vars() | self.power.get_vars()
+        return self.base.get_vars | self.power.get_vars
 
     def substitute_consts(self, const_map):
         base = self.base.substitute_consts(const_map)
@@ -899,9 +899,9 @@ class FormEqn(_FormEqnTemplate):
 
     @cached_property
     def isconst(self):
-        if not self.lhs.isconst():
+        if not self.lhs.isconst:
             return False
-        if not self.rhs.isconst():
+        if not self.rhs.isconst:
             return False
         return True
     
@@ -910,11 +910,11 @@ class FormEqn(_FormEqnTemplate):
 
     @cached_property
     def get_consts(self):
-        return self.lhs.get_consts() | self.rhs.get_consts()
+        return self.lhs.get_consts | self.rhs.get_consts
 
     @cached_property
     def get_vars(self):
-        return self.lhs.get_vars() | self.rhs.get_vars()
+        return self.lhs.get_vars | self.rhs.get_vars
 
     def substitute_consts(self, const_map):
         return FormEqn(self.lhs.substitute_consts(const_map), self.rhs.substitute_consts(const_map))
@@ -985,8 +985,8 @@ def match(form, expr):
     if not matches:
         return False
     # Calculating number of constants to solve for
-    n_consts = len(form.get_consts())
-    n_vars = len(form.get_vars())
+    n_consts = len(form.get_consts)
+    n_vars = len(form.get_vars)
     for constr in matches:
         result = solve_constraints(constr, n_consts, n_vars)
         if result:
