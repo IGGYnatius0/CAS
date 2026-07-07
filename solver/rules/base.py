@@ -105,7 +105,7 @@ class RewriteSet:
                 temp = temp.simplify()
             if temp != expr: # Dont return the same thing
                 new.append(temp)
-        return list(set(new))
+        return list(dict.fromkeys(new))
 
 
 class RewriteGroup:
@@ -116,4 +116,4 @@ class RewriteGroup:
         new = []
         for rule in self.rules:
             new.extend(rule.rewrite(expr, simplify))
-        return list(set(new))
+        return list(dict.fromkeys(new))
