@@ -21,7 +21,7 @@ def substitute(form, const_map, var_map):
         return sub_frac(form, const_map, var_map)
     if isinstance(form, FormExp):
         return sub_exp(form, const_map, var_map)
-    return form
+    return form # FormNum
 
 
 def sub_const(form: FormConst, const_map: dict, var_map: dict):
