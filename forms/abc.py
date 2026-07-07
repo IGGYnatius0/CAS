@@ -1,4 +1,4 @@
-from forms.form_classes import FormVar, FormConst, FormExpr
+from forms.classes import FormVar, FormConst, FormExpr
 
 # Variables are lowercase
 a = FormVar('a')

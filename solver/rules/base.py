@@ -1,5 +1,5 @@
 from core.classes import *
-from forms.form_classes import *
+from forms.classes import *
 
 
 __all__ = ['RewriteRule', 'RewriteSet', 'RewriteGroup']
