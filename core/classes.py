@@ -357,7 +357,7 @@ class Sum(_CoreSumTemplate):
 
     @cached_property
     def get_vars(self):
-        return set.union(*[term.get_vars() for term in self.terms])
+        return set.union(*[term.get_vars for term in self.terms])
 
 
 class Prod(_CoreProdTemplate):
@@ -435,7 +435,7 @@ class Prod(_CoreProdTemplate):
 
     @cached_property
     def get_vars(self):
-        return set.union(*[factor.get_vars() for factor in self.factors])
+        return set.union(*[factor.get_vars for factor in self.factors])
 
 
 class Frac(_CoreFracTemplate):
@@ -463,7 +463,7 @@ class Frac(_CoreFracTemplate):
 
     @cached_property
     def get_vars(self):
-        return self.numer.get_vars() | self.denom.get_vars()
+        return self.numer.get_vars | self.denom.get_vars
 
 
 class Exp(_CoreExpTemplate):
@@ -498,7 +498,7 @@ class Exp(_CoreExpTemplate):
 
     @cached_property
     def get_vars(self):
-        return self.base.get_vars() | self.power.get_vars
+        return self.base.get_vars | self.power.get_vars
 
 
 class Eqn(_CoreEqnTemplate):
@@ -520,9 +520,8 @@ class Eqn(_CoreEqnTemplate):
     def substitute(self):
         pass
 
-    @cached_property
     def get_vars(self):
-        return self.lhs.get_vars() | self.rhs.get_vars()
+        return self.lhs.get_vars | self.rhs.get_vars
 
 
 class Func: # TODO this has been on todo for the longest time
