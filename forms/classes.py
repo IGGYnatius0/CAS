@@ -482,15 +482,18 @@ class FormNum(_FormNumTemplate):
             return SingleConstraint(var_map=var_map)
         return False
 
+    @cached_property
     def isconst(self):
         return True
 
     def group_consts(self):
         return self
 
+    @cached_property
     def get_consts(self):
         return set()
 
+    @cached_property
     def get_vars(self):
         return set()
 
@@ -518,15 +521,18 @@ class FormConst(_FormConstTemplate):
             return False
         return SingleConstraint(self, expr, var_map)
 
+    @cached_property
     def isconst(self):
         return True
 
     def group_consts(self):
         return self
 
+    @cached_property
     def get_consts(self):
         return {self}
 
+    @cached_property
     def get_vars(self):
         return set()
 
@@ -552,15 +558,18 @@ class FormVar(_FormVarTemplate):
         var_map[self] = expr
         return SingleConstraint(self, expr, var_map)
 
+    @cached_property
     def isconst(self):
         return False
 
     def group_consts(self):
         return self
 
+    @cached_property
     def get_consts(self):
         return set()
 
+    @cached_property
     def get_vars(self):
         return {self}
 
@@ -581,15 +590,18 @@ class FormExpr(_FormExprTemplate):
         var_map[self] = expr
         return SingleConstraint(self, expr, var_map)
 
+    @cached_property
     def isconst(self):
         return False
 
     def group_consts(self):
         return self
 
+    @cached_property
     def get_consts(self):
         return set()
 
+    @cached_property
     def get_vars(self):
         return {self}
     
