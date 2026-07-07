@@ -28,8 +28,8 @@ def powerset(iterable):
     """Subsequences of the iterable from shortest to longest."""
     # powerset([1,2,3]) → () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)
     s = list(iterable)
-    # Skip first and last entry which is empty and full set
-    return chain.from_iterable(combinations(s, r) for r in range(1, len(s)))
+    # Skip first entry which is empty set
+    return chain.from_iterable(combinations(s, r) for r in range(1, len(s) + 1))
 
 
 def rewrite_sum(expr: Sum):
