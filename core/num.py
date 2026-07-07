@@ -61,6 +61,9 @@ class Num(_NumTemplate):
     def get_vars(self):
         return set()
 
+    def copy(self):
+        return self
+
     @classmethod
     def isnum(cls, expr):
         return isinstance(expr, (int, float, Decimal, Num))
