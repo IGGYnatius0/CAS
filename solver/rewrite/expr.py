@@ -23,12 +23,13 @@ def route(expr):
     pass
 
 
-# Copied from itertools docs :)
+# Modified from itertools docs :)
 def powerset(iterable):
     """Subsequences of the iterable from shortest to longest."""
     # powerset([1,2,3]) → () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)
     s = list(iterable)
-    return chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
+    # Skip first and last entry which is empty and full set
+    return chain.from_iterable(combinations(s, r) for r in range(1, len(s)))
 
 
 def rewrite_sum(expr: Sum):
