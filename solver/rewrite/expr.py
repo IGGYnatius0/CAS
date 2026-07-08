@@ -1,5 +1,4 @@
 from itertools import chain, combinations
-from copy import deepcopy
 
 from core.classes import *
 from core.num import *
@@ -10,39 +9,37 @@ def rewrite(expr):
     vars = expr.get_vars
     if not vars:
         return []
-    if isinstance(expr, Var):
-        return RULES.rewrite(expr)
+    if isinstance(expr, Num):
+        return []
+    new_expr = RULES.rewrite(expr)
     if isinstance(expr, Sum):
-        return rewrite_sum(expr)
-    if isinstance(expr, Prod):
-        return rewrite_prod(expr)
-    if isinstance(expr, Frac):
-        return rewrite_frac(expr)
-    if isinstance(expr, Exp):
-        return rewrite_exp(expr)
-    return [expr] # Num
+        new_expr.extend(rewrite_sum(expr))
+    elif isinstance(expr, Prod):
+        new_expr.extend(rewrite_prod(expr))
+    elif isinstance(expr, Frac):
+        new_expr.extend(rewrite_frac(expr))
+    elif isinstance(expr, Exp):
+        new_expr.extend(rewrite_exp(expr))
+    return new_expr
 
 
-# Copied from itertools docs :)
+# Modified from itertools docs :)
 def powerset(iterable):
     """Subsequences of the iterable from shortest to longest."""
-    # powerset([1,2,3]) → () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)
+    # powerset([1,2,3]) → (1,) (2,) (3,) (1,2) (1,3) (2,3)
     s = list(iterable)
-    return chain.from_iterable(combinations(s, r) for r in range(len(s) + 1))
+    return chain.from_iterable(combinations(s, r) for r in range(1, len(s)))
 
 
 def rewrite_sum(expr: Sum):
     # Rewrites of subsets of expr.terms
     subset_terms = tuple(powerset(expr.terms))
-    subset_terms_reversed = reversed(subset_terms)
-    zipped = zip(subset_terms, subset_terms_reversed)
-    next(zipped) # skip first entry
+    zipped = zip(subset_terms, reversed(subset_terms))
     new_expr = []
     for terms, others in zipped:
         if len(terms) == 1:
-            new_terms = RULES.rewrite(terms[0])
-        else:
-            new_terms = RULES.rewrite(Sum(terms))
+            continue
+        new_terms = RULES.rewrite(Sum(terms))
         new_expr.extend([Sum((new_term,) + others) for new_term in new_terms])
     # Rewrites of each expr.term, recursive
     for i, term in enumerate(expr.terms):
@@ -56,16 +53,13 @@ def rewrite_sum(expr: Sum):
 def rewrite_prod(expr: Prod):
     # Rewrites of subsets of expr.factors
     subset_factors = tuple(powerset(expr.factors))
-    subset_factors_reversed = reversed(subset_factors)
-    zipped = zip(subset_factors, subset_factors_reversed)
-    next(zipped) # skip first entry
+    zipped = zip(subset_factors, reversed(subset_factors))
     new_expr = []
     for factors, others in zipped:
         if len(factors) == 1:
-            new_factors = RULES.rewrite(factors[0])
-        else:
-            new_factors = RULES.rewrite(Prod(factors))
-        new_expr.extend([Sum((new_factor,) + others) for new_factor in new_factors])
+            continue
+        new_factors = RULES.rewrite(Prod(factors))
+        new_expr.extend([Prod((new_factor,) + others) for new_factor in new_factors])
     # Rewrites of each expr.factor, recursive
     for i, factor in enumerate(expr.factors):
         for new_factor in rewrite(factor):
@@ -77,29 +71,25 @@ def rewrite_prod(expr: Prod):
 
 def rewrite_frac(expr: Frac):
     new_expr = []
-    for numer in rewrite(expr.numer):
-        new_expr.append(Frac(numer, expr.denom))
-    for denom in rewrite(expr.denom):
-        new_expr.append(Frac(expr.numer, denom))
+    new_expr.extend([Frac(numer, expr.denom) for numer in rewrite(expr.numer)])
+    new_expr.extend([Frac(expr.numer, denom) for denom in rewrite(expr.denom)])
     return new_expr
 
 
 def rewrite_exp(expr: Exp):
     new_expr = []
-    for base in rewrite(expr.base):
-        new_expr.append(Exp(base, expr.power))
-    for power in rewrite(expr.power):
-        new_expr.append(Exp(expr.base, power))
+    new_expr.extend([Exp(base, expr.power) for base in rewrite(expr.base)])
+    new_expr.extend([Exp(expr.base, power) for power in rewrite(expr.power)])
     return new_expr
 
 
 if __name__ == '__main__':
     x = Var('x')
-    expr = x**2 + 1/x + x
+    expr = x**2 + x
     print(expr)
     new = rewrite(expr)
     print(len(new))
-    # new = list(dict.fromkeys(new))
-    # print(len(new))
+    new = list(dict.fromkeys(new))
+    print(len(new))
     for i in new:
         print(i)
