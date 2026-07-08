@@ -469,7 +469,7 @@ class Prod(_CoreProdTemplate):
 
     def decomp(self):
         """Decomposes the expression into its constituent factors"""
-        decomp = []
+        decomp = [] # TODO use itertools.chain
         for factor in self.factors:
             decomp.extend(factor.decomp())
         return decomp
@@ -568,7 +568,7 @@ class Exp(_CoreExpTemplate):
         self.base = Num(base) if Num.isnum(base) else base
         self.power = Num(power) if Num.isnum(power) else power
 
-    def decomp(self):
+    def decomp(self): # TODO make it return only numeric and fractional part
         """Decomposes the expression into its constituent factors"""
         i, f = divmod(self.power, one)
         if i > zero:
