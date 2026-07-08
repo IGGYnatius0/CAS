@@ -29,12 +29,11 @@ def route_rewrite(expr):
     return list(dict.fromkeys(new_expr))
 
 
-# Modified from itertools docs :)
+# Modified from itertools docs :D
 def powerset(iterable):
     """Subsequences of the iterable from shortest to longest."""
     # powerset([1,2,3]) → (1,) (2,) (3,) (1,2) (1,3) (2,3)
-    s = list(iterable)
-    return chain.from_iterable(combinations(s, r) for r in range(1, len(s)))
+    return chain.from_iterable(combinations(iterable, r) for r in range(1, len(iterable)))
 
 
 def rewrite_sum(expr: Sum):
