@@ -6,6 +6,10 @@ from solver.rules import RULES
 
 
 def rewrite(expr):
+    return route_rewrite(expr) # TODO ordering eg whether to reverse or not
+
+
+def route_rewrite(expr):
     vars = expr.get_vars
     if not vars:
         return []
@@ -20,7 +24,7 @@ def rewrite(expr):
         new_expr.extend(rewrite_frac(expr))
     elif isinstance(expr, Exp):
         new_expr.extend(rewrite_exp(expr))
-    return new_expr
+    return list(dict.fromkeys(new_expr))
 
 
 # Modified from itertools docs :)
@@ -43,7 +47,7 @@ def rewrite_sum(expr: Sum):
         new_expr.extend([Sum((new_term,) + others) for new_term in new_terms])
     # Rewrites of each expr.term, recursive
     for i, term in enumerate(expr.terms):
-        for new_term in rewrite(term):
+        for new_term in route_rewrite(term):
             copy_sum = expr.copy()
             copy_sum.terms[i] = new_term
             new_expr.append(copy_sum)
@@ -62,7 +66,7 @@ def rewrite_prod(expr: Prod):
         new_expr.extend([Prod((new_factor,) + others) for new_factor in new_factors])
     # Rewrites of each expr.factor, recursive
     for i, factor in enumerate(expr.factors):
-        for new_factor in rewrite(factor):
+        for new_factor in route_rewrite(factor):
             copy_prod = expr.copy()
             copy_prod.factors[i] = new_factor
             new_expr.append(copy_prod)
@@ -71,15 +75,15 @@ def rewrite_prod(expr: Prod):
 
 def rewrite_frac(expr: Frac):
     new_expr = []
-    new_expr.extend([Frac(numer, expr.denom) for numer in rewrite(expr.numer)])
-    new_expr.extend([Frac(expr.numer, denom) for denom in rewrite(expr.denom)])
+    new_expr.extend([Frac(numer, expr.denom) for numer in route_rewrite(expr.numer)])
+    new_expr.extend([Frac(expr.numer, denom) for denom in route_rewrite(expr.denom)])
     return new_expr
 
 
 def rewrite_exp(expr: Exp):
     new_expr = []
-    new_expr.extend([Exp(base, expr.power) for base in rewrite(expr.base)])
-    new_expr.extend([Exp(expr.base, power) for power in rewrite(expr.power)])
+    new_expr.extend([Exp(base, expr.power) for base in route_rewrite(expr.base)])
+    new_expr.extend([Exp(expr.base, power) for power in route_rewrite(expr.power)])
     return new_expr
 
 
@@ -88,8 +92,6 @@ if __name__ == '__main__':
     expr = x**2 + x
     print(expr)
     new = rewrite(expr)
-    print(len(new))
-    new = list(dict.fromkeys(new))
     print(len(new))
     for i in new:
         print(i)
