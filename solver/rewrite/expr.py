@@ -1,7 +1,6 @@
 from itertools import chain, combinations
 
 from core.classes import *
-from core.num import *
 from solver.rules import RULES
 
 

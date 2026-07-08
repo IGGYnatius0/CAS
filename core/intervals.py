@@ -1,5 +1,4 @@
 from core.classes import *
-from core.num import *
 
 
 __all__ = ['Interval', 'MultiInterval']

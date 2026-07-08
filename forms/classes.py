@@ -4,7 +4,6 @@ from functools import cached_property
 from collections import Counter
 
 from core.classes import *
-from core.num import *
 
 # READ BEFORE ADDING!!
 # Every form class has to implement the following methods: (might use ABCs next time)

@@ -1,6 +1,6 @@
 from solver.rules.base import *
 from forms.abc import *
-from core.num import *
+from core.classes import zero, one
 
 
 pow_add = RewriteSet(( # TODO generalised version

@@ -1,10 +1,12 @@
 from collections import defaultdict
 from itertools import product
 from functools import cached_property
+from decimal import Decimal
 
-from core.num import *
+from utils import pfactor
 
-__all__ = ['Var', 'Sum', 'Prod', 'Frac', 'Exp', 'Eqn']
+__all__ = ['Num', 'Var', 'Sum', 'Prod', 'Frac', 'Exp', 'Eqn',
+           'neg_one', 'zero', 'one', 'inf', 'ninf']
 
 # READ BEFORE ADDING!!
 # Every core class has to implement the following methods:
@@ -13,6 +15,8 @@ __all__ = ['Var', 'Sum', 'Prod', 'Frac', 'Exp', 'Eqn']
 
 # TODO check sub and rsub for CoreTemplate and SumTemplate
 # TODO implement functions especially log/ln
+# TODO force frac and exp of Nums to remain symbolic instead of getting evaluated
+
 
 class _CoreTemplate:
     def __eq__(self, other):
@@ -93,6 +97,32 @@ class _CoreTemplate:
 
     def copy(self):
         return self
+
+
+def _num_check(func):
+    def wrapper(*args, **kwargs):
+        f = func(*args, **kwargs)
+        if Num.isnum(f):
+            return Num(f)
+        return f
+    return wrapper
+
+
+class _NumTemplate(Decimal):
+    __add__ = _num_check(Decimal.__add__)
+    __radd__ = _num_check(Decimal.__radd__)
+    __sub__ = _num_check(Decimal.__sub__)
+    __rsub__ = _num_check(Decimal.__rsub__)
+    __mul__ = _num_check(Decimal.__mul__)
+    __rmul__ = _num_check(Decimal.__rmul__)
+    __truediv__ = _num_check(Decimal.__truediv__)
+    __rtruediv__ = _num_check(Decimal.__rtruediv__)
+    __mod__ = _num_check(Decimal.__mod__)
+    __rmod__ = _num_check(Decimal.__rmod__)
+    __pow__ = _num_check(Decimal.__pow__)
+    __rpow__ = _num_check(Decimal.__rpow__)
+    __neg__ = _num_check(Decimal.__neg__)
+    __pos__ = _num_check(Decimal.__pos__)
 
 
 class _CoreVarTemplate(_CoreTemplate):
@@ -276,6 +306,48 @@ class _CoreEqnTemplate:
         return hash(('CoreEqn', self.lhs, self.rhs))
 
 
+class Num(_NumTemplate):
+    def __init__(self, value, *args, **kwargs):
+        Decimal.__init__(str(value), *args, **kwargs)
+
+    def decomp(self):
+        if self.to_integral_value() == self:
+            return [Num(n) for n in pfactor(self)]
+        return [self]
+
+    def group(self):
+        return self
+
+    def simplify(self):
+        return self
+
+    def expand(self):
+        return self
+
+    def factorise(self, out=None):
+        return self
+
+    def substitute(self, var_map):
+        return self
+
+    @cached_property
+    def get_vars(self):
+        return set()
+
+    def copy(self):
+        return self
+
+    @classmethod
+    def isnum(cls, expr):
+        return isinstance(expr, (int, float, Decimal, Num))
+
+    def __repr__(self):
+        return f"Num({str(self)})"
+
+    def __hash__(self):
+        return hash(('CoreNum', super().__hash__()))
+
+
 class Var(_CoreVarTemplate):
     def __init__(self, symbol):
         self.sym = symbol
@@ -291,6 +363,13 @@ class Var(_CoreVarTemplate):
 
     def copy(self):
         return Var(self.sym)
+
+
+neg_one = Num(-1)
+zero = Num(0)
+one = Num(1)
+inf = Num('inf')
+ninf = -Num('inf')
 
 
 class Sum(_CoreSumTemplate):

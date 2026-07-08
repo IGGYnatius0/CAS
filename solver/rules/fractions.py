@@ -1,7 +1,6 @@
 from solver.rules.base import *
 from forms.abc import *
-from core.num import *
-from core.classes import Var
+from core.classes import Var, one
 
 
 rules = RewriteGroup((
