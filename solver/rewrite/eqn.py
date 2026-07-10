@@ -2,8 +2,14 @@ from itertools import chain, combinations
 from core.classes import *
 
 
+__all__ = ['rewrite']
+
+
 def rewrite(eqn: Eqn):
-    pass
+    new_eqns = []
+    new_eqns.extend(arrange_terms(eqn))
+    new_eqns.extend(arrange_factors(eqn))
+    return new_eqns
 
 
 # Copied from itertools docs :D
@@ -59,6 +65,7 @@ def invert_factor(factor):
     return one / factor
 
 
+# TODO denom != 0
 def arrange_factors(eqn: Eqn):
     factors = []
     if isinstance(eqn.lhs, Prod):
@@ -84,13 +91,13 @@ def arrange_factors(eqn: Eqn):
         elif len(lhs) == 1:
             prod_lhs = lhs[0]
         else:
-            prod_lhs = Sum(lhs)
+            prod_lhs = Prod(lhs)
         if len(rhs) == 0:
             prod_rhs = zero
         elif len(rhs) == 1:
             prod_rhs = rhs[0]
         else:
-            prod_rhs = Sum(rhs)
+            prod_rhs = Prod(rhs)
         new_eqns.append(Eqn(prod_lhs, prod_rhs))
     return new_eqns
 
