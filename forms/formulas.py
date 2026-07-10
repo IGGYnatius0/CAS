@@ -1,4 +1,4 @@
-from core.abc import *
+from .abc import *
 
 # Polynomial
 linear    = -B / A
