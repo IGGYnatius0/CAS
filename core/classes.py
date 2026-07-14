@@ -16,6 +16,7 @@ __all__ = ['Num', 'Var', 'Sum', 'Prod', 'Frac', 'Exp', 'Eqn',
 # TODO check sub and rsub for CoreTemplate and SumTemplate
 # TODO implement functions especially log/ln
 # TODO force frac and exp of Nums to remain symbolic instead of getting evaluated
+# TODO make all .decomp() use collections.counter
 
 
 class _CoreTemplate:
