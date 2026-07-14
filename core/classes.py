@@ -586,7 +586,7 @@ class Exp(_CoreExpTemplate):
         #     output.append(self.base ** f)
         # return output
         if isinstance(self.power, Num):
-            return Counter({self.base, self.power})
+            return Counter({self.base: self.power})
         return super().decomp()
 
     def simplify(self):
