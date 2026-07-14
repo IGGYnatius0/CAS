@@ -1,4 +1,4 @@
-from collections import defaultdict
+from collections import defaultdict, Counter
 from itertools import product
 from functools import cached_property
 from decimal import Decimal
@@ -16,7 +16,7 @@ __all__ = ['Num', 'Var', 'Sum', 'Prod', 'Frac', 'Exp', 'Eqn',
 # TODO check sub and rsub for CoreTemplate and SumTemplate
 # TODO implement functions especially log/ln
 # TODO force frac and exp of Nums to remain symbolic instead of getting evaluated
-# TODO make all .decomp() use collections.counter
+# TODO change group and simplify to use collections.counter
 
 
 class _CoreTemplate:
@@ -77,7 +77,7 @@ class _CoreTemplate:
 
     def decomp(self):
         """Decomposes the expression into its constituent factors"""
-        return [self]
+        return Counter({self: 1})
 
     def group(self):
         """Collects like terms"""
@@ -313,8 +313,8 @@ class Num(_NumTemplate):
 
     def decomp(self):
         if self.to_integral_value() == self:
-            return [Num(n) for n in pfactor(self)]
-        return [self]
+            return Counter([Num(n) for n in pfactor(self)])
+        return Counter({self: 1})
 
     def group(self):
         return self
@@ -391,7 +391,7 @@ class Sum(_CoreSumTemplate):
 
     def group(self):
         """Collects like terms"""
-        decomp = [term.group().decomp() for term in self.terms]
+        decomp = [list(term.group().decomp().elements()) for term in self.terms]
         unique = defaultdict(int)
         for term in decomp:
             # Multiplying constants in each term to get coefficient
@@ -470,10 +470,14 @@ class Prod(_CoreProdTemplate):
 
     def decomp(self):
         """Decomposes the expression into its constituent factors"""
-        decomp = [] # TODO use itertools.chain
+        # decomp = [] # TODO use itertools.chain
+        # for factor in self.factors:
+        #     decomp.extend(factor.decomp())
+        # return decomp
+        c = Counter()
         for factor in self.factors:
-            decomp.extend(factor.decomp())
-        return decomp
+            c.update(factor.decomp())
+        return c
 
     def group(self):
         """Collects like factors into exponents"""
@@ -542,8 +546,10 @@ class Frac(_CoreFracTemplate):
         """Decomposes the expression into its constituent factors"""
         numers = self.numer.decomp()
         denoms = self.denom.decomp()
-        denoms = [denom ** neg_one for denom in denoms]
-        return numers + denoms
+        # denoms = [denom ** neg_one for denom in denoms]
+        # return numers + denoms
+        numers.subtract(denoms)
+        return numers
 
     def simplify(self):
         """Returns the fraction with simplified numerator and denominator"""
@@ -571,14 +577,17 @@ class Exp(_CoreExpTemplate):
 
     def decomp(self): # TODO make it return only numeric and fractional part
         """Decomposes the expression into its constituent factors"""
-        i, f = divmod(self.power, one)
-        if i > zero:
-            output = [self.base for _ in range(int(i))]
-        else:
-            output = [self.base ** neg_one for _ in range(-int(i))]
-        if f != zero:
-            output.append(self.base ** f)
-        return output
+        # i, f = divmod(self.power, one)
+        # if i > zero:
+        #     output = [self.base for _ in range(int(i))]
+        # else:
+        #     output = [self.base ** neg_one for _ in range(-int(i))]
+        # if f != zero:
+        #     output.append(self.base ** f)
+        # return output
+        if isinstance(self.power, Num):
+            return Counter({self.base, self.power})
+        return super().decomp()
 
     def simplify(self):
         """Simplifies the expression"""
