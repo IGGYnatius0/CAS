@@ -11,7 +11,7 @@ from core.classes import *
 
 # TODO remove check_validity in match?
 
-__all__ = ['FormNum', 'FormConst', 'FormVar', 'FormSum', 'FormProd', 'FormFrac', 'FormExp', 'FormExpr', 'match']
+__all__ = ['FormNum', 'FormConst', 'FormVar', 'FormSum', 'FormProd', 'FormFrac', 'FormExp', 'FormWild', 'match']
 
 
 class _FormTemplate:
@@ -119,15 +119,15 @@ class _FormVarTemplate(_FormTemplate):
         return hash(('FormVar', self.sym))
 
 
-class _FormExprTemplate(_FormTemplate):
+class _FormWildTemplate(_FormTemplate):
     def __str__(self):
         return self.sym
 
     def __repr__(self):
-        return f"FormExpr('{self.sym}')"
+        return f"FormWild('{self.sym}')"
 
     def __hash__(self):
-        return hash(('FormExpr', self.sym))
+        return hash(('FormWild', self.sym))
 
 
 class _FormSumTemplate(_FormTemplate):
@@ -576,7 +576,7 @@ class FormVar(_FormVarTemplate):
         return self
 
 
-class FormExpr(_FormExprTemplate):
+class FormWild(_FormWildTemplate):
     # TODO type restrictions
     def __init__(self, sym):
         self.sym = sym
@@ -1021,9 +1021,9 @@ if __name__ == '__main__':
     # form = y + 2
     # expr = x + 2
 
-    # a1 = FormExpr('a1')
-    # a2 = FormExpr('a2')
-    # a3 = FormExpr('a3')
+    # a1 = FormWild('a1')
+    # a2 = FormWild('a2')
+    # a3 = FormWild('a3')
     # form = a1**a2 * a2**a3
     # expr = x**2 * x**3
 

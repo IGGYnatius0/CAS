@@ -11,8 +11,8 @@ def substitute(form, const_map, var_map):
         return sub_const(form, const_map, var_map)
     if isinstance(form, FormVar):
         return sub_var(form, const_map, var_map)
-    if isinstance(form, FormExpr):
-        return sub_expr(form, const_map, var_map)
+    if isinstance(form, FormWild):
+        return sub_wild(form, const_map, var_map)
     if isinstance(form, FormSum):
         return sub_sum(form, const_map, var_map)
     if isinstance(form, FormProd):
@@ -36,7 +36,7 @@ def sub_var(form: FormVar, const_map: dict, var_map: dict):
     return form
 
 
-def sub_expr(form: FormExpr, const_map: dict, var_map: dict):
+def sub_wild(form: FormWild, const_map: dict, var_map: dict):
     if form in var_map:
         return var_map[form]
     return form
