@@ -1,4 +1,5 @@
-from .classes import *
+from itertools import pairwise
+from core.classes import *
 
 
 __all__ = ['Interval', 'MultiInterval']
@@ -160,7 +161,10 @@ def _multiinterval_typecheck(func):
 
 
 class MultiInterval(BaseInterval):
-    def __init__(self, intervals): # TODO ensure intervals are sorted
+    def __init__(self, intervals):
+        for lower, upper in pairwise(intervals):
+            if lower.upper > upper.lower:
+                raise ValueError('Intervals must be in order and must not overlap')
         self.intervals = tuple(intervals)
 
     @_multiinterval_typecheck
