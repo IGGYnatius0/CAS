@@ -1,5 +1,5 @@
 from itertools import pairwise
-from core.classes import *
+from .classes import *
 
 
 __all__ = ['Interval', 'MultiInterval', 'REALS']

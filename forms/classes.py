@@ -4,6 +4,9 @@ from functools import cached_property
 from collections import Counter
 
 from core.classes import *
+from core.intervals import REALS
+
+# TODO move solve_constraints() and match() to another file
 
 # READ BEFORE ADDING!!
 # Every form class has to implement the following methods: (might use ABCs next time)
@@ -494,14 +497,16 @@ class FormNum(_FormNumTemplate):
 
 
 class FormConst(_FormConstTemplate):
-    # TODO ranges eg FormConst('a', 'a>0')
-    def __init__(self, sym):
+    def __init__(self, sym, range=REALS):
         self.sym = sym
+        self.range = range
 
     def match(self, expr, var_map):
         if not isinstance(expr, Num):
             return False
-        return SingleConstraint(self, expr, var_map)
+        if expr in self.range:
+            return SingleConstraint(self, expr, var_map)
+        return False
 
     @cached_property
     def isconst(self):
@@ -952,10 +957,13 @@ def solve_constraints(constrs, n_consts, n_vars):
             if isinstance(constr.form, FormConst):
                 if constr.form in const_map:
                     return False
+                if constr.value not in constr.form.range:
+                    return False
                 const_map[constr.form] = constr.value
         for j, constr in enumerate(constrs):
             # Substitute
-            # Create new instance of SingleConstraint to prevent downstream SingleConstraints from getting modified
+            # Create new instance of SingleConstraint to prevent downstream SingleConstraints from getting modified,
+            # since simplify runs in-place
             if constr.form is None:
                 continue
             constr = SingleConstraint(form=constr.form.substitute_consts(const_map),
@@ -992,7 +1000,7 @@ if __name__ == '__main__':
     x = Var('x')
     y = FormVar('y')
     a = FormConst('a')
-    b = FormConst('b')
+    b = FormConst('b', range=Interval(0, 2, up_inc=True))
     c = FormConst('c')
     d = FormConst('d')
     e = FormConst('e')
