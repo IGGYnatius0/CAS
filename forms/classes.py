@@ -396,7 +396,7 @@ class MultiConstraint:
         for form_match in self.matches:
             if not any(form_match):
                 return False
-        for i in range(len(self.matches[0])): # TODO change to using self.size
+        for i in range(self.size):
             if not any(value_match[i] for value_match in self.matches):
                 return False
         return True
