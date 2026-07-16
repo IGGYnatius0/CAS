@@ -497,9 +497,9 @@ class FormNum(_FormNumTemplate):
 
 
 class FormConst(_FormConstTemplate):
-    def __init__(self, sym, range=REALS):
+    def __init__(self, sym, domain=REALS):
         self.sym = sym
-        self.range = range
+        self.range = domain
 
     def match(self, expr, var_map):
         if not isinstance(expr, Num):
@@ -1000,7 +1000,7 @@ if __name__ == '__main__':
     x = Var('x')
     y = FormVar('y')
     a = FormConst('a')
-    b = FormConst('b', range=Interval(0, 2, up_inc=True))
+    b = FormConst('b', domain=Interval(0, 2, up_inc=True))
     c = FormConst('c')
     d = FormConst('d')
     e = FormConst('e')
