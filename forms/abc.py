@@ -1,4 +1,4 @@
-from forms.form_classes import FormVar, FormConst
+from .classes import FormVar, FormConst, FormWild
 
 # Variables are lowercase
 a = FormVar('a')
@@ -55,3 +55,15 @@ W = FormConst('W')
 X = FormConst('X')
 Y = FormConst('Y')
 Z = FormConst('Z')
+
+# Arbitrary expressions are "a"+number
+a1 = FormWild('a1')
+a2 = FormWild('a2')
+a3 = FormWild('a3')
+a4 = FormWild('a4')
+a5 = FormWild('a5')
+a6 = FormWild('a6')
+a7 = FormWild('a7')
+a8 = FormWild('a8')
+a9 = FormWild('a9')
+a10 = FormWild('a10')

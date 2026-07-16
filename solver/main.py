@@ -1,6 +1,5 @@
-from core.core_classes import *
-from core.num import *
-from forms.form_classes import *
+from core.classes import *
+from forms.classes import *
 from forms.forms import FORMS
 from forms.formulas import FORMULAS
 
@@ -50,28 +49,41 @@ def replace_denoms(expr):
     return expr, []
 
 
+# def solve(expr):
+#     # TODO add FORMULAS to known_forms and starting on rewrite logic
+#     """Solver tries to solve by rewriting, but checking for form matches at every step"""
+#     expr = expr.simplify()
+#     expr, muls = replace_denoms(expr)
+#     print(muls)
+#     if muls:
+#         muls = Prod(muls).simplify()
+#         neq = solve(muls)
+#     else:
+#         neq = []
+#     result = match_form(expr)
+#     if result is not None:
+#         form_id = result[0]
+#         formulas = FORMULAS[form_id]
+#         eq = []
+#         for formula in formulas:
+#             # Convert const_map from FormConst to Var
+#             const_map = result[1]['consts']
+#             var_map = {}
+#             for key, value in const_map.items():
+#                 var_map[Var(key.sym)] = value
+#             ans = formula.substitute(var_map)
+#             ans = ans.simplify()
+#             eq.append(ans)
+#         eq = list(set(eq))
+#         if isinstance(neq, dict):
+#             eq += neq['neq']
+#             neq = neq['eq']
+#         return {'eq': eq, 'neq': neq}
+#     return None
+
+
 def solve(expr):
-    # TODO add FORMULAS to known_forms and starting on rewrite logic
-    """Solver tries to solve by rewriting, but checking for form matches at every step"""
-    expr = expr.simplify()
-    expr, muls = replace_denoms(expr) # later, need to have a constraint that muls != 0
-    muls = Prod(muls).simplify()
-    result = match_form(expr)
-    if result is not None:
-        form_id = result[0]
-        formulas = FORMULAS[form_id]
-        anss = []
-        for formula in formulas:
-            # Convert const_map from FormConst to Var
-            const_map = result[1]['consts']
-            var_map = {}
-            for key, value in const_map.items():
-                var_map[Var(key.sym)] = value
-            ans = formula.substitute(var_map)
-            ans = ans.simplify()
-            anss.append(ans)
-        return anss
-    return None
+    pass
 
 
 if __name__ == '__main__':

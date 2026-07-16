@@ -1,4 +1,4 @@
-from forms.abc import *
+from .abc import *
 
 # Polynomial
 linear    = A * x + B
