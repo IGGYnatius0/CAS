@@ -346,10 +346,6 @@ class SingleConstraint:
                 self.form = self.form.terms[0]
             elif isinstance(self.form, FormProd) and len(self.form.factors) == 1:
                 self.form = self.form.factors[0]
-            # if isinstance(self.form, FormFrac):
-            #     pass
-            # if isinstance(self.form, FormExp):
-            #     pass
 
     def simplify_sum(self):
         for i, term in enumerate(self.form.terms):
