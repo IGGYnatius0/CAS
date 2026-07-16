@@ -403,14 +403,8 @@ class MultiConstraint:
 
     def sort_matches(self):
         """Sorts self.matches by increasing number of constraints"""
-        # TODO change to out-of-place
-        for form_matches in self.matches:
-            for match in form_matches:
-                if match:
-                    match.sort_matches()
-        sorted_matches = sorted(zip(self.nmatches, self.matches), key=lambda x: x[0]) # TODO confirm if need to reverse
-        self.matches = [match[1] for match in sorted_matches]
-        return self.matches
+        sorted_matches = sorted(zip(self.nmatches, self.matches), key=lambda x: x[0])
+        self.nmatches, self.matches = zip(*sorted_matches)
 
     def get_constraints(self):
         if not self.check_validity():
@@ -420,6 +414,8 @@ class MultiConstraint:
         if self.size == 1:
             yield from self.matches[0][0].get_constraints()
             return
+
+        self.sort_matches()
 
         # Getting all valid constraints in the first row
         idxs = []
@@ -982,7 +978,6 @@ def match(form, expr):
     matches = form.match(expr, var_map)
     if not matches:
         return False
-    # matches.sort_matches() # fucking useless
     matches = matches.get_constraints()
     if not matches:
         return False
