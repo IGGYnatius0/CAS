@@ -327,7 +327,8 @@ class SingleConstraint:
 
     def get_constraints(self):
         """Returns a generator of all possible combinations of constraints"""
-        return [(self,)]
+        yield (self,)
+        return
 
     def simplify(self):
         prev_form = None
@@ -419,10 +420,12 @@ class MultiConstraint:
 
     def get_constraints(self):
         if not self.check_validity():
-            return [()]
+            yield ()
+            return
 
         if self.size == 1:
-            return self.matches[0][0].get_constraints()
+            yield from self.matches[0][0].get_constraints()
+            return
 
         # Getting all valid constraints in the first row
         idxs = []
@@ -433,7 +436,6 @@ class MultiConstraint:
             idxs.append(i)
 
         # Remove the column where each constraint identified above is
-        new_mcs = []
         for idx in idxs:
             new_matches = []
             for row in self.matches[1:]:
@@ -448,16 +450,11 @@ class MultiConstraint:
             new_mc.size = self.size - 1
             new_mc.matches = new_matches
             new_mc.nmatches = [n - 1 for n in self.nmatches[1:]]
-            new_mcs.append(new_mc)
 
-        combs = [] # TODO convert to generator?
-        for i, (idx, mc) in enumerate(zip(idxs, new_mcs)):
             constrs1 = self.matches[0][idx].get_constraints()
-            constrs2 = mc.get_constraints()
-            prod = product(constrs1, constrs2)
-            combs.extend([chain.from_iterable(i) for i in prod])
-        return combs
-
+            constrs2 = new_mc.get_constraints()
+            for c1, c2 in product(constrs1, constrs2):
+                yield chain.from_iterable((c1, c2))
 
     def __setitem__(self, idx, item):
         self.matches[idx[0]][idx[1]] = item
