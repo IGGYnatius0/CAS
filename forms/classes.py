@@ -319,10 +319,6 @@ class SingleConstraint:
         self.value = value
         self.var_map = var_map
 
-    def sort_matches(self):
-        """Sorts self.matches by increasing number of constraints"""
-        return [(self,)]
-
     def get_constraints(self):
         """Returns a generator of all possible combinations of constraints"""
         yield (self,)
