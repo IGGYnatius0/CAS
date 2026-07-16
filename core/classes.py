@@ -6,7 +6,8 @@ from decimal import Decimal
 from utils import pfactor
 
 __all__ = ['Num', 'Var', 'Sum', 'Prod', 'Frac', 'Exp', 'Eqn',
-           'neg_one', 'zero', 'one', 'inf', 'ninf']
+           'neg_one', 'zero', 'one', 'inf', 'ninf',
+           'CORE_TYPES']
 
 # READ BEFORE ADDING!!
 # Every core class has to implement the following methods:
@@ -641,6 +642,9 @@ class Eqn(_CoreEqnTemplate):
 class Func: # TODO this has been on todo for the longest time
     def __init__(self):
         pass
+
+
+CORE_TYPES = (Num, Var, Sum, Prod, Frac, Exp)
 
 
 if __name__ == '__main__':

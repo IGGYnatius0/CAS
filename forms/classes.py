@@ -566,13 +566,16 @@ class FormVar(_FormVarTemplate):
 
 class FormWild(_FormWildTemplate):
     # TODO type restrictions
-    def __init__(self, sym):
+    def __init__(self, sym, types=CORE_TYPES):
         self.sym = sym
+        self.types = tuple(types)
 
     def match(self, expr, var_map):
         if self in var_map:
             if var_map[self] == expr:
                 return SingleConstraint(self, expr, var_map)
+            return False
+        if not isinstance(expr, self.types):
             return False
         var_map[self] = expr
         return SingleConstraint(self, expr, var_map)
@@ -1000,22 +1003,22 @@ if __name__ == '__main__':
     x = Var('x')
     y = FormVar('y')
     a = FormConst('a')
-    b = FormConst('b', domain=Interval(0, 2, up_inc=True))
+    b = FormConst('b')
     c = FormConst('c')
     d = FormConst('d')
     e = FormConst('e')
     # form = ((a*b+c)*y**3 + b*c*y**2 + c*d*y + d).group_consts()
     # expr =  10*x**3   + 12*x**2  + 20*x  + 5
-    form = (y**(a*b+c) + b*c*y + b/y).group_consts()
-    expr = (x**-5 + 2*x + 2/x)
+    # form = (y**(a*b+c) + b*c*y + b/y).group_consts()
+    # expr = (x**-5 + 2*x + 2/x)
     # form = y + 2
     # expr = x + 2
 
-    # a1 = FormWild('a1')
-    # a2 = FormWild('a2')
-    # a3 = FormWild('a3')
-    # form = a1**a2 * a2**a3
-    # expr = x**2 * x**3
+    a1 = FormWild('a1', types=[Var])
+    a2 = FormWild('a2')
+    a3 = FormWild('a3')
+    form = a1**a2 * a1**a3
+    expr = x**2 * x**3
 
     # form = a*y**2+b*y+c
     # expr = 3*x**2-5*x-3
