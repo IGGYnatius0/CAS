@@ -2,7 +2,7 @@ from itertools import pairwise
 from core.classes import *
 
 
-__all__ = ['Interval', 'MultiInterval']
+__all__ = ['Interval', 'MultiInterval', 'REALS']
 
 
 class BaseInterval:
@@ -280,6 +280,9 @@ class MultiInterval(BaseInterval):
         for i in self.intervals:
             out.append(str(i))
         return ', '.join(out)
+
+
+REALS = Interval()
 
 
 if __name__ == '__main__':
