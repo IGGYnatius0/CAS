@@ -969,7 +969,7 @@ def solve_constraints(constrs, n_consts, n_vars):
             constr = SingleConstraint(form=constr.form.substitute_consts(const_map),
                                           value=constr.value)
             # Simplify
-            constr.simplify() # FIXME change to out of place (inplace bad)
+            constr.simplify()
             constrs[j] = constr
         i += 1
     if len(const_map) == n_consts:
