@@ -9,8 +9,6 @@ from core.classes import *
 # Every form class has to implement the following methods: (might use ABCs next time)
 # __hash__, match, isconst, group_consts, get_consts, get_vars, substitute
 
-# TODO remove check_validity in match?
-
 __all__ = ['FormNum', 'FormConst', 'FormVar', 'FormSum', 'FormProd', 'FormFrac', 'FormExp', 'FormWild', 'match']
 
 
