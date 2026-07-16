@@ -1,6 +1,6 @@
 from core.classes import *
 from forms.classes import *
-from forms.forms import FORMS
+from forms.known_forms import FORMS
 from forms.formulas import FORMULAS
 
 
