@@ -3,7 +3,7 @@ from itertools import product
 from functools import cached_property
 from decimal import Decimal
 
-from utils import pfactor
+from utils import pfactor, prod
 
 __all__ = ['Num', 'Var', 'Sum', 'Prod', 'Frac', 'Exp', 'Eqn',
            'neg_one', 'zero', 'one', 'inf', 'ninf',
@@ -392,55 +392,55 @@ class Sum(_CoreSumTemplate):
 
     def group(self):
         """Collects like terms"""
-        decomp = [list(term.group().decomp().elements()) for term in self.terms]
-        unique = defaultdict(int)
-        for term in decomp:
-            # Multiplying constants in each term to get coefficient
-            coeff = one
-            for i, factor in reversed(list(enumerate(term))):
-                if Num.isnum(factor):
-                    coeff *= term.pop(i)
-            # Accumulating coefficients of like terms
-            term = Prod(term) # term was a list
-            unique[term] += coeff
-        output = [coeff * term for term, coeff in unique.items()]
-        return Sum(output)
+        c = Counter()
+        for term in self.terms:
+            decomp = term.decomp()
+            const = one
+            for expr in tuple(decomp.keys()):
+                if isinstance(expr, Num):
+                    const *= expr ** decomp[expr]
+                    decomp.pop(expr)
+            # Convert all remaining in decomp to Prod
+            factors = []
+            for expr, power in decomp.items():
+                if power == one:
+                    factors.append(expr)
+                else:
+                    factors.append(Exp(expr, power))
+            term = Prod(factors)
+            c.update({term: const})
+        return Sum([coeff * term for term, coeff in c.items()])
 
     def simplify(self):
         """Simplifies the expression"""
         terms = self.group().terms
         terms = [term.simplify() for term in terms]
-        terms = [term for term in terms if term != zero]
         if len(terms) == 0:
             return zero
         if len(terms) == 1:
             return terms[0]
         return Sum(terms)
 
-    def expand(self):
-        """Returns the expanded form of each term"""
-        return Sum([term.expand() for term in self.terms])
-
-    def factorise(self, out=None):
-        """Factorises the Sum; if out is provided, factorises it out"""
-        if out is not None:
-            return self._factorise_out(out)
-        decomp = [term.decomp() for term in self.terms]
-        gcd = one
-        decomp0 = decomp[0].copy()
-        # TODO use collections.Counter to optimise
-        for factor in decomp0:
-            if all([factor in factors for factors in decomp]):
-                for factors in decomp:
-                    factors.remove(factor)
-                gcd *= factor
-        factorised = [Prod(term) for term in decomp]
-        return gcd * Sum(factorised)
-
-    def _factorise_out(self, out):
-        """Factorise helper method"""
-        factorised = [term / out for term in self.terms]
-        return out * Sum(factorised)
+    # def factorise(self, out=None):
+    #     """Factorises the Sum; if out is provided, factorises it out"""
+    #     if out is not None:
+    #         return self._factorise_out(out)
+    #     decomp = [term.decomp() for term in self.terms]
+    #     gcd = one
+    #     decomp0 = decomp[0].copy()
+    #     # TODO use collections.Counter to optimise
+    #     for factor in decomp0:
+    #         if all([factor in factors for factors in decomp]):
+    #             for factors in decomp:
+    #                 factors.remove(factor)
+    #             gcd *= factor
+    #     factorised = [Prod(term) for term in decomp]
+    #     return gcd * Sum(factorised)
+    #
+    # def _factorise_out(self, out):
+    #     """Factorise helper method"""
+    #     factorised = [term / out for term in self.terms]
+    #     return out * Sum(factorised)
 
     def substitute(self, var_map):
         return Sum([term.substitute(var_map) for term in self.terms])
@@ -471,10 +471,6 @@ class Prod(_CoreProdTemplate):
 
     def decomp(self):
         """Decomposes the expression into its constituent factors"""
-        # decomp = [] # TODO use itertools.chain
-        # for factor in self.factors:
-        #     decomp.extend(factor.decomp())
-        # return decomp
         c = Counter()
         for factor in self.factors:
             c.update(factor.decomp())
@@ -482,21 +478,20 @@ class Prod(_CoreProdTemplate):
 
     def group(self):
         """Collects like factors into exponents"""
-        unique = defaultdict(int)
-        const = 1
-        for factor in self.factors:
-            # Multiplying to get constant
-            if isinstance(factor, Num):
-                const *= factor
-                continue
-            # Accumulating powers of like factors
-            if isinstance(factor, Exp):
-                base, power = factor.base, factor.power
+        const = one
+        factors = []
+        for expr, power in self.decomp().items():
+            if isinstance(expr, Num):
+                const *= expr ** power
             else:
-                base, power = factor, 1
-            unique[base] += power
-        output = [base ** power for base, power in unique.items()]
-        return const * Prod(output)
+                if power == one:
+                    factors.append(expr)
+                else:
+                    factors.append(Exp(expr, power))
+        if const == one:
+            return Prod(factors)
+        else:
+            return const * Prod(factors)
 
     def simplify(self):
         """Simplifies the expression; if factors contain zero, returns zero"""
@@ -504,28 +499,11 @@ class Prod(_CoreProdTemplate):
         factors = [factor.simplify() for factor in factors]
         if zero in factors:
             return zero
-        factors = [factor for factor in factors if factor != one]
         if len(factors) == 0:
             return one
         if len(factors) == 1:
             return factors[0]
         return Prod(factors)
-
-    def expand(self):
-        """Returns an expansion of the product following distributive law"""
-        # First expand all factors to get rid of Exp
-        prod = [factor.expand() for factor in self.factors]
-        # Get all factors as a list of their terms
-        factors = []
-        for factor in prod:
-            if isinstance(factor, Sum):
-                factors.append(factor.terms)
-            else:
-                factors.append([factor])
-        # Get all combinations of terms from each factor using itertools product
-        new_terms = product(*factors)
-        output = [Prod(list(term)) for term in new_terms]
-        return Sum(output)
 
     def substitute(self, var_map):
         return Prod([term.substitute(var_map) for term in self.factors])
@@ -547,18 +525,15 @@ class Frac(_CoreFracTemplate):
         """Decomposes the expression into its constituent factors"""
         numers = self.numer.decomp()
         denoms = self.denom.decomp()
-        # denoms = [denom ** neg_one for denom in denoms]
-        # return numers + denoms
         numers.subtract(denoms)
         return numers
 
+    def group(self):
+        return Frac(self.numer.group(), self.denom.group())
+
     def simplify(self):
         """Returns the fraction with simplified numerator and denominator"""
-        return self.numer.simplify() / self.denom.simplify()
-
-    def expand(self):
-        """Returns an expansion of the numerator and denominator"""
-        return Frac(self.numer.expand(), self.denom.expand())
+        return Frac(self.numer.simplify(), self.denom.simplify())
 
     def substitute(self, var_map):
         return Frac(self.numer.substitute(var_map), self.denom.substitute(var_map))
@@ -578,28 +553,16 @@ class Exp(_CoreExpTemplate):
 
     def decomp(self): # TODO make it return only numeric and fractional part
         """Decomposes the expression into its constituent factors"""
-        # i, f = divmod(self.power, one)
-        # if i > zero:
-        #     output = [self.base for _ in range(int(i))]
-        # else:
-        #     output = [self.base ** neg_one for _ in range(-int(i))]
-        # if f != zero:
-        #     output.append(self.base ** f)
-        # return output
         if isinstance(self.power, Num):
             return Counter({self.base: self.power})
-        return super().decomp()
+        return Counter({self: 1})
+
+    def group(self):
+        return Exp(self.base.group(), self.power.group())
 
     def simplify(self):
         """Simplifies the expression"""
-        return self.base.simplify() ** self.power.simplify()
-
-    def expand(self):
-        """Returns an expansion of the exponential"""
-        decomp = self.decomp()
-        if len(decomp) == 1:
-            return decomp[0]
-        return Prod(decomp).expand()
+        return Exp(self.base.simplify(), self.power.simplify())
 
     def substitute(self, var_map):
         return self.base.substitute(var_map) ** self.power.substitute(var_map)
@@ -651,7 +614,8 @@ if __name__ == '__main__':
     x = Var('x')
     # expr = (x+1)**2 * (x+1)**3
     # expr = expr.expand().simplify()
-    expr = neg_one * 17/x**2 * x
-    print(expr)
-    expr = expr.expand().simplify()
-    print(expr)
+    # expr = neg_one * 17/x**2 * x
+    # print(expr)
+    # expr = expr.expand().simplify()
+    # print(expr)
+    print((6*x-2*x+4*x).simplify())
