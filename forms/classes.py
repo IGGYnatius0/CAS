@@ -563,7 +563,6 @@ class FormVar(_FormVarTemplate):
 
 
 class FormWild(_FormWildTemplate):
-    # TODO type restrictions
     def __init__(self, sym, types=CORE_TYPES):
         self.sym = sym
         self.types = tuple(types)
