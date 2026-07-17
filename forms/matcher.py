@@ -2,6 +2,7 @@ from collections import Counter
 
 from core.classes import *
 from forms.classes import *
+from forms.classes import SingleConstraint
 
 
 def solve_constraints(constrs, n_consts, n_vars):

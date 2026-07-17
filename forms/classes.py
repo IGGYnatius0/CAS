@@ -9,8 +9,7 @@ from core.intervals import REALS
 # Every form class has to implement the following methods: (might use ABCs next time)
 # __hash__, match, isconst, group_consts, get_consts, get_vars, substitute
 
-__all__ = ['FormNum', 'FormConst', 'FormVar', 'FormSum', 'FormProd', 'FormFrac', 'FormExp', 'FormWild',
-           'SingleConstraint', 'MultiConstraint']
+__all__ = ['FormNum', 'FormConst', 'FormVar', 'FormSum', 'FormProd', 'FormFrac', 'FormExp', 'FormWild']
 
 
 class _FormTemplate:

@@ -1,5 +1,6 @@
 from core.classes import *
 from forms.classes import *
+import forms.matcher as matcher
 
 
 __all__ = ['RewriteRule', 'RewriteSet', 'RewriteGroup']
@@ -67,7 +68,7 @@ class RewriteRule:
         self.target = target
 
     def rewrite(self, expr, simplify=True):
-        result = match(self.form, expr)
+        result = matcher.match(self.form, expr)
         if result:
             const_map, var_map = result['consts'], result['vars']
             new = substitute(self.target, const_map, var_map)
@@ -88,7 +89,7 @@ class RewriteSet:
         # TODO change to generator?
         # Finding which form exr matches, if any
         for i, form in enumerate(self.forms):
-            result = match(form, expr)
+            result = matcher.match(form, expr)
             if result:
                 const_map, var_map = result['consts'], result['vars']
                 idx = i
