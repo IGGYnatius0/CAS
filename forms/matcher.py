@@ -97,15 +97,14 @@ if __name__ == '__main__':
     # form = y + 2
     # expr = x + 2
 
-    a1 = FormWild('a1', types=[Var])
+    a1 = FormWild('a1')
     a2 = FormWild('a2')
     a3 = FormWild('a3')
-    form = a1**a2 * a1**a3
-    expr = x**2 * x**3
+    # form = a1**a2 * a1**a3
+    # expr = x**2 * x**3
 
-    # form = a*y**2+b*y+c
-    # expr = 3*x**2-5*x-3
-    # expr = expr.simplify()
+    form = a1 + a2
+    expr = x**2-x
 
     print(form)
     print(expr)
