@@ -1,9 +1,8 @@
-from collections import defaultdict, Counter
-from itertools import product
+from collections import Counter
 from functools import cached_property
 from decimal import Decimal
 
-from utils import pfactor, prod
+from utils import pfactor
 
 __all__ = ['Num', 'Var', 'Sum', 'Prod', 'Frac', 'Exp', 'Eqn',
            'neg_one', 'zero', 'one', 'inf', 'ninf',
