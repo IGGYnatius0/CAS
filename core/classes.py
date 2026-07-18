@@ -553,7 +553,7 @@ class Exp(_CoreExpTemplate):
         self.base = Num(base) if Num.isnum(base) else base
         self.power = Num(power) if Num.isnum(power) else power
 
-    def decomp(self): # TODO make it return only numeric and fractional part
+    def decomp(self):
         """Decomposes the expression into its constituent factors"""
         if isinstance(self.power, Num):
             return Counter({self.base: self.power})
