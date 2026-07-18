@@ -10,7 +10,7 @@ __all__ = ['Num', 'Var', 'Sum', 'Prod', 'Frac', 'Exp', 'Eqn',
 
 # READ BEFORE ADDING!!
 # Every core class has to implement the following methods:
-# __hash__, decomp, group, simplify, expand, factorise, substitute, get_vars, copy
+# __hash__, decomp, group, simplify, substitute, get_vars, copy
 
 
 # TODO check sub and rsub for CoreTemplate and SumTemplate
@@ -85,12 +85,6 @@ class _CoreTemplate:
 
     def simplify(self):
         """Simplifies the expression"""
-        return self
-
-    def expand(self):
-        return self
-
-    def factorise(self, out=None):
         return self
 
     def substitute(self, var_map):
@@ -322,12 +316,6 @@ class Num(_NumTemplate):
     def simplify(self):
         return self
 
-    def expand(self):
-        return self
-
-    def factorise(self, out=None):
-        return self
-
     def substitute(self, var_map):
         return self
 
@@ -425,27 +413,6 @@ class Sum(_CoreSumTemplate):
         if len(terms) == 1:
             return terms[0]
         return Sum(terms)
-
-    # def factorise(self, out=None):
-    #     """Factorises the Sum; if out is provided, factorises it out"""
-    #     if out is not None:
-    #         return self._factorise_out(out)
-    #     decomp = [term.decomp() for term in self.terms]
-    #     gcd = one
-    #     decomp0 = decomp[0].copy()
-    #     # TODO use collections.Counter to optimise
-    #     for factor in decomp0:
-    #         if all([factor in factors for factors in decomp]):
-    #             for factors in decomp:
-    #                 factors.remove(factor)
-    #             gcd *= factor
-    #     factorised = [Prod(term) for term in decomp]
-    #     return gcd * Sum(factorised)
-    #
-    # def _factorise_out(self, out):
-    #     """Factorise helper method"""
-    #     factorised = [term / out for term in self.terms]
-    #     return out * Sum(factorised)
 
     def substitute(self, var_map):
         return Sum([term.substitute(var_map) for term in self.terms])
