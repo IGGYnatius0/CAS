@@ -1,5 +1,4 @@
 from itertools import product
-from collections import Counter
 
 from core.classes import *
 
@@ -18,8 +17,6 @@ def expand(expr):
         else:
             to_expand.append(factor)
     expanded = tuple(product(*to_expand))
-    if len(expanded) == 1:
-        return [expanded[0]]
     return [Sum(expanded)]
 
 
@@ -32,19 +29,23 @@ def factorise(expr):
         common &= decomp
     for i in range(len(decomps)):
         decomps[i].subtract(common)
-    return [Prod(common.elements()) * Sum([Prod(elements(decomp)) for decomp in decomps])]
 
+    # Convert from Counter to list of Exp
+    common_list = []
+    for expr, power in common.items():
+        common_list.append(Exp(expr, power))
+    common_prod = Prod(common_list)
 
-def elements(counter: Counter):
-    output = []
-    for item, count in counter.items():
-        if int(count) == count: # Integer check
-            output.extend([item.copy() for _ in range(int(count))])
-        else:
-            i, f = divmod(count, one)
-            output.extend([item.copy() for _ in range(int(i))])
-            output.append(Exp(item.copy(), f))
-    return output
+    terms_list = []
+    for decomp in decomps:
+        temp = []
+        for expr, power in decomp.items():
+            if power != zero:
+                temp.append(Exp(expr, power))
+        terms_list.append(Prod(temp))
+    terms_sum = Sum(terms_list)
+
+    return [common_prod * terms_sum]
 
 
 # TODO group, simplify
