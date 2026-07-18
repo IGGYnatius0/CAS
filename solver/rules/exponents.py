@@ -23,7 +23,7 @@ def sum_pows_rewrite_1(expr, simplify=True):
     output = bases[0] ** Sum(powers)
     if simplify:
         output = output.simplify()
-    return output
+    return [output]
 
 
 def sum_pows_rewrite_2(expr, simplify=True):
@@ -59,7 +59,7 @@ def prod_bases_rewrite_1(expr, simplify=True):
     output = Prod(bases) ** powers[0]
     if simplify:
         output = output.simplify()
-    return output
+    return [output]
 
 
 def prod_bases_rewrite_2(expr, simplify=True):
@@ -90,20 +90,13 @@ prod_bases.rewrite = prod_bases_rewrite
 
 
 rules = RewriteGroup((
-    # RewriteSet(( # TODO generalised version
-    #     a1**a2 * a1**a3,
-    #     a1 ** (a2+a3)
-    # )),
     sum_pows,
 
     RewriteSet((
         a1**a2 / a1**a3,
         a1 ** (a2-a3)
     )),
-    # RewriteSet(( # TODO generalised version
-    #     a1**a3 * a2**a3,
-    #     (a1*a2) ** a3
-    # )),
+
     prod_bases,
 
     RewriteSet((
@@ -136,7 +129,7 @@ rules = RewriteGroup((
 if __name__ == '__main__':
     from core.classes import *
     x = Var('x')
-    expr = (x**2+3/x-8*x)**0
+    expr = x**3*x**2*x**-4
     print(expr)
     new = rules.rewrite(expr)
     for i in new:
