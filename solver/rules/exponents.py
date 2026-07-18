@@ -8,19 +8,13 @@ def sum_pows_rewrite_1(expr, simplify=True):
         return []
     if len(expr.factors) < 2:
         return []
-    bases = []
-    powers = []
     for factor in expr.factors:
-        if isinstance(factor, Exp):
-            bases.append(factor.base)
-            powers.append(factor.power)
-        else:
-            bases.append(factor)
-            powers.append(one)
-    for base in bases[1:]:
-        if base != bases[0]:
+        if not isinstance(factor, Exp):
             return []
-    output = bases[0] ** Sum(powers)
+        if factor.base != expr.factors[0].base:
+            return []
+    powers = [factor.power for factor in expr.factors]
+    output = expr.factors[0].base ** Sum(powers)
     if simplify:
         output = output.simplify()
     return [output]
@@ -44,19 +38,13 @@ def prod_bases_rewrite_1(expr, simplify=True):
         return []
     if len(expr.factors) < 2:
         return []
-    bases = []
-    powers = []
     for factor in expr.factors:
-        if isinstance(factor, Exp):
-            bases.append(factor.base)
-            powers.append(factor.power)
-        else:
-            bases.append(factor)
-            powers.append(one)
-    for power in powers[1:]:
-        if power != powers[0]:
+        if not isinstance(factor, Exp):
             return []
-    output = Prod(bases) ** powers[0]
+        if factor.power != expr.factors[0].power:
+            return []
+    bases = [factor.base for factor in expr.factors]
+    output = Prod(bases) ** expr.factors[0].power
     if simplify:
         output = output.simplify()
     return [output]
@@ -131,6 +119,6 @@ if __name__ == '__main__':
     x = Var('x')
     expr = x**3*x**2*x**-4
     print(expr)
-    new = rules.rewrite(expr)
+    new = rules.rewrite(expr, simplify=False)
     for i in new:
         print(str(i))
