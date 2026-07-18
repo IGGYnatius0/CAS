@@ -1,11 +1,16 @@
 from itertools import product
 
 from core.classes import *
+from solver.rules.base import RewriteRule
 
 
 def rewrite(expr):
     new = expand(expr) + factorise(expr) + simplify(expr)
     return list(dict.fromkeys(new))
+
+
+rules = RewriteRule()
+rules.rewrite = rewrite
 
 
 def expand(expr):
