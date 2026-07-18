@@ -3,7 +3,7 @@ from forms.abc import *
 from core.classes import zero, one
 
 
-def sum_pows_rewrite_1(expr, simplify=True):
+def sum_pows_rewrite_1(expr):
     if not isinstance(expr, Prod):
         return []
     if len(expr.factors) < 2:
@@ -15,12 +15,10 @@ def sum_pows_rewrite_1(expr, simplify=True):
             return []
     powers = [factor.power for factor in expr.factors]
     output = expr.factors[0].base ** Sum(powers)
-    if simplify:
-        output = output.simplify()
     return [output]
 
 
-def sum_pows_rewrite_2(expr, simplify=True):
+def sum_pows_rewrite_2(expr):
     if not isinstance(expr, Exp):
         return []
     if not isinstance(expr.power, Sum):
@@ -28,12 +26,10 @@ def sum_pows_rewrite_2(expr, simplify=True):
     if len(expr.power.terms) < 2:
         return []
     output = Prod([Exp(expr.base, term) for term in expr.power.terms])
-    if simplify:
-        output = output.simplify()
     return [output]
 
 
-def prod_bases_rewrite_1(expr, simplify=True):
+def prod_bases_rewrite_1(expr):
     if not isinstance(expr, Prod):
         return []
     if len(expr.factors) < 2:
@@ -45,12 +41,10 @@ def prod_bases_rewrite_1(expr, simplify=True):
             return []
     bases = [factor.base for factor in expr.factors]
     output = Prod(bases) ** expr.factors[0].power
-    if simplify:
-        output = output.simplify()
     return [output]
 
 
-def prod_bases_rewrite_2(expr, simplify=True):
+def prod_bases_rewrite_2(expr):
     if not isinstance(expr, Exp):
         return []
     if not isinstance(expr.base, Prod):
@@ -58,17 +52,15 @@ def prod_bases_rewrite_2(expr, simplify=True):
     if len(expr.base.factors) < 2:
         return []
     output = Prod([Exp(base, expr.power) for base in expr.base.factors])
-    if simplify:
-        output = output.simplify()
     return [output]
 
 
-def sum_pows_rewrite(expr, simplify=True):
-    return sum_pows_rewrite_1(expr, simplify) + sum_pows_rewrite_2(expr, simplify)
+def sum_pows_rewrite(expr):
+    return sum_pows_rewrite_1(expr) + sum_pows_rewrite_2(expr)
 
 
-def prod_bases_rewrite(expr, simplify=True):
-    return prod_bases_rewrite_1(expr, simplify) + prod_bases_rewrite_2(expr, simplify)
+def prod_bases_rewrite(expr):
+    return prod_bases_rewrite_1(expr) + prod_bases_rewrite_2(expr)
 
 
 sum_pows = RewriteRule()
@@ -119,6 +111,6 @@ if __name__ == '__main__':
     x = Var('x')
     expr = x**3*x**2*x**-4
     print(expr)
-    new = rules.rewrite(expr, simplify=False)
+    new = rules.rewrite(expr)
     for i in new:
         print(str(i))

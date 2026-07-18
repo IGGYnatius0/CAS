@@ -3,7 +3,7 @@ from forms.abc import *
 from core.classes import *
 
 
-def prod_fracs_rewrite(expr, simplify=True):
+def prod_fracs_rewrite(expr):
     if not isinstance(expr, Prod):
         return []
     if len(expr.factors) < 2:
@@ -14,12 +14,10 @@ def prod_fracs_rewrite(expr, simplify=True):
     numer = Prod([factor.numer for factor in expr.factors])
     denom = Prod([factor.denom for factor in expr.factors])
     output = Frac(numer, denom)
-    if simplify:
-        output.simplify()
     return [output]
 
 
-def sum_fracs_rewrite(expr, simplify=True):
+def sum_fracs_rewrite(expr):
     if not isinstance(expr, Sum):
         return []
     if len(expr.terms) < 2:
@@ -38,8 +36,6 @@ def sum_fracs_rewrite(expr, simplify=True):
         numer.append(Prod(factors))
     denom = Prod([term.denom for term in expr.terms])
     output = Frac(Sum(numer), denom)
-    if simplify:
-        output.simplify()
     return [output]
 
 
