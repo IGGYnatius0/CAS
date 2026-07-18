@@ -78,7 +78,15 @@ rules = RewriteGroup((
     RewriteSet((
         (a1/a2)/(a3/a4),
         (a1/a2)*(a4/a3)
-    ))
+    )),
+    RewriteSet((
+        a1/one,
+        a1
+    )),
+    RewriteRule(
+        form=zero/a1,
+        target=zero
+    )
 ))
 
 if __name__ == '__main__':

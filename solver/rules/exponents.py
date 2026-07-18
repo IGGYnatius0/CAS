@@ -96,7 +96,7 @@ rules = RewriteGroup((
         target=a1**-a2
     ),
     RewriteRule(
-        form=a1 ** zero,
+        form=a1**zero,
         target=one
     ),
     RewriteSet((
