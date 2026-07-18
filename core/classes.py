@@ -408,7 +408,13 @@ class Sum(_CoreSumTemplate):
                     factors.append(Exp(expr, power))
             term = Prod(factors)
             c.update({term: const})
-        return Sum([coeff * term for term, coeff in c.items()])
+        terms = []
+        for term, coeff in c.items():
+            if coeff == one:
+                terms.append(term)
+            else:
+                terms.append(coeff * term)
+        return Sum(terms)
 
     def simplify(self):
         """Simplifies the expression"""
@@ -480,13 +486,10 @@ class Prod(_CoreProdTemplate):
         const = one
         factors = []
         for expr, power in self.decomp().items():
-            if isinstance(expr, Num):
-                const *= expr ** power
+            if power == one:
+                factors.append(expr)
             else:
-                if power == one:
-                    factors.append(expr)
-                else:
-                    factors.append(Exp(expr, power))
+                factors.append(Exp(expr, power))
         if const == one:
             return Prod(factors)
         else:
