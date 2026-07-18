@@ -95,10 +95,6 @@ rules = RewriteGroup((
         form=one / a1**a2,
         target=a1**-a2
     ),
-    RewriteRule(
-        form=a1**zero,
-        target=one
-    ),
     RewriteSet((
         a1**one,
         a1

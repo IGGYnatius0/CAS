@@ -46,7 +46,7 @@ sum_fracs.rewrite = sum_fracs_rewrite
 
 
 rules = RewriteGroup((
-    RewriteRule(
+    RewriteRule( # TODO add !=0 restriction
         form=a1/a1,
         target=one
     ),
@@ -82,11 +82,7 @@ rules = RewriteGroup((
     RewriteSet((
         a1/one,
         a1
-    )),
-    RewriteRule(
-        form=zero/a1,
-        target=zero
-    )
+    ))
 ))
 
 if __name__ == '__main__':
