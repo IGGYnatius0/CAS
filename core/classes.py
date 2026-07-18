@@ -10,12 +10,10 @@ __all__ = ['Num', 'Var', 'Sum', 'Prod', 'Frac', 'Exp', 'Eqn',
 
 # READ BEFORE ADDING!!
 # Every core class has to implement the following methods:
-# __hash__, decomp, group, simplify, substitute, get_vars, copy
+# __hash__, decomp, simplify, substitute, get_vars, copy
 
 
-# TODO check sub and rsub for CoreTemplate and SumTemplate
 # TODO implement functions especially log/ln
-# TODO force frac and exp of Nums to remain symbolic instead of getting evaluated
 
 
 class _CoreTemplate:
@@ -77,10 +75,6 @@ class _CoreTemplate:
     def decomp(self):
         """Decomposes the expression into its constituent factors"""
         return Counter({self: 1})
-
-    def group(self):
-        """Collects like terms"""
-        return self
 
     def simplify(self):
         """Simplifies the expression"""
@@ -309,9 +303,6 @@ class Num(_NumTemplate):
             return Counter([Num(n) for n in pfactor(self)])
         return Counter({self: 1})
 
-    def group(self):
-        return self
-
     def simplify(self):
         return self
 
@@ -376,37 +367,28 @@ class Sum(_CoreSumTemplate):
         if not self.terms:
             self.terms = [zero]
 
-    def group(self):
-        """Collects like terms"""
-        c = Counter()
-        for term in self.terms:
-            decomp = term.decomp()
-            const = one
-            for expr in tuple(decomp.keys()):
-                if isinstance(expr, Num):
-                    const *= expr ** decomp[expr]
-                    decomp.pop(expr)
-            # Convert all remaining in decomp to Prod
+    def simplify(self):
+        """Simplifies the expression"""
+        decomps = [term.simplify().decomp() for term in self.terms]
+        terms_counter = Counter()
+        for decomp in decomps:
+            coeff = one
             factors = []
-            for expr, power in decomp.items():
-                if power == one:
-                    factors.append(expr)
+            for base, power in tuple(decomp.items()):
+                if isinstance(base, Num):
+                    coeff *= base ** power
+                    decomp.pop(base)
                 else:
-                    factors.append(Exp(expr, power))
-            term = Prod(factors)
-            c.update({term: const})
+                    factors.append(Exp(base, power))
+            terms_counter.update({Prod(factors).simplify(): coeff})
         terms = []
-        for term, coeff in c.items():
-            if coeff == one:
+        for term, coeff in terms_counter.items():
+            if coeff == zero:
+                pass
+            elif coeff == one:
                 terms.append(term)
             else:
                 terms.append(coeff * term)
-        return Sum(terms)
-
-    def simplify(self):
-        """Simplifies the expression"""
-        terms = self.group().terms
-        terms = [term.simplify() for term in terms]
         if len(terms) == 0:
             return zero
         if len(terms) == 1:
@@ -447,31 +429,27 @@ class Prod(_CoreProdTemplate):
             c.update(factor.decomp())
         return c
 
-    def group(self):
-        """Collects like factors into exponents"""
-        const = one
-        factors = []
-        for expr, power in self.decomp().items():
-            if power == one:
-                factors.append(expr)
-            else:
-                factors.append(Exp(expr, power))
-        if const == one:
-            return Prod(factors)
-        else:
-            return const * Prod(factors)
-
     def simplify(self):
         """Simplifies the expression; if factors contain zero, returns zero"""
-        factors = self.group().factors
-        factors = [factor.simplify() for factor in factors]
-        if zero in factors:
+        decomp = Prod([factor.simplify() for factor in self.factors]).decomp()
+        const = one
+        factors = []
+        for base, power in decomp.items():
+            expr = Exp(base, power).simplify()
+            if isinstance(expr, Num):
+                const *= expr
+            else:
+                factors.append(expr)
+        if const == one:
+            return Prod(factors)
+        if const == zero:
             return zero
-        if len(factors) == 0:
+        output = const * Prod(factors)
+        if len(output.factors) == 0:
             return one
-        if len(factors) == 1:
-            return factors[0]
-        return Prod(factors)
+        if len(output.factors) == 1:
+            return output[0]
+        return output
 
     def substitute(self, var_map):
         return Prod([term.substitute(var_map) for term in self.factors])
@@ -496,12 +474,20 @@ class Frac(_CoreFracTemplate):
         numers.subtract(denoms)
         return numers
 
-    def group(self):
-        return Frac(self.numer.group(), self.denom.group())
-
     def simplify(self):
         """Returns the fraction with simplified numerator and denominator"""
-        return Frac(self.numer.simplify(), self.denom.simplify())
+        numer = self.numer.simplify()
+        denom = self.denom.simplify()
+        if numer == zero and denom != zero:
+            return zero
+        if denom == one:
+            return numer
+        if numer == zero and denom == zero:
+            return Frac(zero, zero)
+        if isinstance(numer, Num) and isinstance(denom, Num):
+            if numer % denom == 0:
+                return numer / denom
+        return Frac(numer, denom)
 
     def substitute(self, var_map):
         return Frac(self.numer.substitute(var_map), self.denom.substitute(var_map))
@@ -525,12 +511,22 @@ class Exp(_CoreExpTemplate):
             return Counter({self.base: self.power})
         return Counter({self: 1})
 
-    def group(self):
-        return Exp(self.base.group(), self.power.group())
-
     def simplify(self):
         """Simplifies the expression"""
-        return Exp(self.base.simplify(), self.power.simplify())
+        base = self.base.simplify()
+        power = self.power.simplify()
+        if power == one:
+            return base
+        if base == one or (power == zero and base != zero):
+            return one
+        if base == zero and power != zero:
+            return zero
+        if base == zero and power == zero:
+            return Exp(zero, zero)
+        if isinstance(base, Num) and isinstance(power, Num):
+            if base == int(base) and power == int(power):
+                return base ** power
+        return Exp(base, power)
 
     def substitute(self, var_map):
         return self.base.substitute(var_map) ** self.power.substitute(var_map)
@@ -549,12 +545,7 @@ class Eqn(_CoreEqnTemplate):
         self.rhs = Num(rhs) if Num.isnum(rhs) else rhs
 
     def simplify(self):
-        lhs = self.lhs.simplify()
-        rhs = self.rhs.simplify()
-        return Eqn(lhs, rhs)
-
-    # def isequal(self):
-    #     return self.lhs == self.rhs
+        return Eqn(self.lhs.simplify(), self.rhs.simplify())
 
     def swap(self):
         return Eqn(self.rhs, self.lhs)
@@ -580,10 +571,10 @@ CORE_TYPES = (Num, Var, Sum, Prod, Frac, Exp)
 
 if __name__ == '__main__':
     x = Var('x')
-    # expr = (x+1)**2 * (x+1)**3
-    # expr = expr.expand().simplify()
-    # expr = neg_one * 17/x**2 * x
-    # print(expr)
-    # expr = expr.expand().simplify()
-    # print(expr)
-    print((6*x-2*x+4*x).simplify())
+    y = Var('y')
+
+    # expr = ( (3*x**2*y**3 - 2*x*y**2 + 4*x**3*y) + (2*x**2*y**3 + 5*x*y**2 - x**3*y) + (4*x**2*y**3 + 3*x*y**2 - 5*x**3*y) ) + ( (x**2*y**3 + 4*x*y**2 - 2*x**3*y) + (2*x**2*y**3 - x*y**2 + 3*x**3*y) + (3*x**2*y**3 - 2*x*y**2 + x**3*y) )
+    # print(expr.simplify()) # ((15 * (x ^ 2) * (y ^ 3)) + (7 * x * (y ^ 2)))
+
+    expr = Frac(2, 3)
+    print(expr.simplify())
