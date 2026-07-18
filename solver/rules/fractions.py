@@ -1,6 +1,7 @@
 from solver.rules.base import *
 from forms.abc import *
 from core.classes import *
+from forms.classes import FormWild
 
 
 def prod_fracs_rewrite(expr):
@@ -45,9 +46,11 @@ prod_fracs.rewrite = prod_fracs_rewrite
 sum_fracs.rewrite = sum_fracs_rewrite
 
 
+b1 = FormWild('b1', blacklist=zero)
+
 rules = RewriteGroup((
-    RewriteRule( # TODO add !=0 restriction
-        form=a1/a1,
+    RewriteRule(
+        form=b1/b1,
         target=one
     ),
     RewriteSet((
