@@ -4,7 +4,7 @@ from core.classes import *
 
 
 def rewrite(expr):
-    new = expand(expr) + factorise(expr) + group(expr) + simplify(expr)
+    new = expand(expr) + factorise(expr) + simplify(expr)
     return list(dict.fromkeys(new))
 
 
@@ -47,10 +47,6 @@ def factorise(expr):
     terms_sum = Sum(terms_list)
 
     return [common_prod * terms_sum]
-
-
-def group(expr):
-    return [expr.group()]
 
 
 def simplify(expr):
