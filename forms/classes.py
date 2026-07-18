@@ -224,7 +224,7 @@ class _FormExpTemplate(_FormTemplate):
         return hash(('FormExp', self.base, self.power))
 
 
-def eqn_typecheck(func):
+def _eqn_typecheck(func):
     def wrapper(self, other):
         if not isinstance(other, _FormEqnTemplate):
             return func(self, FormEqn(other, other))
@@ -242,71 +242,71 @@ class _FormEqnTemplate:
     def __hash__(self):
         return hash(('FormEqn', self.lhs, self.rhs))
 
-    @eqn_typecheck
+    @_eqn_typecheck
     def __add__(self, other):
         return FormEqn(self.lhs + other.lhs, self.rhs + other.rhs)
     
-    @eqn_typecheck
+    @_eqn_typecheck
     def __radd__(self, other):
         return FormEqn(other.lhs + self.lhs, other.rhs + self.rhs)  # Fixed: was self.lhs
     
-    @eqn_typecheck
+    @_eqn_typecheck
     def __iadd__(self, other):
         self.lhs += other.lhs
         self.rhs += other.rhs
         return self
     
-    @eqn_typecheck
+    @_eqn_typecheck
     def __sub__(self, other):
         return FormEqn(self.lhs - other.lhs, self.rhs - other.rhs)
     
-    @eqn_typecheck
+    @_eqn_typecheck
     def __rsub__(self, other):
         return FormEqn(other.lhs - self.lhs, other.rhs - self.rhs)
     
-    @eqn_typecheck
+    @_eqn_typecheck
     def __isub__(self, other):
         self.lhs -= other.lhs
         self.rhs -= other.rhs
         return self
     
-    @eqn_typecheck
+    @_eqn_typecheck
     def __mul__(self, other):
         return FormEqn(self.lhs * other.lhs, self.rhs * other.rhs)
     
-    @eqn_typecheck
+    @_eqn_typecheck
     def __rmul__(self, other):
         return FormEqn(other.lhs * self.lhs, other.rhs * self.rhs)
     
-    @eqn_typecheck
+    @_eqn_typecheck
     def __imul__(self, other):
         self.lhs *= other.lhs
         self.rhs *= other.rhs
         return self
     
-    @eqn_typecheck
+    @_eqn_typecheck
     def __truediv__(self, other):
         return FormEqn(self.lhs / other.lhs, self.rhs / other.rhs)
     
-    @eqn_typecheck
+    @_eqn_typecheck
     def __rtruediv__(self, other):
         return FormEqn(other.lhs / self.lhs, other.rhs / self.rhs)
     
-    @eqn_typecheck
+    @_eqn_typecheck
     def __itruediv__(self, other):
         self.lhs /= other.lhs
         self.rhs /= other.rhs
         return self
     
-    @eqn_typecheck
+    @_eqn_typecheck
     def __pow__(self, other):
         return FormEqn(self.lhs ** other.lhs, self.rhs ** other.rhs)
     
-    @eqn_typecheck
+    @_eqn_typecheck
     def __rpow__(self, other):
         return FormEqn(other.lhs ** self.lhs, other.rhs ** self.rhs)
     
-    @eqn_typecheck
+    @_eqn_typecheck
     def __ipow__(self, other):
         self.lhs **= other.lhs
         self.rhs **= other.rhs
@@ -562,14 +562,20 @@ class FormVar(_FormVarTemplate):
 
 
 class FormWild(_FormWildTemplate):
-    def __init__(self, sym, types=CORE_TYPES):
+    def __init__(self, sym, whitelist=(), blacklist=(), types=CORE_TYPES):
         self.sym = sym
+        self.whitelist = tuple(whitelist)
+        self.blacklist = tuple(blacklist)
         self.types = tuple(types)
 
     def match(self, expr, var_map):
         if self in var_map:
             if var_map[self] == expr:
                 return SingleConstraint(self, expr, var_map)
+            return False
+        if expr not in self.whitelist and self.whitelist:
+            return False
+        if expr in self.blacklist:
             return False
         if not isinstance(expr, self.types):
             return False
