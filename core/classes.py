@@ -291,7 +291,8 @@ class _CoreEqnTemplate:
         return f'Eqn({repr(self.lhs)}, {repr(self.rhs)})'
 
     def __hash__(self):
-        return hash(('CoreEqn', self.lhs, self.rhs))
+        hashes = (hash(self.lhs), hash(self.rhs))
+        return hash(('CoreEqn', min(hashes), max(hashes)))
 
 
 class Num(_NumTemplate):
