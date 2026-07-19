@@ -1,5 +1,4 @@
 from itertools import product
-
 from core.classes import *
 from solver.rules.base import RewriteRule
 

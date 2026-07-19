@@ -1,6 +1,6 @@
+from decimal import Decimal
 from collections import Counter
 from functools import cached_property
-from decimal import Decimal
 
 from utils import pfactor
 

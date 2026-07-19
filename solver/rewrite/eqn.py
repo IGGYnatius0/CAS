@@ -1,5 +1,4 @@
 from itertools import chain, combinations
-
 from core.classes import *
 
 

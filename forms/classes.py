@@ -1,7 +1,6 @@
 from decimal import Decimal
 from itertools import product, chain
 from functools import cached_property
-
 from core.classes import *
 from core.intervals import REALS
 
