@@ -1,5 +1,7 @@
 from forms.abc import *
 
+# TODO implement a single object containing both form and formula, similar to RewriteRule
+
 # Polynomial
 linear    = A * x + B
 quadratic = A * x ** 2 + B * x + C
