@@ -440,18 +440,15 @@ class Prod(_CoreProdTemplate):
                 const *= expr
             else:
                 factors.append(expr)
-        if len(factors) == 0:
-            return const
-        if const == one:
-            return Prod(factors)
         if const == zero:
             return zero
-        output = const * Prod(factors)
-        if len(output.factors) == 0:
-            return one
-        if len(output.factors) == 1:
-            return output.factors[0]
-        return output
+        if len(factors) == 0:
+            return const
+        if const == one and len(factors) == 1:
+            return factors[0]
+        if const == one and len(factors) > 1:
+            return Prod(factors)
+        return const * Prod(factors)
 
     def substitute(self, var_map):
         return Prod([term.substitute(var_map) for term in self.factors])
@@ -578,5 +575,5 @@ if __name__ == '__main__':
     # expr = ( (3*x**2*y**3 - 2*x*y**2 + 4*x**3*y) + (2*x**2*y**3 + 5*x*y**2 - x**3*y) + (4*x**2*y**3 + 3*x*y**2 - 5*x**3*y) ) + ( (x**2*y**3 + 4*x*y**2 - 2*x**3*y) + (2*x**2*y**3 - x*y**2 + 3*x**3*y) + (3*x**2*y**3 - 2*x*y**2 + x**3*y) )
     # print(expr.simplify()) # ((15 * (x ^ 2) * (y ^ 3)) + (7 * x * (y ^ 2)))
 
-    expr = Prod([14])
+    expr = Sum([x])
     print(expr.simplify())
