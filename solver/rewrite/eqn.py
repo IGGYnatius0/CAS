@@ -2,14 +2,11 @@ from itertools import chain, combinations
 from core.classes import *
 
 
-__all__ = ['rewrite']
-
-
 def rewrite(eqn: Eqn):
     new_eqns = []
     new_eqns.extend(arrange_terms(eqn))
     new_eqns.extend(arrange_factors(eqn))
-    return new_eqns
+    return list(dict.fromkeys(new_eqns))
 
 
 # Copied from itertools docs :D

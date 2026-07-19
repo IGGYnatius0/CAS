@@ -3,9 +3,6 @@ from core.classes import *
 from solver.rules import RULES
 
 
-__all__ = ['rewrite']
-
-
 def rewrite(expr):
     return route_rewrite(expr) # TODO ordering eg whether to reverse or not
 
