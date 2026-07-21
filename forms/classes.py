@@ -8,7 +8,8 @@ from core.intervals import REALS
 # Every form class has to implement the following methods: (might use ABCs next time)
 # __hash__, match, isconst, group_consts, get_consts, get_vars, substitute
 
-__all__ = ['FormNum', 'FormConst', 'FormVar', 'FormSum', 'FormProd', 'FormFrac', 'FormExp', 'FormWild']
+__all__ = ['FormNum', 'FormConst', 'FormVar', 'FormSum', 'FormProd', 'FormFrac', 'FormExp', 'FormWild',
+           'FORM_TYPES']
 
 
 class _FormTemplate:
@@ -921,3 +922,6 @@ class FormEqn(_FormEqnTemplate):
 
     def substitute_consts(self, const_map):
         return FormEqn(self.lhs.substitute_consts(const_map), self.rhs.substitute_consts(const_map))
+
+
+FORM_TYPES = (FormNum, FormConst, FormVar, FormWild, FormSum, FormProd, FormFrac, FormExp)
