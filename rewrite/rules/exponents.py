@@ -88,12 +88,12 @@ rules = RewriteGroup((
         a1 ** (a2*a3)
     )),
     RewriteRule(
-        form=a1**a2,
-        target=one / a1**-a2
+        target_form=a1 ** a2,
+        new_form=one / a1 ** -a2
     ),
     RewriteRule(
-        form=one / a1**a2,
-        target=a1**-a2
+        target_form=one / a1 ** a2,
+        new_form=a1 ** -a2
     ),
     RewriteSet((
         a1**one,

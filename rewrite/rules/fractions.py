@@ -50,8 +50,8 @@ b1 = FormWild('b1', blacklist=zero)
 
 rules = RewriteGroup((
     RewriteRule(
-        form=b1/b1,
-        target=one
+        target_form=b1 / b1,
+        new_form=one
     ),
     RewriteSet((
         a1*(one/a2),
