@@ -1,6 +1,6 @@
 from core.classes import one
 from forms.abc import *
-from solver.rules.base import *
+from rewrite.rules.base import *
 
 
 def sum_pows_rewrite_1(expr):

@@ -1,7 +1,4 @@
 from core.classes import *
-from forms.classes import *
-from forms.known_forms import FORMS
-from forms.formulas import FORMULAS
 
 
 def solve(expr):

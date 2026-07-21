@@ -1,8 +1,6 @@
-from functools import lru_cache
-from forms.known_forms import FORMS
-from forms.formulas import FORMULAS
+from known_forms.known_forms import FORMS
 import forms.matcher as matcher
-from solver.rewrite import rewrite
+from rewrite import rewrite
 
 
 def match_form(expr):

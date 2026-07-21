@@ -1,6 +1,6 @@
 from core.classes import *
-from solver.rewrite.expr import rewrite as expr_rewrite
-from solver.rewrite.eqn import rewrite as eqn_rewrite
+from rewrite.expr import rewrite as expr_rewrite
+from rewrite.eqn import rewrite as eqn_rewrite
 
 
 def rewrite(eqn):

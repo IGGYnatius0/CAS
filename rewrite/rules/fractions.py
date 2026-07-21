@@ -1,7 +1,7 @@
 from core.classes import *
 from forms.classes import FormWild
 from forms.abc import *
-from solver.rules.base import *
+from rewrite.rules.base import *
 
 
 def prod_fracs_rewrite(expr):
