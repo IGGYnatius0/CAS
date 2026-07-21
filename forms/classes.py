@@ -6,7 +6,9 @@ from core.intervals import REALS
 
 # READ BEFORE ADDING!!
 # Every form class has to implement the following methods: (might use ABCs next time)
-# __hash__, match, isconst, group_consts, get_consts, get_vars, substitute
+# __hash__, match, isconst, group_consts, get_consts, get_vars, substitute_consts
+# TODO add a to_coretype(var_map, const_map) or smth similar for converting from form to core when substituting
+# from formulas when solving
 
 __all__ = ['FormNum', 'FormConst', 'FormVar', 'FormSum', 'FormProd', 'FormFrac', 'FormExp', 'FormWild',
            'FORM_TYPES']
