@@ -27,7 +27,7 @@ class SolveRule:
         solns = []
         for formula in self.formula:
             soln = formula.substitute_consts(result['consts'])
-            solns.append(soln)
+            solns.append(soln.to_coretype(result['consts']).simplify())
         return solns
 
 
