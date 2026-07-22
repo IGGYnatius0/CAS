@@ -6,7 +6,7 @@ import forms.matcher as matcher
 __all__ = ['RewriteRule', 'RewriteSet', 'RewriteGroup']
 
 
-# TODO use functools.singledispatch?
+# TODO transfer this into forms/classes
 def substitute(form, const_map, var_map):
     if isinstance(form, FormConst):
         return sub_const(form, const_map, var_map)
