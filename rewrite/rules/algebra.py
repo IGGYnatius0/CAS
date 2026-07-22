@@ -22,7 +22,7 @@ def expand(expr):
         else:
             to_expand.append([factor])
     expanded = tuple(product(*to_expand))
-    return [Sum(expanded)]
+    return [Sum([Prod(term) for term in expanded])]
 
 
 def factorise(expr):
