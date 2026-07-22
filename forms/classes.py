@@ -2,7 +2,7 @@ from decimal import Decimal
 from itertools import product, chain
 from functools import cached_property
 from core.classes import *
-from core.intervals import REALS
+from core.intervals import REALS, from_str
 
 # READ BEFORE ADDING!!
 # Every form class has to implement the following methods: (might use ABCs next time)
@@ -499,12 +499,14 @@ class FormNum(_FormNumTemplate):
 class FormConst(_FormConstTemplate):
     def __init__(self, sym, domain=REALS):
         self.sym = sym
-        self.range = domain
+        if isinstance(domain, str):
+            self.domain = from_str(domain)
+        self.domain = domain
 
     def match(self, expr, var_map):
         if not isinstance(expr, Num):
             return False
-        if expr in self.range:
+        if expr in self.domain:
             return SingleConstraint(self, expr, var_map)
         return False
 

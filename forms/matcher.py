@@ -42,7 +42,7 @@ def solve_constraints(constrs, n_consts, n_vars):
             if isinstance(constr.form, FormConst):
                 if constr.form in const_map:
                     return False
-                if constr.value not in constr.form.range:
+                if constr.value not in constr.form.domain:
                     return False
                 const_map[constr.form] = constr.value
         for j, constr in enumerate(constrs):
