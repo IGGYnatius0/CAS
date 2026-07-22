@@ -70,11 +70,31 @@ prod_bases.rewrite = prod_bases_rewrite
 
 
 rules = RewriteGroup((
+    RewriteSet(( # TODO split this?
+        a1**one,
+        a1
+    )),
+
+    RewriteRule(
+        target_form=one / a1 ** a2,
+        new_form=a1 ** -a2
+    ),
+
     sum_pows,
 
-    RewriteSet((
+    RewriteSet(( # TODO combine this with sum_pows?
         a1**a2 / a1**a3,
         a1 ** (a2-a3)
+    )),
+
+    RewriteRule(
+        target_form=a1 ** a2,
+        new_form=one / a1 ** -a2
+    ),
+
+    RewriteSet((
+        (a1**a2) ** a3,
+        a1 ** (a2*a3)
     )),
 
     prod_bases,
@@ -82,22 +102,6 @@ rules = RewriteGroup((
     RewriteSet((
         a1**a3 / a2**a3,
         (a1/a2) ** a3
-    )),
-    RewriteSet((
-        (a1**a2) ** a3,
-        a1 ** (a2*a3)
-    )),
-    RewriteRule(
-        target_form=a1 ** a2,
-        new_form=one / a1 ** -a2
-    ),
-    RewriteRule(
-        target_form=one / a1 ** a2,
-        new_form=a1 ** -a2
-    ),
-    RewriteSet((
-        a1**one,
-        a1
     ))
 ))
 

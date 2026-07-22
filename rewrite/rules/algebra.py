@@ -4,7 +4,7 @@ from rewrite.rules.base import RewriteRule
 
 
 def rewrite(expr):
-    new = expand(expr) + factorise(expr) + simplify(expr)
+    new = simplify(expr) + factorise(expr) + expand(expr)
     return list(dict.fromkeys(new))
 
 
@@ -12,17 +12,8 @@ rules = RewriteRule()
 rules.rewrite = rewrite
 
 
-def expand(expr):
-    if not isinstance(expr, Prod):
-        return []
-    to_expand = []
-    for factor in expr.factors:
-        if isinstance(factor, Sum):
-            to_expand.append(factor.terms)
-        else:
-            to_expand.append([factor])
-    expanded = tuple(product(*to_expand))
-    return [Sum([Prod(term) for term in expanded])]
+def simplify(expr):
+    return [expr.simplify()]
 
 
 def factorise(expr):
@@ -53,8 +44,17 @@ def factorise(expr):
     return [common_prod * terms_sum]
 
 
-def simplify(expr):
-    return [expr.simplify()]
+def expand(expr):
+    if not isinstance(expr, Prod):
+        return []
+    to_expand = []
+    for factor in expr.factors:
+        if isinstance(factor, Sum):
+            to_expand.append(factor.terms)
+        else:
+            to_expand.append([factor])
+    expanded = tuple(product(*to_expand))
+    return [Sum([Prod(term) for term in expanded])]
 
 
 if __name__ == '__main__':

@@ -8,7 +8,7 @@ __all__ = ['RULES']
 
 
 RULES = RewriteGroup((
+    alg_rules,
     exp_rules,
     frac_rules,
-    alg_rules
 ))

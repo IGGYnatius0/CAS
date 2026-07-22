@@ -49,19 +49,28 @@ sum_fracs.rewrite = sum_fracs_rewrite
 # TODO
 b1 = FormWild('b1') # , blacklist=zero)
 
+# TODO split all RewriteSet?
 rules = RewriteGroup((
+    RewriteSet((
+        a1/one,
+        a1
+    )),
+
     RewriteRule(
         target_form=b1 / b1,
         new_form=one
     ),
+
     RewriteSet((
         a1*(one/a2),
         a1/a2
     )),
+
     RewriteRule(
         a1*(a2/a3),
         (a1*a2)/a3
     ),
+
     RewriteSet((
         one/(a1/a2),
         a2/a1
@@ -69,24 +78,22 @@ rules = RewriteGroup((
 
     prod_fracs,
 
-    sum_fracs,
-
     RewriteSet((
         (a1/a2)/a3,
         (a1/a2)*(one/a3)
     )),
+
     RewriteSet((
         a1/(a2/a3),
         a1*(a3/a2)
     )),
+
     RewriteSet((
         (a1/a2)/(a3/a4),
         (a1/a2)*(a4/a3)
     )),
-    RewriteSet((
-        a1/one,
-        a1
-    ))
+
+    sum_fracs,
 ))
 
 if __name__ == '__main__':
