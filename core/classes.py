@@ -483,8 +483,8 @@ class Frac(_CoreFracTemplate):
             return zero
         if denom == one:
             return numer
-        if numer == zero and denom == zero:
-            return Frac(zero, zero)
+        if denom == zero:
+            return Frac(numer, zero)
         if isinstance(numer, Num) and isinstance(denom, Num):
             if numer % denom == 0:
                 return numer / denom
