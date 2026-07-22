@@ -1,6 +1,6 @@
 from forms.classes import FormConst
 from forms.abc import *
-from known_forms.base import *
+from solve_rules.base import *
 
 
 A = FormConst('A', '(0, inf)')
