@@ -46,7 +46,8 @@ prod_fracs.rewrite = prod_fracs_rewrite
 sum_fracs.rewrite = sum_fracs_rewrite
 
 
-b1 = FormWild('b1', blacklist=zero)
+# TODO
+b1 = FormWild('b1') # , blacklist=zero)
 
 rules = RewriteGroup((
     RewriteRule(

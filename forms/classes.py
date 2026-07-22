@@ -66,7 +66,7 @@ class _FormTemplate:
         return FormExp(other, self)
 
     def __neg__(self):
-        return self * neg_one
+        return self * fneg_one
 
     def __pos__(self):
         return self
@@ -346,32 +346,32 @@ class SingleConstraint:
 
     def simplify_sum(self):
         for i, term in enumerate(self.form.terms):
-            if isinstance(term, Decimal):
-                self.value -= Num(term)
+            if isinstance(term, FormNum):
+                self.value -= FormNum(term)
                 self.form.terms.pop(i)
                 return
 
     def simplify_prod(self):
         for i, factor in enumerate(self.form.factors):
-            if isinstance(factor, Decimal):
-                self.value /= Num(factor) # FIXME possible division by zero
+            if isinstance(factor, FormNum):
+                self.value /= FormNum(factor) # FIXME possible division by zero
                 self.form.factors.pop(i)
                 return
 
     def simplify_frac(self):
-        if isinstance(self.form.numer, Decimal):
-            self.value = Num(self.form.numer) / self.value
+        if isinstance(self.form.numer, FormNum):
+            self.value = FormNum(self.form.numer) / self.value
             self.form = self.form.denom
-        elif isinstance(self.form.denom, Decimal):
-            self.value *= Num(self.form.denom)
+        elif isinstance(self.form.denom, FormNum):
+            self.value *= FormNum(self.form.denom)
             self.form = self.form.numer
 
     def simplify_exp(self):
-        if isinstance(self.form.base, Decimal):
+        if isinstance(self.form.base, FormNum):
             # TODO logarithm
             pass
-        elif isinstance(self.form.power, Decimal):
-            self.value **= one / Num(self.form.power)
+        elif isinstance(self.form.power, FormNum):
+            self.value **= one / FormNum(self.form.power)
             self.form = self.form.base
 
     def __bool__(self):
@@ -496,12 +496,18 @@ class FormNum(_FormNumTemplate):
         return hash(('FormNum', super().__hash__()))
 
 
+fzero = FormNum(0)
+fone = FormNum(1)
+fneg_one = FormNum(-1)
+
+
 class FormConst(_FormConstTemplate):
     def __init__(self, sym, domain=REALS):
         self.sym = sym
         if isinstance(domain, str):
             self.domain = from_str(domain)
-        self.domain = domain
+        else:
+            self.domain = domain
 
     def match(self, expr, var_map):
         if not isinstance(expr, Num):
@@ -619,7 +625,7 @@ class FormSum(_FormSumTemplate):
                 self.terms.append(term)
         # Empty case
         if not self.terms:
-            self.terms = [zero]
+            self.terms = [fzero]
 
     def match(self, expr, var_map):
         if isinstance(expr, Num):
@@ -627,19 +633,19 @@ class FormSum(_FormSumTemplate):
                 return SingleConstraint(self, expr, var_map.copy())
             if expr == zero:
                 # FormSum can match zero if all terms can match zero
-                zeros = [zero] * len(self.terms)
+                zeros = [fzero] * len(self.terms)
                 return self.match(Sum(zeros), var_map.copy())
             return False
         if isinstance(expr, Sum) and len(self.terms) != len(expr.terms):
             if len(expr.terms) > len(self.terms):
                 return False
             # Padding by +0
-            zeros = [zero] * (len(self.terms) - len(expr.terms))
+            zeros = [fzero] * (len(self.terms) - len(expr.terms))
             terms = expr.terms + zeros
             return self.match(Sum(terms), var_map.copy())
         if not isinstance(expr, Sum):
             # Padding by +0
-            zeros = [zero] * (len(self.terms)-1)
+            zeros = [fzero] * (len(self.terms)-1)
             return self.match(Sum([expr] + zeros), var_map.copy())
         matches = MultiConstraint(len(self.terms))
         for i, ft in enumerate(self.terms):
@@ -684,14 +690,14 @@ class FormSum(_FormSumTemplate):
     
     def substitute_consts(self, const_map):
         terms = []
-        num = zero
+        num = fzero
         for term in self.terms:
             sub = term.substitute_consts(const_map)
             if isinstance(sub, FormNum):
                 num += sub
             else:
                 terms.append(sub)
-        if num == zero:
+        if num == fzero:
             return FormSum(terms)
         return FormSum(terms + [num])
 
@@ -709,7 +715,7 @@ class FormProd(_FormProdTemplate):
                 self.factors.append(factor)
         # Empty case
         if not self.factors:
-            self.factors = [one]
+            self.factors = [fone]
 
     def match(self, expr, var_map):
         if isinstance(expr, Num):
@@ -727,12 +733,12 @@ class FormProd(_FormProdTemplate):
             if len(expr.factors) > len(self.factors):
                 return False
             # Padding by *1
-            ones = [one] * (len(self.factors) - len(expr.factors))
+            ones = [fone] * (len(self.factors) - len(expr.factors))
             factors = expr.factors + ones
             return self.match(Prod(factors), var_map.copy())
         if not isinstance(expr, Prod):
             # Padding by *1
-            ones = [one] * (len(self.factors)-1)
+            ones = [fone] * (len(self.factors)-1)
             return self.match(Prod([expr] + ones), var_map.copy())
         matches = MultiConstraint(len(self.factors))
         for i, ff in enumerate(self.factors):
@@ -775,14 +781,14 @@ class FormProd(_FormProdTemplate):
     
     def substitute_consts(self, const_map):
         factors = []
-        num = zero
+        num = fone
         for factor in self.factors:
             sub = factor.substitute_consts(const_map)
             if isinstance(sub, FormNum):
-                num += sub
+                num *= sub
             else:
                 factors.append(sub)
-        if num == zero:
+        if num == fone:
             return FormProd(factors)
         return FormProd(factors + [num])
 
@@ -929,4 +935,4 @@ class FormEqn(_FormEqnTemplate):
         return FormEqn(self.lhs.substitute_consts(const_map), self.rhs.substitute_consts(const_map))
 
 
-FORM_TYPES = (FormNum, FormConst, FormVar, FormWild, FormSum, FormProd, FormFrac, FormExp)
+FORM_TYPES = (FormNum, FormConst, FormVar, FormWild, FormSum, FormProd, FormFrac, FormExp, FormEqn)

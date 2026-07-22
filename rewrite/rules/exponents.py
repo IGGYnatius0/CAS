@@ -1,4 +1,4 @@
-from core.classes import one
+from core.classes import *
 from forms.abc import *
 from rewrite.rules.base import *
 

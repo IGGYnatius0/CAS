@@ -6,5 +6,5 @@ __all__ = ['RULES']
 
 
 RULES = SolveGroup((
-    poly_rules
+    poly_rules,
 ))
