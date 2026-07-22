@@ -99,7 +99,7 @@ rules = RewriteGroup((
 
     prod_bases,
 
-    RewriteSet((
+    RewriteSet(( # TODO combine with prod_bases?
         a1**a3 / a2**a3,
         (a1/a2) ** a3
     ))
