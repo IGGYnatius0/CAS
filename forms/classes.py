@@ -6,9 +6,7 @@ from core.intervals import REALS, from_str
 
 # READ BEFORE ADDING!!
 # Every form class has to implement the following methods: (might use ABCs next time)
-# __hash__, match, isconst, group_consts, get_consts, get_vars, substitute_consts
-# TODO add a to_coretype(var_map, const_map) or smth similar for converting from form to core when substituting
-# from formulas when solving
+# __hash__, match, isconst, group_consts, get_consts, get_vars, substitute_consts, to_coretype
 # TODO force frac and exp of FormNums to remain symbolic similar to Num
 
 __all__ = ['FormNum', 'FormConst', 'FormVar', 'FormSum', 'FormProd', 'FormFrac', 'FormExp', 'FormWild', 'FormEqn',
@@ -485,6 +483,9 @@ class FormNum(_FormNumTemplate):
     def substitute_consts(self, const_map):
         return self
 
+    def to_coretype(self, const_map, var_map={}):
+        return Num(self)
+
     @classmethod
     def isnum(cls, expr):
         return isinstance(expr, (int, float, Decimal, Num))
@@ -536,6 +537,10 @@ class FormConst(_FormConstTemplate):
             return FormNum(const_map[self])
         return self
 
+    def to_coretype(self, const_map, var_map={}):
+        if self not in const_map:
+            raise RuntimeError("'const_map' does not contain all constants")
+        return const_map[self]
 
 class FormVar(_FormVarTemplate):
     def __init__(self, sym):
@@ -570,6 +575,13 @@ class FormVar(_FormVarTemplate):
 
     def substitute_consts(self, const_map):
         return self
+
+    def to_coretype(self, const_map, var_map={}):
+        if not var_map:
+            return Var(self.sym)
+        if self not in var_map:
+            raise RuntimeError("'var_map' does not contain all variables")
+        return var_map[self]
 
 
 class FormWild(_FormWildTemplate):
@@ -610,6 +622,13 @@ class FormWild(_FormWildTemplate):
     
     def substitute_consts(self, const_map):
         return self
+
+    def to_coretype(self, const_map, var_map={}):
+        if not var_map:
+            return Var(self.sym)
+        if self not in var_map:
+            raise RuntimeError("'var_map' does not contain all variables")
+        return var_map[self]
 
 
 class FormSum(_FormSumTemplate):
@@ -700,6 +719,9 @@ class FormSum(_FormSumTemplate):
         if num == fzero:
             return FormSum(terms)
         return FormSum(terms + [num])
+
+    def to_coretype(self, const_map, var_map={}):
+        return Sum([term.to_coretype(const_map, var_map) for term in self.terms])
 
 
 class FormProd(_FormProdTemplate):
@@ -792,6 +814,9 @@ class FormProd(_FormProdTemplate):
             return FormProd(factors)
         return FormProd(factors + [num])
 
+    def to_coretype(self, const_map, var_map={}):
+        return Prod([factor.to_coretype(const_map, var_map) for factor in self.factors])
+
 
 class FormFrac(_FormFracTemplate):
     def __init__(self, numer, denom):
@@ -839,6 +864,9 @@ class FormFrac(_FormFracTemplate):
         if isinstance(numer, FormNum) and isinstance(denom, FormNum):
             return numer / denom
         return FormFrac(numer, denom)
+
+    def to_coretype(self, const_map, var_map={}):
+        return Frac(self.numer.to_coretype(const_map, var_map), self.denom.to_coretype(const_map, var_map))
 
 
 class FormExp(_FormExpTemplate):
@@ -894,6 +922,9 @@ class FormExp(_FormExpTemplate):
             return base ** power
         return FormExp(base, power)
 
+    def to_coretype(self, const_map, var_map={}):
+        return Exp(self.base.to_coretype(const_map, var_map), self.power.to_coretype(const_map, var_map))
+
 
 class FormEqn(_FormEqnTemplate):
     def __init__(self, lhs, rhs):
@@ -933,6 +964,9 @@ class FormEqn(_FormEqnTemplate):
 
     def substitute_consts(self, const_map):
         return FormEqn(self.lhs.substitute_consts(const_map), self.rhs.substitute_consts(const_map))
+
+    def to_coretype(self, const_map, var_map={}):
+        return Eqn(self.lhs.to_coretype(const_map, var_map), self.rhs.to_coretype(const_map, var_map))
 
 
 FORM_TYPES = (FormNum, FormConst, FormVar, FormWild, FormSum, FormProd, FormFrac, FormExp, FormEqn)
