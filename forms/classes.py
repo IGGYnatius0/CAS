@@ -11,7 +11,7 @@ from core.intervals import REALS, from_str
 # from formulas when solving
 # TODO force frac and exp of FormNums to remain symbolic similar to Num
 
-__all__ = ['FormNum', 'FormConst', 'FormVar', 'FormSum', 'FormProd', 'FormFrac', 'FormExp', 'FormWild',
+__all__ = ['FormNum', 'FormConst', 'FormVar', 'FormSum', 'FormProd', 'FormFrac', 'FormExp', 'FormWild', 'FormEqn',
            'FORM_TYPES']
 
 

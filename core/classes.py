@@ -566,7 +566,7 @@ class Func: # TODO this has been on todo for the longest time
         pass
 
 
-CORE_TYPES = (Num, Var, Sum, Prod, Frac, Exp)
+CORE_TYPES = (Num, Var, Sum, Prod, Frac, Exp, Eqn)
 
 
 if __name__ == '__main__':

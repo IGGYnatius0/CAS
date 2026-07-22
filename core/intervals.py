@@ -2,7 +2,7 @@ from itertools import pairwise
 from core.classes import *
 
 
-__all__ = ['Interval', 'MultiInterval', 'REALS']
+__all__ = ['Interval', 'MultiInterval', 'REALS', 'from_str']
 
 
 class BaseInterval:
