@@ -9,6 +9,7 @@ from core.intervals import REALS
 # __hash__, match, isconst, group_consts, get_consts, get_vars, substitute_consts
 # TODO add a to_coretype(var_map, const_map) or smth similar for converting from form to core when substituting
 # from formulas when solving
+# TODO force frac and exp of FormNums to remain symbolic similar to Num
 
 __all__ = ['FormNum', 'FormConst', 'FormVar', 'FormSum', 'FormProd', 'FormFrac', 'FormExp', 'FormWild',
            'FORM_TYPES']
