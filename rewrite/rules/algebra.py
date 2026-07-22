@@ -20,7 +20,7 @@ def expand(expr):
         if isinstance(factor, Sum):
             to_expand.append(factor.terms)
         else:
-            to_expand.append(factor)
+            to_expand.append([factor])
     expanded = tuple(product(*to_expand))
     return [Sum(expanded)]
 
