@@ -1,6 +1,6 @@
 from itertools import product
 from core.classes import *
-from rewrite.rules.base import RewriteRule
+from rewrite.expr_rules.base import RewriteRule
 
 
 def rewrite(expr):

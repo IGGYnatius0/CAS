@@ -1,6 +1,6 @@
 from core.classes import *
 from forms.abc import *
-from rewrite.rules.base import *
+from rewrite.expr_rules.base import *
 
 
 def sum_pows_rewrite_1(expr):

@@ -1,6 +1,6 @@
 from itertools import chain, combinations
 from core.classes import *
-from rewrite.rules import RULES
+from rewrite.expr_rules import RULES
 
 
 def rewrite(expr):
