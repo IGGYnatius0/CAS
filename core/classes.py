@@ -376,7 +376,8 @@ class Sum(_CoreSumTemplate):
             coeff = one
             factors = []
             for base, power in tuple(decomp.items()):
-                if isinstance(base, Num):
+                if isinstance(base, Num) and power > 0 and power == int(power):
+                    # Force symbolic Exps such as square roots to not get evaluated
                     coeff *= base ** power
                     decomp.pop(base)
                 else:
@@ -576,5 +577,5 @@ if __name__ == '__main__':
     # expr = ( (3*x**2*y**3 - 2*x*y**2 + 4*x**3*y) + (2*x**2*y**3 + 5*x*y**2 - x**3*y) + (4*x**2*y**3 + 3*x*y**2 - 5*x**3*y) ) + ( (x**2*y**3 + 4*x*y**2 - 2*x**3*y) + (2*x**2*y**3 - x*y**2 + 3*x**3*y) + (3*x**2*y**3 - 2*x*y**2 + x**3*y) )
     # print(expr.simplify()) # ((15 * (x ^ 2) * (y ^ 3)) + (7 * x * (y ^ 2)))
 
-    expr = Sum([x])
+    expr = Prod((Exp(3, 0.5), Exp(2, 0.5)))
     print(expr.simplify())
