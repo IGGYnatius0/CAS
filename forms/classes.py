@@ -891,8 +891,8 @@ class FormExp(_FormExpTemplate):
 
 class FormEqn(_FormEqnTemplate):
     def __init__(self, lhs, rhs):
-        self.lhs = lhs
-        self.rhs = rhs
+        self.lhs = FormNum(lhs) if FormNum.isnum(lhs) else lhs
+        self.rhs = FormNum(rhs) if FormNum.isnum(rhs) else rhs
     
     def match(self, expr, var_map):
         if not isinstance(expr, Eqn):
