@@ -1,7 +1,7 @@
 from core.classes import *
 from forms.abc import *
 from forms.matcher import match
-from solver.polynomial.forms import rules
+from solver.polynomial.rules import rules
 
 
 def is_poly_expr(expr):
@@ -33,7 +33,12 @@ def get_terms(expr):
 def solve(eqn: Eqn):
     terms = get_terms(eqn.lhs)
     terms.extend([-term for term in get_terms(eqn.rhs)])
-    expr = Sum(terms).simplify()
+    expr = Eqn(Sum(terms), 0).simplify()
     if is_poly_expr(expr):
         return rules.apply(expr)
     return []
+
+
+if __name__ == '__main__':
+    y = Var('x')
+    print(solve(Eqn(2 * y ** 2 - 7 * y + 3, 0)))
