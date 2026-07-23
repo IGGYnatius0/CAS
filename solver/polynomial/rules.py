@@ -3,7 +3,7 @@ from forms.abc import *
 from solver.base import *
 
 
-rules = SolveGroup((
+rules = SolveGroup(( # TODO cubic, quartic and general case
     SolveRule(
         target_form=A*x+B,
         formula=-B/A
