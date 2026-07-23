@@ -485,7 +485,7 @@ class Frac(_CoreFracTemplate):
             return numer
         if denom == zero:
             return Frac(numer, zero)
-        if isinstance(numer, Num) and isinstance(denom, Num):
+        if isinstance(numer, Num) and isinstance(denom, Num): # TODO number simplest form
             if numer % denom == 0:
                 return numer / denom
         return Frac(numer, denom)
@@ -527,6 +527,9 @@ class Exp(_CoreExpTemplate):
         if isinstance(base, Num) and isinstance(power, Num):
             if base == int(base) and power == int(power):
                 return base ** power
+            result = base ** power
+            if result == int(result):
+                return result
         return Exp(base, power)
 
     def substitute(self, var_map):
