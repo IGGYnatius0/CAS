@@ -65,6 +65,12 @@ def _interval_typecheck(func):
 class Interval(BaseInterval):
     def __init__(self, lower: Num = None, upper: Num = None,
                  lo_inc: bool = False, up_inc: bool = False):
+        if lower == upper and lower is not None:
+            self.lower = lower
+            self.upper = upper
+            self.lo_inc = True
+            self.up_inc = True
+            return
         # lower and upper being inf will override lo_inc and up_inc
         self.lower = ninf if lower is None else lower
         self.upper = inf if upper is None else upper
@@ -287,10 +293,11 @@ REALS = Interval()
 
 if __name__ == '__main__':
     # TODO test cases
-    s1 = from_str('(-1, 3)')
-    s2 = from_str('[5, 10]')
-    s3 = from_str('[2, 7)')
-    s4 = (s1 | s2) & s3
-    print(s4)
-    print(~s4)
-    print(Num(1) in s1)
+    # s1 = from_str('(-1, 3)')
+    # s2 = from_str('[5, 10]')
+    # s3 = from_str('[2, 7)')
+    # s4 = (s1 | s2) & s3
+    # print(s4)
+    # print(~s4)
+    # print(Num(1) in s1)
+    print(REALS & ~Interval(0, 0))
