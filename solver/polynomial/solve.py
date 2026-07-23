@@ -16,11 +16,10 @@ def is_poly_expr(expr):
             result = match(A * x ** B, term)
             if not result:
                 return False
-            # temp[result['consts'][B]] = result['consts'][A]
-    # coeffs = [zero] * int(max(temp.keys()) + 1)
-    # for i, coeff in temp.items():
-    #     coeffs[int(i)] = coeff
-    # return coeffs[::-1]
+    else:
+        result = match(A * x ** B, expr)
+        if not result:
+            return False
     return True
 
 
@@ -41,4 +40,4 @@ def solve(eqn: Eqn):
 
 if __name__ == '__main__':
     y = Var('x')
-    print(solve(Eqn(2 * y ** 2 - 7 * y + 3, 0)))
+    print(solve(Eqn(1/y, 0)))
