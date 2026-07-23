@@ -1,7 +1,6 @@
 from core.classes import *
 from forms.abc import *
 from forms.matcher import match
-from solver.polynomial.utils import is_poly_expr
 from solver.polynomial.forms import rules
 
 
