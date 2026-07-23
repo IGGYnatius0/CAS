@@ -1,6 +1,7 @@
 from decimal import Decimal
 from collections import Counter
 from functools import cached_property
+from math import gcd
 
 from utils import pfactor
 
@@ -485,9 +486,14 @@ class Frac(_CoreFracTemplate):
             return numer
         if denom == zero:
             return Frac(numer, zero)
-        if isinstance(numer, Num) and isinstance(denom, Num): # TODO number simplest form
+        if isinstance(numer, Num) and isinstance(denom, Num):
             if numer % denom == 0:
                 return numer / denom
+            if numer == int(numer) and denom == int(denom):
+                gcd_ = gcd(int(numer), int(denom))
+                numer /= gcd_
+                denom /= gcd_
+                return Frac(numer, denom)
         return Frac(numer, denom)
 
     def substitute(self, var_map):
