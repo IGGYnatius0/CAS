@@ -4,7 +4,7 @@ from solver import RULES
 
 
 def iterative_deepening_inner(eqn, seen, max_depth, current_depth):
-    solns = RULES.apply(eqn)
+    solns = RULES.solve(eqn)
     if solns:
         return solns
     if current_depth == max_depth:

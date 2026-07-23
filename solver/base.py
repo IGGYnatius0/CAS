@@ -20,7 +20,7 @@ class SolveRule:
                     raise ValueError("'formulas' cannot contain FormVars")
             self.formula = tuple(formula)
 
-    def apply(self, expr, first_result=True):
+    def solve(self, expr, first_result=True):
         result = matcher.match(self.target_form, expr)
         if not result:
             return None
@@ -35,15 +35,15 @@ class SolveGroup:
     def __init__(self, rules):
         self.rules = rules
 
-    def apply(self, expr, first_result=True):
+    def solve(self, expr, first_result=True):
         if first_result:
             for rule in self.rules:
-                solns = rule.apply(expr, first_result)
+                solns = rule.solve(expr, first_result)
                 if solns:
                     return solns
             return []
 
         solns = []
         for rule in self.rules:
-            solns.extend(rule.apply(expr, first_result))
+            solns.extend(rule.solve(expr, first_result))
         return solns

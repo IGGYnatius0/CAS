@@ -35,7 +35,7 @@ def solve(eqn: Eqn):
     terms.extend([-term for term in get_terms(eqn.rhs)])
     expr = Eqn(Sum(terms), 0).simplify()
     if is_poly_expr(expr):
-        return rules.apply(expr)
+        return rules.solve(expr)
     return []
 
 
