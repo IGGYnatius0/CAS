@@ -1,6 +1,6 @@
 from forms.classes import FormEqn
 from forms.abc import *
-from solve_rules.base import *
+from solver.base import *
 
 
 rules = SolveGroup((

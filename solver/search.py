@@ -1,6 +1,6 @@
 from core.classes import *
 from rewrite import rewrite
-from solve_rules import RULES
+from solver import RULES
 
 
 def iterative_deepening_inner(eqn, seen, max_depth, current_depth):
