@@ -532,7 +532,7 @@ class Exp(_CoreExpTemplate):
         if base == zero and power == zero:
             return Exp(zero, zero)
         if isinstance(base, Num) and isinstance(power, Num):
-            if base == int(base) and power == int(power):
+            if base == int(base) and power == int(power) and power > 0:
                 return base ** power
             result = base ** power
             if result == int(result):
@@ -587,5 +587,5 @@ if __name__ == '__main__':
     # expr = ( (3*x**2*y**3 - 2*x*y**2 + 4*x**3*y) + (2*x**2*y**3 + 5*x*y**2 - x**3*y) + (4*x**2*y**3 + 3*x*y**2 - 5*x**3*y) ) + ( (x**2*y**3 + 4*x*y**2 - 2*x**3*y) + (2*x**2*y**3 - x*y**2 + 3*x**3*y) + (3*x**2*y**3 - 2*x*y**2 + x**3*y) )
     # print(expr.simplify()) # ((15 * (x ^ 2) * (y ^ 3)) + (7 * x * (y ^ 2)))
 
-    expr = Prod((Exp(3, 0.5), Exp(2, 0.5)))
+    expr = -Frac(8, 6)
     print(expr.simplify())
