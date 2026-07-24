@@ -1,9 +1,31 @@
+from itertools import product
+
 from core.classes import *
 from forms.matcher import match
 from forms.abc import A, B, x
 
-
 # TODO partial fractions?
+
+
+__all__ = ['is_poly_expr', 'poly_div', 'get_rational_roots']
+
+
+def is_poly_expr(expr):
+    if len(expr.get_vars) != 1:
+        return False
+    if isinstance(expr, Sum):
+        for term in expr.terms:
+            if isinstance(term, Num):
+                continue
+            result = match(A * x ** B, term)
+            if not result:
+                return False
+    else:
+        result = match(A * x ** B, expr)
+        if not result:
+            return False
+    return True
+
 
 def poly_to_coeffs(poly):
     temp = {}
@@ -51,6 +73,38 @@ def poly_div(poly1, poly2):
     q_poly = coeffs_to_poly(q_coeffs, var)
     r_poly = coeffs_to_poly(coeffs1, var)
     return (q_poly + Frac(r_poly, poly2)).simplify()
+
+
+def get_rational_roots(coeffs):
+    first = abs(coeffs[0]).decomp()
+    last = abs(coeffs[-1]).decomp()
+    numer_temp = []
+    denom_temp = []
+    for n in last.values():
+        numer_temp.append(range(int(n) + 1))
+    for n in first.values():
+        denom_temp.append(range(int(n) + 1))
+    numer_powers = product(*numer_temp)
+    denom_powers = product(*denom_temp)
+    numer_factors = []
+    denom_factors = []
+    for powers in numer_powers:
+        factor = one
+        for p, power in zip(last.keys(), powers):
+            factor *= p ** power
+        numer_factors.append(factor)
+    for powers in denom_powers:
+        factor = one
+        for p, power in zip(first.keys(), powers):
+            factor *= p ** power
+        denom_factors.append(factor)
+    roots = []
+    for numer_factor in numer_factors:
+        for denom_factor in denom_factors:
+            roots.append(Frac(numer_factor, denom_factor).simplify())
+    roots.extend([(-root).simplify() for root in roots])
+    roots = list(dict.fromkeys(roots))
+    return roots
 
 
 if __name__ == '__main__':
