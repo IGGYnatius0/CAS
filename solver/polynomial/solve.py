@@ -1,26 +1,6 @@
 from core.classes import *
-from forms.abc import *
-from forms.matcher import match
 from solver.polynomial.rules import rules
-
-
-def is_poly_expr(expr):
-    if len(expr.get_vars) != 1:
-        return False
-    # temp = defaultdict(int)
-    if isinstance(expr, Sum):
-        for term in expr.terms:
-            if isinstance(term, Num):
-                # temp[zero] = term
-                continue
-            result = match(A * x ** B, term)
-            if not result:
-                return False
-    else:
-        result = match(A * x ** B, expr)
-        if not result:
-            return False
-    return True
+from polynomial import is_poly_expr
 
 
 def get_terms(expr):
