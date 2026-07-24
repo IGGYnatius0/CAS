@@ -112,6 +112,7 @@ class _NumTemplate(Decimal):
     __rpow__ = _num_check(Decimal.__rpow__)
     __neg__ = _num_check(Decimal.__neg__)
     __pos__ = _num_check(Decimal.__pos__)
+    __abs__ = _num_check(Decimal.__abs__)
 
 
 class _CoreVarTemplate(_CoreTemplate):
