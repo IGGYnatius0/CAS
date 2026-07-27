@@ -13,7 +13,7 @@ __all__ = ['Num', 'Var', 'Sum', 'Prod', 'Frac', 'Exp', 'Eqn',
 
 # READ BEFORE ADDING!!
 # Every core class has to implement the following methods:
-# __hash__, decomp, simplify, substitute, get_vars, copy
+# __hash__, decomp, simplify, substitute_vars, get_vars, copy
 
 
 # TODO implement functions especially log/ln
@@ -101,7 +101,7 @@ class _CoreTemplate:
         """Simplifies the expression"""
         return self
 
-    def substitute(self, var_map):
+    def substitute_vars(self, var_map):
         return self
 
     def copy(self):
@@ -333,7 +333,7 @@ class Num(_NumTemplate):
     def simplify(self):
         return self
 
-    def substitute(self, var_map):
+    def substitute_vars(self, var_map):
         return self
 
     @cached_property
@@ -358,7 +358,7 @@ class Var(_CoreVarTemplate):
     def __init__(self, symbol):
         self.sym = symbol
 
-    def substitute(self, var_map):
+    def substitute_vars(self, var_map):
         if self in var_map:
             return var_map[self]
         return self
@@ -423,8 +423,8 @@ class Sum(_CoreSumTemplate):
             return terms[0]
         return Sum(terms)
 
-    def substitute(self, var_map):
-        return Sum([term.substitute(var_map) for term in self.terms])
+    def substitute_vars(self, var_map):
+        return Sum([term.substitute_vars(var_map) for term in self.terms])
 
     @cached_property
     def get_vars(self):
@@ -478,8 +478,8 @@ class Prod(_CoreProdTemplate):
             return Prod(factors)
         return const * Prod(factors)
 
-    def substitute(self, var_map):
-        return Prod([term.substitute(var_map) for term in self.factors])
+    def substitute_vars(self, var_map):
+        return Prod([term.substitute_vars(var_map) for term in self.factors])
 
     @cached_property
     def get_vars(self):
@@ -521,8 +521,8 @@ class Frac(_CoreFracTemplate):
                 return Frac(numer, denom)
         return Frac(numer, denom)
 
-    def substitute(self, var_map):
-        return Frac(self.numer.substitute(var_map), self.denom.substitute(var_map))
+    def substitute_vars(self, var_map):
+        return Frac(self.numer.substitute_vars(var_map), self.denom.substitute_vars(var_map))
 
     @cached_property
     def get_vars(self):
@@ -563,8 +563,8 @@ class Exp(_CoreExpTemplate):
                 return result
         return Exp(base, power)
 
-    def substitute(self, var_map):
-        return self.base.substitute(var_map) ** self.power.substitute(var_map)
+    def substitute_vars(self, var_map):
+        return self.base.substitute_vars(var_map) ** self.power.substitute_vars(var_map)
 
     @cached_property
     def get_vars(self):
@@ -585,7 +585,7 @@ class Eqn(_CoreEqnTemplate):
     def swap(self):
         return Eqn(self.rhs, self.lhs)
 
-    def substitute(self):
+    def substitute_vars(self):
         pass
 
     @cached_property
