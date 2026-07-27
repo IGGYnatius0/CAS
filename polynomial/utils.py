@@ -1,7 +1,6 @@
 from itertools import product
 
 from core.classes import *
-from core.classes import CORE_EXPR
 from forms.matcher import match
 from forms.abc import A, B, x
 
@@ -9,44 +8,55 @@ from forms.abc import A, B, x
 # TODO partial fractions?
 
 
-__all__ = ['poly_to_coeffs', 'coeffs_to_poly', 'is_poly_expr', 'poly_div', 'get_rational_roots']
+__all__ = ['Polynomial', 'Poly', 'poly_div', 'get_rational_roots']
 
 
-def _auto_coeffs(func):
-    def wrapper(arg):
-        if isinstance(arg, list):
-            return func(arg)
+class Polynomial:
+    def __init__(self, arg, var=None):
         if isinstance(arg, CORE_EXPR):
-            return func(poly_to_coeffs(arg))
-        raise ValueError('Input must be polynomial or coefficient list')
-    return wrapper
+            if Polynomial.is_poly_expr(arg):
+                self.coeffs = poly_to_coeffs(arg)
+                self.deg = len(self.coeffs) - 1
+                if var is None:
+                    self.var = list(arg.get_vars)[0]
+                else:
+                    self.var = var
+            else:
+                raise ValueError('Input must be polynomial or coefficient list')
+        elif isinstance(arg, list):
+            self.coeffs = arg
+            self.deg = len(self.coeffs) - 1
+            if var is None:
+                self.var = Var('x')
+            else:
+                self.var = var
+        else:
+            raise ValueError('Input must be polynomial or coefficient list')
 
+    def to_expr(self):
+        terms = []
+        for power, coeff in zip(range(self.deg, -1, -1), self.coeffs):
+            terms.append(coeff * self.var ** power)
+        return Sum(terms).simplify()
 
-def _auto_poly(func):
-    def wrapper(arg):
-        if isinstance(arg, list):
-            return func(coeffs_to_poly(arg))
-        if isinstance(arg, CORE_EXPR):
-            return func(arg)
-        raise ValueError('Input must be polynomial or coefficient list')
-    return wrapper
-
-
-def is_poly_expr(expr):
-    if len(expr.get_vars) != 1:
-        return False
-    if isinstance(expr, Sum):
-        for term in expr.terms:
-            if isinstance(term, Num):
-                continue
-            result = match(A * x ** B, term)
+    @staticmethod
+    def is_poly_expr(expr):
+        if len(expr.get_vars) != 1:
+            return False
+        if isinstance(expr, Sum):
+            for term in expr.terms:
+                if isinstance(term, Num):
+                    continue
+                result = match(A * x ** B, term)
+                if not result:
+                    return False
+        else:
+            result = match(A * x ** B, expr)
             if not result:
                 return False
-    else:
-        result = match(A * x ** B, expr)
-        if not result:
-            return False
-    return True
+        return True
+
+Poly = Polynomial
 
 
 def poly_to_coeffs(poly):
@@ -71,37 +81,21 @@ def poly_to_coeffs(poly):
     return coeffs[::-1]
 
 
-def coeffs_to_poly(coeffs, var):
-    deg = len(coeffs) - 1
-    terms = []
-    for power, coeff in zip(range(deg, -1, -1), coeffs):
-        terms.append(coeff * var ** power)
-    return Sum(terms).simplify()
-
-
-@_auto_poly
 def poly_div(poly1, poly2):
-    coeffs1 = poly_to_coeffs(poly1)
-    coeffs2 = poly_to_coeffs(poly2)
-    deg1 = len(coeffs1) - 1
-    deg2 = len(coeffs2) - 1
-    if deg1 < deg2:
+    if poly1.deg < poly2.deg:
         return poly1
-    q_coeffs = [zero] * (deg1 - deg2 + 1)
+    q_coeffs = [zero] * (poly1.deg - poly2.deg + 1)
     for i in range(len(q_coeffs)):
-        q_coeffs[i] = Frac(coeffs1[i], coeffs2[0]).simplify()
-        for j in range(deg2 + 1):
-            coeffs1[j+i] -= coeffs2[j] * q_coeffs[i]
+        q_coeffs[i] = Frac(poly1.coeffs[i], poly2.coeffs[0]).simplify()
+        for j in range(poly2.deg + 1):
+            poly1.coeffs[j+i] -= poly2.coeffs[j] * q_coeffs[i]
     var = list(poly1.get_vars)[0]
-    q_poly = coeffs_to_poly(q_coeffs, var)
-    r_poly = coeffs_to_poly(coeffs1, var)
-    return (q_poly + Frac(r_poly, poly2)).simplify()
+    return (q_coeffs.to_expr() + Frac(poly1.to_expr(), poly2.to_expr())).simplify()
 
 
-@_auto_coeffs
-def get_rational_roots(coeffs):
-    first = abs(coeffs[0]).decomp()
-    last = abs(coeffs[-1]).decomp()
+def get_rational_roots(poly):
+    first = abs(poly.coeffs[0]).decomp()
+    last = abs(poly.coeffs[-1]).decomp()
     numer_temp = []
     denom_temp = []
     for n in last.values():
