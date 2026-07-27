@@ -12,24 +12,28 @@ __all__ = ['Polynomial', 'Poly', 'poly_div', 'get_rational_roots']
 
 
 class Polynomial:
-    def __init__(self, arg, var=None):
-        if isinstance(arg, CORE_EXPR):
-            if Polynomial.is_poly_expr(arg):
-                self.coeffs = poly_to_coeffs(arg)
+    def __init__(self, poly, var=None):
+        if isinstance(poly, CORE_EXPR):
+            if Polynomial.is_poly_expr(poly):
+                self.coeffs = poly_to_coeffs(poly)
                 self.deg = len(self.coeffs) - 1
                 if var is None:
-                    self.var = list(arg.get_vars)[0]
+                    self.var = list(poly.get_vars)[0]
                 else:
                     self.var = var
             else:
                 raise ValueError('Input must be polynomial or coefficient list')
-        elif isinstance(arg, list):
-            self.coeffs = arg
+        elif isinstance(poly, list):
+            self.coeffs = [Num(i) for i in poly]
             self.deg = len(self.coeffs) - 1
             if var is None:
                 self.var = Var('x')
             else:
                 self.var = var
+        elif isinstance(poly, Polynomial):
+            self.coeffs = poly.coeffs.copy()
+            self.deg = poly.deg
+            self.var = poly.var
         else:
             raise ValueError('Input must be polynomial or coefficient list')
 
@@ -82,6 +86,8 @@ def poly_to_coeffs(poly):
 
 
 def poly_div(poly1, poly2):
+    poly1 = Polynomial(poly1)
+    poly2 = Polynomial(poly2)
     if poly1.deg < poly2.deg:
         return poly1
     q_coeffs = [zero] * (poly1.deg - poly2.deg + 1)
@@ -89,8 +95,7 @@ def poly_div(poly1, poly2):
         q_coeffs[i] = Frac(poly1.coeffs[i], poly2.coeffs[0]).simplify()
         for j in range(poly2.deg + 1):
             poly1.coeffs[j+i] -= poly2.coeffs[j] * q_coeffs[i]
-    var = list(poly1.get_vars)[0]
-    return (q_coeffs.to_expr() + Frac(poly1.to_expr(), poly2.to_expr())).simplify()
+    return (Polynomial(q_coeffs).to_expr() + Frac(poly1.to_expr(), poly2.to_expr())).simplify()
 
 
 def get_rational_roots(poly):
