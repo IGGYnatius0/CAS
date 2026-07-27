@@ -1,13 +1,35 @@
 from itertools import product
 
 from core.classes import *
+from core.classes import CORE_EXPR
 from forms.matcher import match
 from forms.abc import A, B, x
 
+# TODO add constraint that B must be integer
 # TODO partial fractions?
 
 
-__all__ = ['is_poly_expr', 'poly_div', 'get_rational_roots']
+__all__ = ['poly_to_coeffs', 'coeffs_to_poly', 'is_poly_expr', 'poly_div', 'get_rational_roots']
+
+
+def _auto_coeffs(func):
+    def wrapper(arg):
+        if isinstance(arg, list):
+            return func(arg)
+        if isinstance(arg, CORE_EXPR):
+            return func(poly_to_coeffs(arg))
+        raise ValueError('Input must be polynomial or coefficient list')
+    return wrapper
+
+
+def _auto_poly(func):
+    def wrapper(arg):
+        if isinstance(arg, list):
+            return func(coeffs_to_poly(arg))
+        if isinstance(arg, CORE_EXPR):
+            return func(arg)
+        raise ValueError('Input must be polynomial or coefficient list')
+    return wrapper
 
 
 def is_poly_expr(expr):
@@ -57,6 +79,7 @@ def coeffs_to_poly(coeffs, var):
     return Sum(terms).simplify()
 
 
+@_auto_poly
 def poly_div(poly1, poly2):
     coeffs1 = poly_to_coeffs(poly1)
     coeffs2 = poly_to_coeffs(poly2)
@@ -75,6 +98,7 @@ def poly_div(poly1, poly2):
     return (q_poly + Frac(r_poly, poly2)).simplify()
 
 
+@_auto_coeffs
 def get_rational_roots(coeffs):
     first = abs(coeffs[0]).decomp()
     last = abs(coeffs[-1]).decomp()
@@ -102,8 +126,8 @@ def get_rational_roots(coeffs):
     for numer_factor in numer_factors:
         for denom_factor in denom_factors:
             roots.append(Frac(numer_factor, denom_factor).simplify())
-    roots.extend([(-root).simplify() for root in roots])
     roots = list(dict.fromkeys(roots))
+    roots.extend([(-root).simplify() for root in roots])
     return roots
 
 
