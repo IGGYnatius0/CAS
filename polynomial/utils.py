@@ -4,7 +4,6 @@ from core.classes import *
 from forms.matcher import match
 from forms.abc import A, B, x
 
-# TODO add constraint that B must be integer
 # TODO partial fractions?
 
 
@@ -52,11 +51,13 @@ class Polynomial:
                 if isinstance(term, Num):
                     continue
                 result = match(A * x ** B, term)
-                if not result:
+                b = result['consts'][B]
+                if not (result and b == int(b) and b > 0):
                     return False
         else:
             result = match(A * x ** B, expr)
-            if not result:
+            b = result['consts'][B]
+            if not (result and b == int(b) and b > 0):
                 return False
         return True
 
