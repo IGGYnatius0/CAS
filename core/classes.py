@@ -7,7 +7,7 @@ from utils import pfactor
 
 __all__ = ['Num', 'Var', 'Sum', 'Prod', 'Frac', 'Exp', 'Eqn',
            'neg_one', 'zero', 'one', 'inf', 'ninf',
-           'CORE_TYPES']
+           'CORE_TYPES', 'CORE_EXPR']
 
 # READ BEFORE ADDING!!
 # Every core class has to implement the following methods:
@@ -17,53 +17,71 @@ __all__ = ['Num', 'Var', 'Sum', 'Prod', 'Frac', 'Exp', 'Eqn',
 # TODO implement functions especially log/ln
 
 
+def _operator_typecheck(func):
+    def wrapper(self, other):
+        if isinstance(other, CORE_EXPR + (int, float, Decimal)):
+            return func(self, other)
+        return NotImplemented
+    return wrapper
+
+
 class _CoreTemplate:
     def __eq__(self, other):
         if type(other) is not type(self):
             return False
         return hash(self) == hash(other)
 
+    @_operator_typecheck
     def __add__(self, other):
         if isinstance(other, _CoreSumTemplate):
             return Sum([self] + other.terms)
         return Sum([self, other])
 
+    @_operator_typecheck
     def __radd__(self, other):
         if isinstance(other, _CoreSumTemplate):
             return Sum(other.terms + [self])
         return Sum([other, self])
 
+    @_operator_typecheck
     def __sub__(self, other):
         # if isinstance(other, CoreSumTemplate):
         #     return Sum([self] + (-other).terms)
         return Sum([self, -other])
 
+    @_operator_typecheck
     def __rsub__(self, other):
         # if isinstance(other, CoreSumTemplate):
         #     return Sum([-other).terms + [self])
         return Sum([other, -self])
 
+    @_operator_typecheck
     def __mul__(self, other):
         if isinstance(other, _CoreProdTemplate):
             return Prod([self] + other.factors)
         return Prod([self, other])
 
+    @_operator_typecheck
     def __rmul__(self, other):
         if isinstance(other, _CoreProdTemplate):
             return Prod(other.factors + [self])
         return Prod([other, self])
 
+    @_operator_typecheck
     def __truediv__(self, other):
         return Frac(self, other)
 
+    @_operator_typecheck
     def __rtruediv__(self, other):
         return Frac(other, self)
 
+    @_operator_typecheck
     def __pow__(self, power, modulo=None):
         if modulo is not None:
             raise NotImplementedError("Modulo functionality is not available")
         return Exp(self, power)
 
+    @_operator_typecheck
     def __rpow__(self, other):
         return Exp(other, self)
 
@@ -581,6 +599,7 @@ class Func: # TODO this has been on todo for the longest time
         pass
 
 
+CORE_EXPR = (Num, Var, Sum, Prod, Frac, Exp)
 CORE_TYPES = (Num, Var, Sum, Prod, Frac, Exp, Eqn)
 
 
