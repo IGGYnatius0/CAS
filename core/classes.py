@@ -113,6 +113,10 @@ class _NumTemplate(Decimal):
     __neg__ = _num_check(Decimal.__neg__)
     __pos__ = _num_check(Decimal.__pos__)
     __abs__ = _num_check(Decimal.__abs__)
+    def __hash__(self):
+        if self == neg_one: # to prevent hash collision between -1 and -2
+            return -1279179286899660244 # hash('-1')
+        return super().__hash__()
 
 
 class _CoreVarTemplate(_CoreTemplate):
