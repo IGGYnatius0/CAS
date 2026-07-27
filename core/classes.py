@@ -8,7 +8,6 @@ from utils import pfactor
 
 __all__ = ['Num', 'Var', 'Sum', 'Prod', 'Frac', 'Exp', 'Eqn',
            'neg_one', 'zero', 'one', 'inf', 'ninf',
-           'expand',
            'CORE_TYPES', 'CORE_EXPR']
 
 # READ BEFORE ADDING!!
@@ -96,6 +95,9 @@ class _CoreTemplate:
     def decomp(self):
         """Decomposes the expression into its constituent factors"""
         return Counter({self: 1})
+
+    def expand(self):
+        return self
 
     def simplify(self):
         """Simplifies the expression"""
@@ -330,6 +332,9 @@ class Num(_NumTemplate):
             return Counter([Num(n) for n in pfactor(self)])
         return Counter({self: 1})
 
+    def expand(self):
+        return self
+
     def simplify(self):
         return self
 
@@ -394,6 +399,9 @@ class Sum(_CoreSumTemplate):
         if not self.terms:
             self.terms = [zero]
 
+    def expand(self):
+        return Sum([term.expand() for term in self.terms])
+
     def simplify(self):
         """Simplifies the expression"""
         decomps = [term.simplify().decomp() for term in self.terms]
@@ -457,6 +465,17 @@ class Prod(_CoreProdTemplate):
             c.update(factor.decomp())
         return c
 
+    def expand(self):
+        to_expand = []
+        for factor in self.factors:
+            factor = factor.expand()
+            if isinstance(factor, Sum):
+                to_expand.append(factor.terms)
+            else:
+                to_expand.append([factor])
+        expanded = tuple(product(*to_expand))
+        return Sum([Prod(term) for term in expanded])
+
     def simplify(self):
         """Simplifies the expression; if factors contain zero, returns zero"""
         decomp = Prod([factor.simplify() for factor in self.factors]).decomp()
@@ -501,6 +520,9 @@ class Frac(_CoreFracTemplate):
         numers.subtract(denoms)
         return numers
 
+    def expand(self):
+        return Frac(self.numer.expand(), self.denom.expand())
+
     def simplify(self):
         """Returns the fraction with simplified numerator and denominator"""
         numer = self.numer.simplify()
@@ -543,6 +565,11 @@ class Exp(_CoreExpTemplate):
             return Counter({self.base: self.power})
         return Counter({self: 1})
 
+    def expand(self):
+        if int(self.power) == self.power:
+            return expand(Prod([self.base] * int(self.power)))
+        return self
+
     def simplify(self):
         """Simplifies the expression"""
         base = self.base.simplify()
@@ -579,6 +606,9 @@ class Eqn(_CoreEqnTemplate):
         self.lhs = Num(lhs) if Num.isnum(lhs) else lhs
         self.rhs = Num(rhs) if Num.isnum(rhs) else rhs
 
+    def expand(self):
+        return Eqn(self.lhs.expand(), self.rhs.expand())
+
     def simplify(self):
         return Eqn(self.lhs.simplify(), self.rhs.simplify())
 
@@ -599,21 +629,6 @@ class Eqn(_CoreEqnTemplate):
 class Func: # TODO this has been on todo for the longest time
     def __init__(self):
         pass
-
-
-def expand(expr):
-    if isinstance(expr, Exp) and int(expr.power) == expr.power:
-        return expand(Prod([expr.base] * int(expr.power)))
-    if not isinstance(expr, Prod):
-        return expr
-    to_expand = []
-    for factor in expr.factors:
-        if isinstance(factor, Sum):
-            to_expand.append(factor.terms)
-        else:
-            to_expand.append([factor])
-    expanded = tuple(product(*to_expand))
-    return Sum([Prod(term) for term in expanded])
 
 
 CORE_EXPR = (Num, Var, Sum, Prod, Frac, Exp)
