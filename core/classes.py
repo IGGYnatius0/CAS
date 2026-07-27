@@ -113,7 +113,7 @@ class _CoreTemplate:
 def _num_check(func):
     def wrapper(*args, **kwargs):
         f = func(*args, **kwargs)
-        if Num.isnum(f):
+        if Num.is_num(f):
             return Num(f)
         return f
     return wrapper
@@ -344,12 +344,19 @@ class Num(_NumTemplate):
     @cached_property
     def get_vars(self):
         return set()
+    
+    @cached_property
+    def isnum(self):
+        return True
 
     def copy(self):
         return self
+    
+    def eval_nums(self):
+        return self
 
     @classmethod
-    def isnum(cls, expr):
+    def is_num(cls, expr):
         return isinstance(expr, (int, float, Decimal, Num))
 
     def __repr__(self):
@@ -371,9 +378,16 @@ class Var(_CoreVarTemplate):
     @cached_property
     def get_vars(self):
         return {self}
+    
+    @cached_property
+    def isnum(self):
+        return False
 
     def copy(self):
         return Var(self.sym)
+    
+    def eval_nums(self):
+        return self
 
 
 neg_one = Num(-1)
@@ -387,7 +401,7 @@ class Sum(_CoreSumTemplate):
     def __init__(self, terms):
         self.terms = []
         for term in terms:
-            if Num.isnum(term):
+            if Num.is_num(term):
                 self.terms.append(Num(term))
             elif isinstance(term, Sum):
                 self.terms.extend(term.terms)
@@ -437,16 +451,37 @@ class Sum(_CoreSumTemplate):
     @cached_property
     def get_vars(self):
         return set.union(*[term.get_vars for term in self.terms])
+    
+    @cached_property
+    def isnum(self):
+        for term in self.terms:
+            if not term.isnum:
+                return False
+        return True
 
     def copy(self):
         return Sum([term.copy() for term in self.terms])
+    
+    def eval_nums(self):
+        num = zero
+        terms = []
+        has_num = False
+        for term in self.terms:
+            if term.isnum:
+                num += term.eval_nums()
+                has_num = True
+            else:
+                terms.append(term)
+        if has_num:
+            terms.append(num)
+        return Sum(terms)
 
 
 class Prod(_CoreProdTemplate):
     def __init__(self, factors):
         self.factors = []
         for factor in factors:
-            if Num.isnum(factor):
+            if Num.is_num(factor):
                 self.factors.append(Num(factor))
             elif isinstance(factor, Prod):
                 self.factors.extend(factor.factors)
@@ -503,15 +538,36 @@ class Prod(_CoreProdTemplate):
     @cached_property
     def get_vars(self):
         return set.union(*[factor.get_vars for factor in self.factors])
+    
+    @cached_property
+    def isnum(self):
+        for factor in self.factors:
+            if not factor.isnum:
+                return False
+        return True
 
     def copy(self):
         return Prod([factor.copy() for factor in self.factors])
+    
+    def eval_nums(self):
+        num = one
+        factors = []
+        has_num = False
+        for factor in self.factors:
+            if factor.isnum:
+                num += factor.eval_nums()
+                has_num = True
+            else:
+                factors.append(factor)
+        if has_num:
+            factors.append(num)
+        return Prod(factors)
 
 
 class Frac(_CoreFracTemplate):
     def __init__(self, numer, denom):
-        self.numer = Num(numer) if Num.isnum(numer) else numer
-        self.denom = Num(denom) if Num.isnum(denom) else denom
+        self.numer = Num(numer) if Num.is_num(numer) else numer
+        self.denom = Num(denom) if Num.is_num(denom) else denom
 
     def decomp(self):
         """Decomposes the expression into its constituent factors"""
@@ -550,14 +606,21 @@ class Frac(_CoreFracTemplate):
     def get_vars(self):
         return self.numer.get_vars | self.denom.get_vars
 
+    @cached_property
+    def isnum(self):
+        return self.numer.isnum and self.denom.isnum
+
     def copy(self):
         return Frac(self.numer.copy(), self.denom.copy())
+
+    def eval_nums(self):
+        return self.numer.eval_nums() / self.denom.eval_nums()
 
 
 class Exp(_CoreExpTemplate):
     def __init__(self, base, power):
-        self.base = Num(base) if Num.isnum(base) else base
-        self.power = Num(power) if Num.isnum(power) else power
+        self.base = Num(base) if Num.is_num(base) else base
+        self.power = Num(power) if Num.is_num(power) else power
 
     def decomp(self):
         """Decomposes the expression into its constituent factors"""
@@ -597,14 +660,21 @@ class Exp(_CoreExpTemplate):
     def get_vars(self):
         return self.base.get_vars | self.power.get_vars
 
+    @cached_property
+    def isnum(self):
+        return self.base.isnum and self.power.isnum
+
     def copy(self):
         return Exp(self.base.copy(), self.power.copy())
+
+    def eval_nums(self):
+        return self.base.eval_nums() ** self.power.eval_nums()
 
 
 class Eqn(_CoreEqnTemplate):
     def __init__(self, lhs, rhs):
-        self.lhs = Num(lhs) if Num.isnum(lhs) else lhs
-        self.rhs = Num(rhs) if Num.isnum(rhs) else rhs
+        self.lhs = Num(lhs) if Num.is_num(lhs) else lhs
+        self.rhs = Num(rhs) if Num.is_num(rhs) else rhs
 
     def expand(self):
         return Eqn(self.lhs.expand(), self.rhs.expand())
