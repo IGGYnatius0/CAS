@@ -567,7 +567,7 @@ class Exp(_CoreExpTemplate):
 
     def expand(self):
         if int(self.power) == self.power:
-            return expand(Prod([self.base] * int(self.power)))
+            return Prod([self.base] * int(self.power)).expand()
         return self
 
     def simplify(self):
@@ -644,7 +644,3 @@ if __name__ == '__main__':
 
     # expr = -Frac(8, 6)
     # print(expr.simplify())
-
-    expr = (x+1)**4
-    print(expr)
-    print(expand(expr).simplify())
