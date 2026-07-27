@@ -3,6 +3,9 @@ from core.abc import x, t
 from polynomial import *
 
 
+__all__ = ['rational_root_solve']
+
+
 # Cubic, quartic, rational root thing
 
 
