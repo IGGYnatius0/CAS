@@ -1,5 +1,6 @@
 from decimal import Decimal
 from collections import Counter
+from itertools import product
 from functools import cached_property
 from math import gcd
 
@@ -7,6 +8,7 @@ from utils import pfactor
 
 __all__ = ['Num', 'Var', 'Sum', 'Prod', 'Frac', 'Exp', 'Eqn',
            'neg_one', 'zero', 'one', 'inf', 'ninf',
+           'expand',
            'CORE_TYPES', 'CORE_EXPR']
 
 # READ BEFORE ADDING!!
@@ -599,6 +601,21 @@ class Func: # TODO this has been on todo for the longest time
         pass
 
 
+def expand(expr):
+    if isinstance(expr, Exp) and int(expr.power) == expr.power:
+        return expand(Prod([expr.base] * int(expr.power)))
+    if not isinstance(expr, Prod):
+        return expr
+    to_expand = []
+    for factor in expr.factors:
+        if isinstance(factor, Sum):
+            to_expand.append(factor.terms)
+        else:
+            to_expand.append([factor])
+    expanded = tuple(product(*to_expand))
+    return Sum([Prod(term) for term in expanded])
+
+
 CORE_EXPR = (Num, Var, Sum, Prod, Frac, Exp)
 CORE_TYPES = (Num, Var, Sum, Prod, Frac, Exp, Eqn)
 
@@ -610,5 +627,9 @@ if __name__ == '__main__':
     # expr = ( (3*x**2*y**3 - 2*x*y**2 + 4*x**3*y) + (2*x**2*y**3 + 5*x*y**2 - x**3*y) + (4*x**2*y**3 + 3*x*y**2 - 5*x**3*y) ) + ( (x**2*y**3 + 4*x*y**2 - 2*x**3*y) + (2*x**2*y**3 - x*y**2 + 3*x**3*y) + (3*x**2*y**3 - 2*x*y**2 + x**3*y) )
     # print(expr.simplify()) # ((15 * (x ^ 2) * (y ^ 3)) + (7 * x * (y ^ 2)))
 
-    expr = -Frac(8, 6)
-    print(expr.simplify())
+    # expr = -Frac(8, 6)
+    # print(expr.simplify())
+
+    expr = (x+1)**4
+    print(expr)
+    print(expand(expr).simplify())
