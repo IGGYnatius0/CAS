@@ -51,13 +51,18 @@ class Polynomial:
                 if isinstance(term, Num):
                     continue
                 result = match(A * x ** B, term)
-                b = result['consts'][B]
-                if not (result and b == int(b) and b > 0):
+                if not result:
                     return False
+                b = result['consts'][B]
+                if not (b == int(b) and b > 0):
+                    return False
+
         else:
             result = match(A * x ** B, expr)
+            if not result:
+                return False
             b = result['consts'][B]
-            if not (result and b == int(b) and b > 0):
+            if not (b == int(b) and b > 0):
                 return False
         return True
 
