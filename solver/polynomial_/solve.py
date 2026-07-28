@@ -5,12 +5,6 @@ from solver.polynomial_.solvers import *
 from solver.zero_prod import solve as zero_solve
 
 
-def get_terms(expr):
-    if isinstance(expr, Sum):
-        return expr.terms
-    return [expr]
-
-
 def solve(expr: CORE_EXPR, main_solve):
     expr = expr.expand().simplify()
     expr = expr.factorise().simplify() # Global factorise
