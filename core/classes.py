@@ -12,7 +12,7 @@ __all__ = ['Num', 'Var', 'Sum', 'Prod', 'Frac', 'Exp', 'Eqn',
 
 # READ BEFORE ADDING!!
 # Every core class has to implement the following methods:
-# __hash__, decomp, simplify, substitute_vars, get_vars, copy
+# __hash__, decomp, expand, factorise, simplify, substitute_vars, get_vars, copy
 
 
 # TODO implement functions especially log/ln
@@ -97,6 +97,9 @@ class _CoreTemplate:
         return Counter({self: 1})
 
     def expand(self):
+        return self
+
+    def factorise(self):
         return self
 
     def simplify(self):
@@ -335,6 +338,9 @@ class Num(_NumTemplate):
     def expand(self):
         return self
 
+    def factorise(self):
+        return self
+
     def simplify(self):
         return self
 
@@ -415,6 +421,31 @@ class Sum(_CoreSumTemplate):
 
     def expand(self):
         return Sum([term.expand() for term in self.terms])
+
+    def factorise(self):
+        decomps = [term.factorise().decomp() for term in self.terms]
+        common = decomps[0].copy()
+        for decomp in decomps[1:]:
+            common &= decomp
+        for i in range(len(decomps)):
+            decomps[i].subtract(common)
+
+        # Convert from Counter to list of Exp
+        common_list = []
+        for expr, power in common.items():
+            common_list.append(Exp(expr, power))
+        common_prod = Prod(common_list)
+
+        terms_list = []
+        for decomp in decomps:
+            temp = []
+            for expr, power in decomp.items():
+                if power != zero:
+                    temp.append(Exp(expr, power))
+            terms_list.append(Prod(temp))
+        terms_sum = Sum(terms_list)
+
+        return Prod([common_prod, terms_sum])
 
     def simplify(self):
         """Simplifies the expression"""
@@ -511,6 +542,9 @@ class Prod(_CoreProdTemplate):
         expanded = tuple(product(*to_expand))
         return Sum([Prod(term) for term in expanded])
 
+    def factorise(self):
+        return Prod([factor.factorise() for factor in self.factors])
+
     def simplify(self):
         """Simplifies the expression; if factors contain zero, returns zero"""
         decomp = Prod([factor.simplify() for factor in self.factors]).decomp()
@@ -579,6 +613,9 @@ class Frac(_CoreFracTemplate):
     def expand(self):
         return Frac(self.numer.expand(), self.denom.expand())
 
+    def factorise(self):
+        return Frac(self.numer.factorise(), self.denom.factorise())
+
     def simplify(self):
         """Returns the fraction with simplified numerator and denominator"""
         numer = self.numer.simplify()
@@ -633,6 +670,9 @@ class Exp(_CoreExpTemplate):
             return Prod([self.base] * int(self.power)).expand()
         return self
 
+    def factorise(self):
+        return Exp(self.base.factorise(), self.power.factorise())
+
     def simplify(self):
         """Simplifies the expression"""
         base = self.base.simplify()
@@ -678,6 +718,9 @@ class Eqn(_CoreEqnTemplate):
 
     def expand(self):
         return Eqn(self.lhs.expand(), self.rhs.expand())
+
+    def factorise(self):
+        return Eqn(self.lhs.factorise(), self.rhs.factorise())
 
     def simplify(self):
         return Eqn(self.lhs.simplify(), self.rhs.simplify())
