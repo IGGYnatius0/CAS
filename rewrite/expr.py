@@ -7,6 +7,7 @@ def rewrite(expr):
     return route_rewrite(expr) # TODO ordering eg whether to reverse or not
 
 
+# TODO use functools.singledispatch
 def route_rewrite(expr):
     vars = expr.get_vars
     if not vars:
