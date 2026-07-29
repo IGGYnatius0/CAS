@@ -666,7 +666,7 @@ class Exp(_CoreExpTemplate):
         return Counter({self: 1})
 
     def expand(self):
-        if int(self.power) == self.power:
+        if isinstance(self.power, Num) and int(self.power) == self.power and self.power > 0:
             return Prod([self.base] * int(self.power)).expand()
         return self
 
@@ -752,8 +752,8 @@ if __name__ == '__main__':
     x = Var('x')
     y = Var('y')
 
-    # expr = ( (3*x**2*y**3 - 2*x*y**2 + 4*x**3*y) + (2*x**2*y**3 + 5*x*y**2 - x**3*y) + (4*x**2*y**3 + 3*x*y**2 - 5*x**3*y) ) + ( (x**2*y**3 + 4*x*y**2 - 2*x**3*y) + (2*x**2*y**3 - x*y**2 + 3*x**3*y) + (3*x**2*y**3 - 2*x*y**2 + x**3*y) )
-    # print(expr.simplify()) # ((15 * (x ^ 2) * (y ^ 3)) + (7 * x * (y ^ 2)))
+    expr = (x+1)*(x+2)**-1*(x+2)*(x+3)
+    print(expr.expand().simplify())
 
-    # expr = -Frac(8, 6)
-    # print(expr.simplify())
+    # expr = (x+2)**-1*(x+2)
+    # print(expr.expand().simplify())
