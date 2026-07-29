@@ -75,7 +75,7 @@ def _(expr: Frac) -> bool:
 def _(expr: Exp) -> bool:
     if not isinstance(expr.power, Num):
         return False
-    if not (expr.power != 0 and expr.power == int(expr.power)):
+    if expr.power != int(expr.power):
         return False
     if not is_rational_expr(expr.base):
         return False
