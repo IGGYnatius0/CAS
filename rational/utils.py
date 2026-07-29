@@ -21,7 +21,7 @@ def is_flattened_expr(expr: CORE_EXPR) -> bool:
 
 
 def flatten_expr(expr: CORE_EXPR) -> CORE_EXPR:
-    while not is_flattened_expr(expr):
+    while not Poly.is_poly_expr(expr):
         denoms = get_denoms(expr)
         factors = []
         for base, power in denoms.items():
