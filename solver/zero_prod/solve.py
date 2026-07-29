@@ -5,6 +5,8 @@ def solve(expr: CORE_EXPR, main_solve):
     if isinstance(expr, Prod):
         solns = []
         for factor in expr.factors:
+            if isinstance(factor, Num):
+                continue
             soln = main_solve(factor)
             solns.extend(soln)
         return solns
