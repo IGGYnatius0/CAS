@@ -828,7 +828,7 @@ class FormFrac(_FormFracTemplate):
             if expr == zero:
                 return self.numer.match(zero, var_map.copy())
             if self.isconst:
-                return SingleConstraint(self, expr, var_map.copy())
+                return self.match(Frac(expr, one), var_map.copy())
             return False
         if not isinstance(expr, Frac):
             return self.match(Frac(expr, one), var_map.copy())
