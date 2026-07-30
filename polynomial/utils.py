@@ -4,9 +4,6 @@ from core.classes import *
 from forms.matcher import match
 from forms.abc import A, B, x
 
-# TODO partial fractions?
-# TODO rename this file because utils is a horrible name 💀
-
 
 __all__ = ['Polynomial', 'Poly', 'poly_div', 'get_rational_roots']
 

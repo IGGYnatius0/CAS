@@ -5,6 +5,9 @@ from core.classes import *
 from polynomial import Poly
 
 
+# TODO denom != 0
+# TODO partial fractions?
+
 __all__ = ['is_rational_expr', 'flatten_expr']
 
 

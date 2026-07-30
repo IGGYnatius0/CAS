@@ -539,8 +539,7 @@ class Prod(_CoreProdTemplate):
                 to_expand.append(factor.terms)
             else:
                 to_expand.append([factor])
-        expanded = tuple(product(*to_expand))
-        return Sum([Prod(term) for term in expanded])
+        return Sum([Prod(term) for term in product(*to_expand)])
 
     def factorise(self):
         return Prod([factor.factorise() for factor in self.factors])
