@@ -17,12 +17,6 @@ def is_rational_expr(expr: CORE_EXPR) -> bool:
     return True
 
 
-@lru_cache
-@singledispatch
-def is_flattened_expr(expr: CORE_EXPR) -> bool:
-    return True
-
-
 def flatten_expr(expr: CORE_EXPR) -> CORE_EXPR:
     while not Poly.is_poly_expr(expr):
         denoms = get_denoms(expr)
@@ -83,39 +77,6 @@ def _(expr: Exp) -> bool:
     if not is_rational_expr(expr.base):
         return False
     return True
-
-#####################
-# is_flattened_expr #
-#####################
-
-@is_flattened_expr.register(Sum)
-def _(expr: Sum) -> bool:
-    if Poly.is_poly_expr(expr):
-        return True
-    for term in expr.terms:
-        if not is_flattened_expr(term):
-            return False
-    return True
-
-
-@is_flattened_expr.register(Prod)
-def _(expr: Prod) -> bool:
-    if Poly.is_poly_expr(expr):
-        return True
-    for factor in expr.factors:
-        if not is_flattened_expr(factor):
-            return False
-    return True
-
-
-@ is_flattened_expr.register(Frac)
-def _(expr: Frac) -> bool:
-    return False
-
-
-@is_flattened_expr.register(Exp)
-def _(expr: Exp) -> bool:
-    return expr.power > 0
 
 ##############
 # get_denoms #
