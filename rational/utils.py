@@ -61,9 +61,9 @@ def _(expr: Prod) -> bool:
 
 @is_rational_expr.register(Frac)
 def _(expr: Frac) -> bool:
-    if not Poly.is_poly_expr(expr.numer):
+    if not is_rational_expr(expr.numer):
         return False
-    if not Poly.is_poly_expr(expr.denom):
+    if not is_rational_expr(expr.denom):
         return False
     return True
 
