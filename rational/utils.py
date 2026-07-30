@@ -8,7 +8,7 @@ from polynomial import Poly
 # TODO denom != 0
 # TODO partial fractions?
 
-__all__ = ['is_rational_expr', 'flatten_expr']
+__all__ = ['is_rational_expr', 'rational_flatten']
 
 
 @lru_cache
@@ -17,7 +17,7 @@ def is_rational_expr(expr: CORE_EXPR) -> bool:
     return True
 
 
-def flatten_expr(expr: CORE_EXPR) -> CORE_EXPR:
+def rational_flatten(expr: CORE_EXPR) -> CORE_EXPR:
     while not Poly.is_poly_expr(expr):
         denoms = get_denoms(expr)
         factors = []
@@ -113,4 +113,4 @@ if __name__ == '__main__':
     # expr = ((1+x)/(2+x)+3*x) / ((2+x)/(3+x)+4*x) + 5*x
     expr = expr.simplify()
     print(expr)
-    print(flatten_expr(expr))
+    print(rational_flatten(expr))

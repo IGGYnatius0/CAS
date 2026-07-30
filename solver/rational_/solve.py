@@ -5,5 +5,5 @@ from rational import *
 def solve(expr: CORE_EXPR, main_solve):
     if not is_rational_expr(expr):
         return []
-    expr = flatten_expr(expr)
+    expr = rational_flatten(expr)
     return main_solve(expr)
