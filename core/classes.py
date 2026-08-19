@@ -1,14 +1,15 @@
 from decimal import Decimal
-from collections import Counter
+from collections import Counter, defaultdict
 from itertools import product
 from functools import cached_property
 from math import gcd
 
-from utils import pfactor
+from core.pfactor import pfactor
 
 __all__ = ['Num', 'Var', 'Sum', 'Prod', 'Frac', 'Exp', 'Eqn',
            'neg_one', 'zero', 'one', 'inf', 'ninf',
-           'CORE_TYPES', 'CORE_EXPR']
+           'CORE_TYPES', 'CORE_EXPR',
+           'decomp2prod']
 
 # READ BEFORE ADDING!!
 # Every core class has to implement the following methods:
@@ -17,7 +18,6 @@ __all__ = ['Num', 'Var', 'Sum', 'Prod', 'Frac', 'Exp', 'Eqn',
 
 # TODO implement functions especially log/ln
 # TODO __init__ which pull from classes and intervals
-# TODO utils which contains pfactor and function for decomp -> Prod
 
 
 def _operator_typecheck(func):
@@ -96,7 +96,7 @@ class _CoreTemplate:
 
     def decomp(self):
         """Decomposes the expression into its constituent factors"""
-        return Counter({self: 1})
+        return Counter({self: one})
 
     def expand(self):
         return self
@@ -749,12 +749,17 @@ CORE_EXPR = (Num, Var, Sum, Prod, Frac, Exp)
 CORE_TYPES = (Num, Var, Sum, Prod, Frac, Exp, Eqn)
 
 
+# TODO refactor code using this function
+def decomp2prod(decomp: Counter) -> Prod:
+    return Prod([Exp(base, power) for base, power in decomp.items()])
+
+
 if __name__ == '__main__':
     x = Var('x')
     y = Var('y')
 
-    expr = (x+1)*(x+2)**-1*(x+2)*(x+3)
-    print(expr.expand().simplify())
+    # expr = (x+1)
+    # print(expr.simplify())
 
-    # expr = (x+2)**-1*(x+2)
-    # print(expr.expand().simplify())
+    expr = 2*(x+2)-0.5*(2+x)+1.5*(x+2)
+    print(expr.simplify())
