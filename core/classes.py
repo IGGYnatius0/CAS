@@ -333,9 +333,11 @@ class Num(_NumTemplate):
         Decimal.__init__(str(value), *args, **kwargs)
 
     def decomp(self):
-        if self.to_integral_value() == self:
-            return Counter([Num(n) for n in pfactor(self)])
-        return Counter({self: 1})
+        if int(self) == self:
+            f = pfactor(self)
+            return Counter({Num(base): Num(power) for base, power in f.items()})
+        else:
+            return Frac(*self.as_integer_ratio()).decomp()
 
     def expand(self):
         return self
@@ -449,29 +451,39 @@ class Sum(_CoreSumTemplate):
 
         return Prod([common_prod, terms_sum])
 
+    @staticmethod
+    def sum_fracs(fracs):
+        numer = zero
+        denom = one
+        for i, (_, d) in enumerate(fracs):
+            temp = one
+            for j, frac in enumerate(fracs):
+                if i == j:
+                    temp *= frac[0]
+                else:
+                    temp *= frac[1]
+            numer += temp
+            denom *= d
+        return Frac(numer, denom).simplify()
+
     def simplify(self):
-        """Simplifies the expression"""
         decomps = [term.simplify().decomp() for term in self.terms]
-        terms_counter = Counter()
+        terms_dict = defaultdict(list)
         for decomp in decomps:
-            coeff = one
+            numer = one
+            denom = one
             factors = []
-            for base, power in tuple(decomp.items()):
-                if isinstance(base, Num) and power > 0 and power == int(power):
-                    # Force symbolic Exps such as square roots to not get evaluated
-                    coeff *= base ** power
-                    decomp.pop(base)
+            for base, power in decomp.items():
+                if isinstance(base, Num) and isinstance(power, Num) and int(base) == base and int(power) == power:
+                    if power < 0:
+                        denom *= base ** -power
+                    else:
+                        numer *= base ** power
                 else:
                     factors.append(Exp(base, power))
-            terms_counter.update({Prod(factors).simplify(): coeff})
-        terms = []
-        for term, coeff in terms_counter.items():
-            if coeff == zero:
-                pass
-            elif coeff == one:
-                terms.append(term)
-            else:
-                terms.append(coeff * term)
+            terms_dict[Prod(factors).simplify()].append((numer, denom))
+        terms = [(factors * self.sum_fracs(fracs)).simplify() for factors, fracs in terms_dict.items()]
+
         if len(terms) == 0:
             return zero
         if len(terms) == 1:
@@ -749,7 +761,6 @@ CORE_EXPR = (Num, Var, Sum, Prod, Frac, Exp)
 CORE_TYPES = (Num, Var, Sum, Prod, Frac, Exp, Eqn)
 
 
-# TODO refactor code using this function
 def decomp2prod(decomp: Counter) -> Prod:
     return Prod([Exp(base, power) for base, power in decomp.items()])
 
