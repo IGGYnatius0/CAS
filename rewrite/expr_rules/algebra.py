@@ -4,7 +4,7 @@ from rewrite.expr_rules.base import RewriteRule
 
 
 def rewrite(expr):
-    new = simplify(expr) + factorise(expr) + expand(expr)
+    new = simplify(expr) + factorize(expr) + expand(expr)
     return list(dict.fromkeys(new))
 
 
@@ -16,7 +16,7 @@ def simplify(expr):
     return [expr.simplify()]
 
 
-def factorise(expr):
+def factorize(expr):
     if not isinstance(expr, Sum):
         return []
     decomps = [term.decomp() for term in expr.terms]

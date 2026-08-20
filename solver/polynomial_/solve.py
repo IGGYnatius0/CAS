@@ -7,7 +7,7 @@ from solver.zero_prod import solve as zero_solve
 
 def solve(expr: CORE_EXPR, main_solve):
     expr = expr.expand().simplify()
-    expr = expr.factorise().simplify() # Global factorise
+    expr = expr.factorize().simplify() # Global factorize
     if not Poly.is_poly_expr(expr):
         return zero_solve(expr, main_solve)
     solns = rules.solve(Eqn(expr, zero))

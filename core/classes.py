@@ -2,7 +2,6 @@ from decimal import Decimal
 from collections import Counter, defaultdict
 from itertools import product
 from functools import cached_property
-from math import gcd
 
 from core.pfactor import pfactor
 
@@ -13,7 +12,7 @@ __all__ = ['Num', 'Var', 'Sum', 'Prod', 'Frac', 'Exp', 'Eqn',
 
 # READ BEFORE ADDING!!
 # Every core class has to implement the following methods:
-# __hash__, decomp, expand, factorise, simplify, substitute_vars, get_vars, copy
+# __hash__, decomp, expand, factorize, simplify, substitute_vars, get_vars, copy
 
 
 # TODO implement functions especially log/ln
@@ -101,7 +100,7 @@ class _CoreTemplate:
     def expand(self):
         return self
 
-    def factorise(self):
+    def factorize(self):
         return self
 
     def simplify(self):
@@ -342,7 +341,7 @@ class Num(_NumTemplate):
     def expand(self):
         return self
 
-    def factorise(self):
+    def factorize(self):
         return self
 
     def simplify(self):
@@ -426,8 +425,8 @@ class Sum(_CoreSumTemplate):
     def expand(self):
         return Sum([term.expand() for term in self.terms])
 
-    def factorise(self):
-        decomps = [term.factorise().decomp() for term in self.terms]
+    def factorize(self):
+        decomps = [term.factorize().decomp() for term in self.terms]
         common = decomps[0].copy()
         for decomp in decomps[1:]:
             common &= decomp
@@ -555,8 +554,8 @@ class Prod(_CoreProdTemplate):
                 to_expand.append([factor])
         return Sum([Prod(term) for term in product(*to_expand)])
 
-    def factorise(self):
-        return Prod([factor.factorise() for factor in self.factors])
+    def factorize(self):
+        return Prod([factor.factorize() for factor in self.factors])
 
     def simplify(self):
         """Simplifies the expression; if factors contain zero, returns zero"""
@@ -626,8 +625,8 @@ class Frac(_CoreFracTemplate):
     def expand(self):
         return Frac(self.numer.expand(), self.denom.expand())
 
-    def factorise(self):
-        return Frac(self.numer.factorise(), self.denom.factorise())
+    def factorize(self):
+        return Frac(self.numer.factorize(), self.denom.factorize())
 
     def simplify(self):
         """Returns the fraction with simplified numerator and denominator"""
@@ -670,8 +669,8 @@ class Exp(_CoreExpTemplate):
             return Prod([self.base] * int(self.power)).expand()
         return self
 
-    def factorise(self):
-        return Exp(self.base.factorise(), self.power.factorise())
+    def factorize(self):
+        return Exp(self.base.factorize(), self.power.factorize())
 
     def simplify(self):
         """Simplifies the expression"""
@@ -719,8 +718,8 @@ class Eqn(_CoreEqnTemplate):
     def expand(self):
         return Eqn(self.lhs.expand(), self.rhs.expand())
 
-    def factorise(self):
-        return Eqn(self.lhs.factorise(), self.rhs.factorise())
+    def factorize(self):
+        return Eqn(self.lhs.factorize(), self.rhs.factorize())
 
     def simplify(self):
         return Eqn(self.lhs.simplify(), self.rhs.simplify())
@@ -756,8 +755,5 @@ if __name__ == '__main__':
     x = Var('x')
     y = Var('y')
 
-    expr = Frac(3, 4)
+    expr = Exp(15, 2)
     print(expr.simplify())
-
-    # expr = 2*(x+2)-0.5*(2+x)+1.5*(x+2)
-    # print(expr.simplify())
