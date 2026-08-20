@@ -631,23 +631,10 @@ class Frac(_CoreFracTemplate):
 
     def simplify(self):
         """Returns the fraction with simplified numerator and denominator"""
-        numer = self.numer.simplify()
-        denom = self.denom.simplify()
-        if numer == zero and denom != zero:
-            return zero
-        if denom == one:
-            return numer
-        if denom == zero:
-            return Frac(numer, zero)
-        if isinstance(numer, Num) and isinstance(denom, Num):
-            if numer % denom == 0:
-                return numer / denom
-            if numer == int(numer) and denom == int(denom):
-                gcd_ = gcd(int(numer), int(denom))
-                numer /= gcd_
-                denom /= gcd_
-                return Frac(numer, denom)
-        return Frac(numer, denom)
+        numer = self.numer.simplify().decomp()
+        denom = self.denom.simplify().decomp()
+        numer.subtract(denom)
+        return decomp2prod(numer).simplify()
 
     def substitute_vars(self, var_map):
         return Frac(self.numer.substitute_vars(var_map), self.denom.substitute_vars(var_map))
@@ -769,8 +756,8 @@ if __name__ == '__main__':
     x = Var('x')
     y = Var('y')
 
-    # expr = (x+1)
-    # print(expr.simplify())
-
-    expr = 2*(x+2)-0.5*(2+x)+1.5*(x+2)
+    expr = Frac(3, 4)
     print(expr.simplify())
+
+    # expr = 2*(x+2)-0.5*(2+x)+1.5*(x+2)
+    # print(expr.simplify())
