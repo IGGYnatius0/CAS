@@ -292,7 +292,6 @@ REALS = Interval()
 
 
 if __name__ == '__main__':
-    # TODO test cases
     # s1 = from_str('(-1, 3)')
     # s2 = from_str('[5, 10]')
     # s3 = from_str('[2, 7)')

@@ -16,7 +16,6 @@ __all__ = ['Num', 'Var', 'Sum', 'Prod', 'Frac', 'Exp', 'Eqn',
 
 
 # TODO implement functions especially log/ln
-# TODO __init__ which pull from classes and intervals
 
 
 def _operator_typecheck(func):
