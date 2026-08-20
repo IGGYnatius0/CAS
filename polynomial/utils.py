@@ -48,7 +48,7 @@ class Polynomial:
             for term in expr.terms:
                 if isinstance(term, Num):
                     continue
-                result = match(A * x ** B, term)
+                result = match(A * x ** B, term) # TODO if A is 0.75 it will be simplified to 3 * 2^-2 which fails this
                 if not result:
                     return False
                 b = result['consts'][B]
