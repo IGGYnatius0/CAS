@@ -24,8 +24,9 @@ def is_algebraic_expr(expr: CORE_EXPR) -> bool:
 def get_bases(expr: CORE_EXPR):
     var_map = {}
     bases = []
-    _get_bases(expr, var_map, bases, count())
-    return bases
+    _base = _get_bases(expr, var_map, bases, count())
+    bases.append(_base.simplify())
+    return bases, var_map
 
 
 @singledispatch
@@ -58,7 +59,7 @@ def _(expr: Frac) -> Frac:
 @canonicalize.register
 def _(expr: Exp) -> Prod | Exp:
     # if isinstance(expr.base, Prod):
-    #     return Prod([Exp(factor, expr.power) for factor in expr.base.factors])
+    #     return Prod([canonicalize(Exp(factor, expr.power)) for factor in expr.base.factors])
     if isinstance(expr.base, Exp):
         return Exp(expr.base.base, (expr.base.power * expr.power).simplify())
     return expr
@@ -154,4 +155,5 @@ def _(expr: Exp, var_map: dict, bases: list, counter) -> Exp:
 
 if __name__ == '__main__':
     x = Var('x')
-    get_bases((x+1)**Frac(1, 3) + (x-1)**Frac(1,3) - x**Frac(1,3))
+    y = Var('y')
+    print(get_bases((x+1)**Frac(1, 3) + (x-1)**Frac(1,3) - x**Frac(1,3)))
