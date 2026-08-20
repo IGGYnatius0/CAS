@@ -4,12 +4,12 @@ from functools import cached_property
 from itertools import groupby
 
 from core.classes import *
-from core.abc import a, b, c, x, y, z
+from core.abc import a, b, c, x
 
 
 __all__ = ['groebner_basis']
 
-
+# TODO add more types of ordering lex, grlex, grevlex, degrevlex
 def lex_sort(terms, ordering):
     # Split into buckets by leading variable
     new_terms = {var: [] for var in ordering}
@@ -236,21 +236,16 @@ def groebner_basis(polys, ordering):
 
 
 if __name__ == '__main__':
-    ordering = [a, b, c, x]
-    polys = [a+b-c,
-             a**3-x-2,
-             b**3-x+2,
-             c**3-x-1]
+    ordering = [a, b, x]
+    polys = [a+b-x**2+2*x-1,
+             a**3-x**2,
+             b**2-x]
 
     # ordering = [x, y]
     # polys = [x**2+y**2-2,
     #          x*y-1]
 
     polys = [MVP(poly, ordering) for poly in polys]
-    b = buchberger(polys, ordering)
-    for i in b:
-        print(i)
-    b = reduced_gb(b, ordering)
-    print()
+    b = groebner_basis(polys, ordering)
     for i in b:
         print(i)
