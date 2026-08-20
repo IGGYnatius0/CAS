@@ -1,15 +1,18 @@
 from functools import singledispatch, lru_cache
-from collections import Counter
+from itertools import count
 
 from core.classes import *
-from forms.matcher import match
-from forms.abc import A, B
-from polynomial import Poly
+from core.utils import isrational
 from rational import *
-from rational import rational_flatten as rational_flatten
 
 
-__all__ = ['is_algebraic_expr', 'rational_flatten']
+__all__ = ['canonicalize', 'is_algebraic_expr', 'get_bases']
+
+
+@singledispatch
+def canonicalize(expr: CORE_EXPR) -> CORE_EXPR:
+    """Canonicalizes expressions to not have nested powers"""
+    return expr
 
 
 @lru_cache
@@ -18,23 +21,48 @@ def is_algebraic_expr(expr: CORE_EXPR) -> bool:
     return True
 
 
-def flatten_expr(expr: CORE_EXPR) -> CORE_EXPR:
-    while not Poly.is_poly_expr(expr):
-        denoms = get_denoms(expr)
-        factors = []
-        for base, power in denoms.items():
-            factors.append(Exp(base, power))
-        factors = Prod(factors).simplify()
-        if isinstance(expr, Sum):
-            expr = Sum([(term * factors).simplify() for term in expr.terms]).expand().simplify()
-        else:
-            expr = (expr * factors).expand().simplify()
-    return expr
+def get_bases(expr: CORE_EXPR):
+    var_map = {}
+    bases = []
+    _get_bases(expr, var_map, bases, count())
+    return bases
 
 
 @singledispatch
-def get_denoms(expr: CORE_EXPR) -> Counter:
-    return Counter()
+def _get_bases(expr: CORE_EXPR, var_map: dict, bases: list, counter) -> None:
+    return expr
+
+
+################
+# canonicalize #
+################
+
+@canonicalize.register
+def _(expr: Sum) -> Sum:
+    return Sum([canonicalize(term) for term in expr.terms])
+
+
+@canonicalize.register
+def _(expr: Prod) -> Prod:
+    return Prod([canonicalize(factor) for factor in expr.factors])
+
+
+# Frac doesnt really matter because simplify will convert all Fracs to Exps
+@canonicalize.register
+def _(expr: Frac) -> Frac:
+    return Frac(canonicalize(expr.numer), canonicalize(expr.denom))
+
+
+# TODO have an option whether to apply the product rule here, depending on whether to prioritise simpler expressions
+# or less variables in get_temp_vars
+@canonicalize.register
+def _(expr: Exp) -> Prod | Exp:
+    # if isinstance(expr.base, Prod):
+    #     return Prod([Exp(factor, expr.power) for factor in expr.base.factors])
+    if isinstance(expr.base, Exp):
+        return Exp(expr.base.base, (expr.base.power * expr.power).simplify())
+    return expr
+
 
 #####################
 # is_algebraic_expr #
@@ -71,51 +99,59 @@ def _(expr: Frac) -> bool:
 
 @is_algebraic_expr.register(Exp)
 def _(expr: Exp) -> bool:
-    if not match(A/B, expr.power):
+    if not isrational(expr.power):
         return False
     if not is_algebraic_expr(expr.base):
         return False
     return True
 
-##############
-# get_denoms #
-##############
 
-@get_denoms.register(Sum)
-def _(expr: Sum) -> Counter:
-    denom = Counter()
-    for term in expr.terms:
-        denom |= get_denoms(term)
-    return denom
+#################
+# get_temp_vars #
+#################
+
+@_get_bases.register(Sum)
+def _(expr: Sum, var_map: dict, bases: list, counter) -> Sum:
+    return Sum([_get_bases(term, var_map, bases, counter) for term in expr.terms])
 
 
-@get_denoms.register(Prod)
-@get_denoms.register(Frac)
-@get_denoms.register(Exp)
-def _(expr: Prod | Exp) -> Counter:
-    return -expr.decomp()
+@_get_bases.register(Prod)
+def _(expr: Prod, var_map: dict, bases: list, counter) -> Prod:
+    return Prod([_get_bases(factor, var_map, bases, counter) for factor in expr.factors])
+
+
+@_get_bases.register(Frac)
+def _(expr: Frac, var_map: dict, bases: list, counter) -> Frac:
+    return Frac(
+        _get_bases(expr.numer, var_map, bases, counter),
+        _get_bases(expr.denom, var_map, bases, counter)
+    )
+
+
+# TODO have an option to prioritise simpler expressions or less variables
+# Right now it is prioritising less variables
+@_get_bases.register(Exp)
+def _(expr: Exp, var_map: dict, bases: list, counter) -> Exp:
+    base = expr.base.expand().simplify()
+    power_numer = one
+    power_denom = one
+    for p, n in expr.power.decomp().items():
+        if n > 0:
+            power_numer *= p ** n
+        elif n < 0:
+            power_denom *= p ** -n
+    base_with_pow = Exp(base, Exp(power_denom, neg_one))
+    if base_with_pow in var_map:
+        return Exp(var_map[base_with_pow], power_numer)
+    # Create a new entry
+    n = next(counter)
+    new_var = Var(f'x{n}')
+    var_map[base_with_pow] = new_var
+    new_base = new_var ** power_denom + (-base).expand().simplify()
+    bases.append(new_base)
+    return Exp(var_map[base_with_pow], power_numer)
 
 
 if __name__ == '__main__':
     x = Var('x')
-    expr = expression = (
-    (2*x**3 - 5*x**2 + 3*x - 1)**Frac(1, 2) +
-    ((x**2 + 2*x + 1) / (x**2 - x + 2))**Frac(2, 3) -
-    (3*x - 1)**Frac(3, 2) * ((x**2 + 3*x - 1) / (x - 2))**Frac(1, 3)
-) / (
-    ((x**2 + 1) / (2*x - 3))**Frac(3, 4) +
-    ((x**3 - 2*x**2 + 4*x - 3) / (x**2 + x + 1))**Frac(1, 4) *
-    (x**2 - x + 1)**Frac(2, 5)
-) + (
-    ((x**4 - 3*x**3 + 2*x**2 - x + 4) / (x**3 + 2*x**2 - x + 3))**Frac(1, 2) *
-    (2*x + 1)**Frac(1, 3) -
-    ((x**2 + 3*x + 2) / (x**2 - 3*x + 2))**Frac(3, 5)
-) / (
-    (x**2 - 4)**Frac(2, 3) +
-    ((x**3 + x**2 + x + 1) / (x**3 - x**2 + x - 1))**Frac(1, 2) /
-    (x + 2)**Frac(1, 4)
-)
-    # expr = ((1+x)/(2+x)+3*x) / ((2+x)/(3+x)+4*x) + 5*x
-    expr = expr.simplify()
-    print(expr)
-    print(is_algebraic_expr(expr))
+    get_bases((x+1)**Frac(1, 3) + (x-1)**Frac(1,3) - x**Frac(1,3))
