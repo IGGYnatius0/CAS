@@ -12,10 +12,11 @@ __all__ = ['Num', 'Var', 'Sum', 'Prod', 'Frac', 'Exp', 'Eqn',
 
 # READ BEFORE ADDING!!
 # Every core class has to implement the following methods:
-# __hash__, decomp, expand, factorize, simplify, substitute_vars, get_vars, copy
+# __hash__, decomp, expand, factorize, simplify, substitute_vars, get_vars, copy, isnum, eval_nums, group_nums
 
 
 # TODO implement functions especially log/ln
+# TODO make eval_nums run recursively and not only if the first level is isnum
 
 
 def _operator_typecheck(func):
@@ -110,6 +111,20 @@ class _CoreTemplate:
         return self
 
     def copy(self):
+        return self
+
+    @cached_property
+    def get_vars(self):
+        return set()
+
+    @cached_property
+    def isnum(self):
+        return False
+
+    def eval_nums(self):
+        return self
+
+    def group_nums(self):
         return self
 
 
@@ -359,8 +374,11 @@ class Num(_NumTemplate):
 
     def copy(self):
         return self
-    
+
     def eval_nums(self):
+        return self
+
+    def group_nums(self):
         return self
 
     @classmethod
@@ -393,9 +411,6 @@ class Var(_CoreVarTemplate):
 
     def copy(self):
         return Var(self.sym)
-    
-    def eval_nums(self):
-        return self
 
 
 neg_one = Num(-1)
@@ -516,8 +531,26 @@ class Sum(_CoreSumTemplate):
             else:
                 terms.append(term)
         if has_num:
-            terms.append(num)
+            if len(terms) > 0:
+                return Sum(terms + [num])
+            return num
         return Sum(terms)
+
+    def group_nums(self):
+        terms = [term.group_nums() for term in self.terms]
+        temp = Sum(terms)
+        if temp.isnum:
+            return temp
+        nums = []
+        for i, term in reversed(list(enumerate(terms))):
+            if term.isnum:
+                nums.append(terms.pop(i))
+        sum_ = Sum(terms)
+        if len(nums) == 1:
+            sum_.terms.append(nums[0])
+        elif len(nums) > 1:
+            sum_.terms.append(Sum(nums))
+        return sum_
 
 
 class Prod(_CoreProdTemplate):
@@ -605,8 +638,26 @@ class Prod(_CoreProdTemplate):
             else:
                 factors.append(factor)
         if has_num:
-            factors.append(num)
+            if len(factors) > 0:
+                return Prod(factors + [num])
+            return num
         return Prod(factors)
+    
+    def group_nums(self):
+        factors = [factor.group_nums() for factor in self.factors]
+        temp = Prod(factors)
+        if temp.isnum:
+            return temp
+        nums = []
+        for i, factor in reversed(list(enumerate(factors))):
+            if factor.isnum:
+                nums.append(factors.pop(i))
+        prod = Prod(factors)
+        if len(nums) == 1:
+            prod.factors.append(nums[0])
+        elif len(nums) > 1:
+            prod.factors.append(Prod(nums))
+        return prod
 
 
 class Frac(_CoreFracTemplate):
@@ -650,6 +701,9 @@ class Frac(_CoreFracTemplate):
 
     def eval_nums(self):
         return self.numer.eval_nums() / self.denom.eval_nums()
+
+    def group_nums(self):
+        return Frac(self.numer.group_nums(), self.denom.group_nums())
 
 
 class Exp(_CoreExpTemplate):
@@ -708,6 +762,9 @@ class Exp(_CoreExpTemplate):
     def eval_nums(self):
         return self.base.eval_nums() ** self.power.eval_nums()
 
+    def group_nums(self):
+        return Exp(self.base.group_nums(), self.power.group_nums())
+
 
 class Eqn(_CoreEqnTemplate):
     def __init__(self, lhs, rhs):
@@ -735,6 +792,9 @@ class Eqn(_CoreEqnTemplate):
 
     def copy(self):
         return Eqn(self.lhs.copy, self.rhs.copy)
+
+    def group_nums(self):
+        return Eqn(self.lhs.group_nums(), self.rhs.group_nums())
 
 
 class Func: # TODO this has been on todo for the longest time
