@@ -464,7 +464,7 @@ class Sum(_CoreSumTemplate):
             denom *= d
         return Frac(numer, denom).simplify()
 
-    def simplify(self):
+    def simplify(self): # TODO remove zero
         decomps = [term.simplify().decomp() for term in self.terms]
         terms_dict = defaultdict(list)
         for decomp in decomps:
@@ -481,7 +481,7 @@ class Sum(_CoreSumTemplate):
                     factors.append(Exp(base, power))
             terms_dict[Prod(factors).simplify()].append((numer, denom))
         terms = [(factors * self.sum_fracs(fracs)).simplify() for factors, fracs in terms_dict.items()]
-
+        terms = [term for term in terms if term != zero]
         if len(terms) == 0:
             return zero
         if len(terms) == 1:
@@ -754,5 +754,5 @@ if __name__ == '__main__':
     x = Var('x')
     y = Var('y')
 
-    expr = Exp(15, 2)
+    expr = x**2+2*x-Num(6)+Num(6)
     print(expr.simplify())
