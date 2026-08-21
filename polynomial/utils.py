@@ -46,7 +46,7 @@ class Polynomial:
             return False
         if isinstance(expr, Sum):
             for term in expr.terms:
-                if isinstance(term, Num):
+                if term.isnum:
                     continue
                 result = match(A * x ** B, term) # TODO if A is 0.75 it will be simplified to 3 * 2^-2 which fails this
                 if not result:
@@ -71,7 +71,7 @@ def poly_to_coeffs(poly):
     temp = {}
     if isinstance(poly, Sum):
         for term in poly.terms:
-            if isinstance(term, Num):
+            if term.isnum:
                 temp[zero] = term
                 continue
             result = match(A * x ** B, term)
