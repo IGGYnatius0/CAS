@@ -21,7 +21,7 @@ class Polynomial:
             else:
                 raise ValueError('Input must be polynomial or coefficient list')
         elif isinstance(poly, list):
-            self.coeffs = [Num(i) for i in poly]
+            self.coeffs = [Num(i) if Num.is_num(i) else i for i in poly]
             self.deg = len(self.coeffs) - 1
             if var is None:
                 self.var = Var('x')
@@ -136,6 +136,5 @@ def get_rational_roots(poly):
 
 if __name__ == '__main__':
     y = Var('y')
-    numer = (y**3-2*y**2-4).simplify()
-    denom = (y-3).simplify()
-    print(poly_div(numer, denom))
+    expr = (y + 1) ** Frac(1, 3) + (y + 2) ** Frac(1, 3) - (2 * y + 3) ** Frac(1, 3)
+    print(Poly.is_poly_expr(expr))

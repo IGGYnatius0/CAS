@@ -42,7 +42,7 @@ def solve_constraints(constrs, n_consts, n_vars):
             if isinstance(constr.form, FormConst):
                 if constr.form in const_map:
                     return False
-                if constr.value not in constr.form.domain:
+                if constr.value.eval_nums() not in constr.form.domain:
                     return False
                 const_map[constr.form] = constr.value
         for j, constr in enumerate(constrs):
@@ -64,6 +64,7 @@ def solve_constraints(constrs, n_consts, n_vars):
 
 def match(form, expr):
     var_map = {}
+    expr = expr.group_nums()
     matches = form.match(expr, var_map)
     if not matches:
         return False

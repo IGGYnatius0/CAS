@@ -511,9 +511,9 @@ class FormConst(_FormConstTemplate):
             self.domain = domain
 
     def match(self, expr, var_map):
-        if not isinstance(expr, Num):
+        if not expr.isnum:
             return False
-        if expr in self.domain:
+        if expr.eval_nums() in self.domain:
             return SingleConstraint(self, expr, var_map)
         return False
 
@@ -534,7 +534,7 @@ class FormConst(_FormConstTemplate):
 
     def substitute_consts(self, const_map):
         if self in const_map:
-            return FormNum(const_map[self])
+            return const_map[self]
         return self
 
     def to_coretype(self, const_map, var_map={}):
