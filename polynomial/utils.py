@@ -1,4 +1,5 @@
 from itertools import product
+from collections import Counter
 
 from core.classes import *
 from forms.matcher import match
@@ -103,14 +104,23 @@ def poly_div(poly1, poly2):
 
 
 def get_rational_roots(poly):
-    first = abs(poly.coeffs[0]).decomp()
-    last = abs(poly.coeffs[-1]).decomp()
-    numer_temp = []
-    denom_temp = []
-    for n in last.values():
-        numer_temp.append(range(int(n) + 1))
-    for n in first.values():
-        denom_temp.append(range(int(n) + 1))
+    # Preprocess coefficients, I might turn this into a separate function in future
+    coeffs = poly.coeffs.copy()
+    denom = Counter()
+    for coeff in coeffs:
+        denom_ = Counter()
+        decomp = coeff.decomp()
+        for base, power in decomp.items():
+            if power < 0:
+                denom.update({base: -power})
+        denom |= denom_
+    first = abs(poly.coeffs[0]).decomp() + denom
+    last = abs(poly.coeffs[-1]).decomp() + denom
+    # Original code
+    # first = abs(poly.coeffs[0]).decomp()
+    # last = abs(poly.coeffs[-1]).decomp()
+    numer_temp = [range(int(n) + 1) for n in last.values()]
+    denom_temp = [range(int(n) + 1) for n in first.values()]
     numer_powers = product(*numer_temp)
     denom_powers = product(*denom_temp)
     numer_factors = []
