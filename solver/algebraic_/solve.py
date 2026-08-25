@@ -5,7 +5,7 @@ from algebraic import *
 __all__ = ['solve']
 
 
-def solve(expr: CORE_EXPR, main_solve):
+def solve(expr: CORE_EXPR, main_solve): # TODO FORGOT TO FLATTEN!!
     expr = canonicalize(expr)
     if not is_algebraic_expr(expr):
         return []
