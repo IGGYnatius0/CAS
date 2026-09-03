@@ -1,24 +1,15 @@
-"""Tests for src/CAS/core/classes.py (Eqn and arithmetic operators excluded)."""
+"""Tests for src/CAS/expr/*"""
 from collections import Counter
 from decimal import Decimal
 
 import pytest
+from CAS.core.expr import *
 
-from CAS.core.classes import (
-    CORE_EXPR,
-    Exp,
-    Frac,
-    Num,
-    Prod,
-    Sum,
-    Var,
-    decomp2prod,
-    inf,
-    neg_one,
-    ninf,
-    one,
-    zero,
-)
+inf = Num('inf')
+ninf = -inf
+neg_one = Num(-1)
+one = Num(1)
+zero = Num(0)
 
 
 @pytest.fixture
@@ -564,7 +555,7 @@ class TestEqualityHashing:
 
     def test_core_expr_membership(self, x):
         for expr in (Num(1), x, Sum([x]), Prod([x]), Frac(x, one), Exp(x, one)):
-            assert isinstance(expr, CORE_EXPR)
+            assert isinstance(expr, CoreBaseExpr)
 
 
 class TestStrRepr:

@@ -1,10 +1,5 @@
 from .registry import EXPRS
-import CAS.expr.num
-import CAS.expr.var
-import CAS.expr.sum
-import CAS.expr.prod
-import CAS.expr.frac
-import CAS.expr.exp
+import CAS.core.expr.sum
 from .base import CoreBaseExpr
 from .utils import *
 
