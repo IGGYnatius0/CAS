@@ -1,0 +1,18 @@
+from CAS.forms.classes import FormEqn
+from CAS.forms.abc import *
+from CAS.solver.base import *
+
+
+rules = SolveGroup(( # TODO cubic, quartic and general case
+    SolveRule(
+        target_form=A*x+B,
+        formula=-B/A
+    ),
+
+    SolveRule(
+        target_form=A*x**2+B*x+C,
+        formula=((-B+(B**2-4*A*C)**0.5)/(2*A),
+                 (-B-(B**2-4*A*C)**0.5)/(2*A))
+    )
+))
+
