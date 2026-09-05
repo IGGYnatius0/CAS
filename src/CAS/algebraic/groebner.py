@@ -76,7 +76,7 @@ class MultiVariatePolynomial(Sum):
         decomp = []
         num = None
         for term in terms:
-            if isinstance(term, Num):
+            if term.isnum:
                 num = term
             else:
                 decomp.append(term.decomp())
@@ -97,7 +97,7 @@ class MultiVariatePolynomial(Sum):
 
     @cached_property
     def LC(self) -> Counter:
-        return Counter({base: power for base, power in self.LT.items() if isinstance(base, Num)})
+        return Counter({base: power for base, power in self.LT.items() if base.isnum})
 
     def copy(self):
         return MultiVariatePolynomial(super().copy(), self.ordering)

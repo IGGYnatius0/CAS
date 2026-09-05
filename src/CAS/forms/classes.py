@@ -647,7 +647,7 @@ class FormSum(_FormSumTemplate):
             self.terms = [fzero]
 
     def match(self, expr, var_map):
-        if isinstance(expr, Num):
+        if expr.isnum:
             if self.isconst:
                 return SingleConstraint(self, expr, var_map.copy())
             if expr == zero:
@@ -740,7 +740,7 @@ class FormProd(_FormProdTemplate):
             self.factors = [fone]
 
     def match(self, expr, var_map):
-        if isinstance(expr, Num):
+        if expr.isnum:
             if self.isconst:
                 return SingleConstraint(self, expr, var_map.copy())
             if expr == zero:
@@ -824,7 +824,7 @@ class FormFrac(_FormFracTemplate):
         self.denom = FormNum(denom) if FormNum.isnum(denom) else denom
 
     def match(self, expr, var_map):
-        if isinstance(expr, Num):
+        if expr.isnum:
             if expr == zero:
                 return self.numer.match(zero, var_map.copy())
             if self.isconst:
@@ -875,7 +875,7 @@ class FormExp(_FormExpTemplate):
         self.power = FormNum(power) if FormNum.isnum(power) else power
 
     def match(self, expr, var_map):
-        if isinstance(expr, Num):
+        if expr.isnum:
             if expr == zero or expr == one:
                 b1 = self.base.match(one, var_map.copy())
                 if expr == one and b1:

@@ -54,7 +54,7 @@ def from_str(s):
 
 def _interval_typecheck(func):
     def cmp(self, other):
-        if isinstance(other, Num):
+        if other.isnum:
             other = Interval(other, other, True, True)
         if not isinstance(other, Interval):
             return NotImplemented
@@ -158,7 +158,7 @@ class Interval(BaseInterval):
 
 def _multiinterval_typecheck(func):
     def cmp(self, other):
-        if isinstance(other, Num):
+        if other.isnum:
             other = Interval(other, other, True, True)
         if not isinstance(other, (Interval, MultiInterval)):
             return NotImplemented

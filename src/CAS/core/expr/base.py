@@ -1,3 +1,4 @@
+import math
 from decimal import Decimal
 from collections import Counter
 from functools import cached_property
@@ -97,35 +98,13 @@ class CoreBaseExpr:
         return self
 
 
-def _num_check(func):
-    def wrapper(*args, **kwargs):
-        f = func(*args, **kwargs)
-        if EXPRS['num'].is_num(f):
-            return EXPRS['num'](f)
-        return f
-    return wrapper
+class CoreBaseNum(CoreBaseExpr, int):
+    def __repr__(self):
+        return f"Num({str(self)})"
 
-
-class CoreBaseNum(Decimal):
-    __add__ = _num_check(Decimal.__add__)
-    __radd__ = _num_check(Decimal.__radd__)
-    __sub__ = _num_check(Decimal.__sub__)
-    __rsub__ = _num_check(Decimal.__rsub__)
-    __mul__ = _num_check(Decimal.__mul__)
-    __rmul__ = _num_check(Decimal.__rmul__)
-    __truediv__ = _num_check(Decimal.__truediv__)
-    __rtruediv__ = _num_check(Decimal.__rtruediv__)
-    __mod__ = _num_check(Decimal.__mod__)
-    __rmod__ = _num_check(Decimal.__rmod__)
-    __pow__ = _num_check(Decimal.__pow__)
-    __rpow__ = _num_check(Decimal.__rpow__)
-    __neg__ = _num_check(Decimal.__neg__)
-    __pos__ = _num_check(Decimal.__pos__)
-    __abs__ = _num_check(Decimal.__abs__)
     def __hash__(self):
-        if self == -1: # to prevent hash collision between -1 and -2
-            return -1279179286899660244 # hash('-1')
-        return super().__hash__()
+        # hash('-1') = 357669246384252548
+        return super(int).__hash__() if self != -1 else 357669246384252548
 
 
 class CoreBaseVar(CoreBaseExpr):

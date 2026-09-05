@@ -5,7 +5,7 @@ def solve(expr: CORE_EXPR, main_solve):
     if isinstance(expr, Prod):
         solns = []
         for factor in expr.factors:
-            if isinstance(factor, Num):
+            if factor.isnum:
                 continue
             soln = main_solve(factor)
             solns.extend(soln)
@@ -13,6 +13,6 @@ def solve(expr: CORE_EXPR, main_solve):
     if isinstance(expr, Frac):
         return main_solve(expr.numer)
     if isinstance(expr, Exp):
-        if isinstance(expr.power, Num) and expr.power > 0:
+        if expr.power.isnum and expr.power > 0: # FIXME
             return main_solve(expr.base)
     return []

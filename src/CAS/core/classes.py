@@ -383,7 +383,7 @@ class Num(_NumTemplate):
 
     @classmethod
     def is_num(cls, expr):
-        return isinstance(expr, (int, float, Decimal, Num))
+        return expr, (int, float, Decimal.isnum)
 
     def __repr__(self):
         return f"Num({str(self)})"
@@ -596,7 +596,7 @@ class Prod(_CoreProdTemplate):
         factors = []
         for base, power in decomp.items():
             expr = Exp(base, power).simplify()
-            if isinstance(expr, Num):
+            if expr.isnum:
                 const *= expr
             else:
                 factors.append(expr)
@@ -713,12 +713,12 @@ class Exp(_CoreExpTemplate):
 
     def decomp(self):
         """Decomposes the expression into its constituent factors"""
-        if isinstance(self.power, Num):
+        if self.power.isnum:
             return Counter({self.base: self.power})
         return Counter({self: 1})
 
     def expand(self):
-        if isinstance(self.power, Num) and int(self.power) == self.power and self.power > 0:
+        if self.power.isnum and int(self.power) == self.power and self.power > 0:
             return Prod([self.base] * int(self.power)).expand()
         return self
 

@@ -70,7 +70,7 @@ def _(expr: Frac) -> bool:
 
 @is_rational_expr.register(Exp)
 def _(expr: Exp) -> bool:
-    if not isinstance(expr.power, Num):
+    if not expr.power.isnum:
         return False
     if expr.power != int(expr.power):
         return False

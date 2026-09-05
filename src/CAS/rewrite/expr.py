@@ -12,7 +12,7 @@ def route_rewrite(expr):
     vars = expr.get_vars
     if not vars:
         return []
-    if isinstance(expr, Num):
+    if expr.isnum:
         return []
     new_expr = RULES.rewrite(expr)
     if isinstance(expr, Sum):
