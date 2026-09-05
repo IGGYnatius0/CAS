@@ -27,13 +27,9 @@ class CoreBaseExpr:
         return EXPRS['sum']([other, self])
 
     def __sub__(self, other):
-        # if isinstance(other, CoreSumTemplate):
-        #     return EXPRS['sum']([self] + (-other).terms)
         return EXPRS['sum']([self, -other])
 
     def __rsub__(self, other):
-        # if isinstance(other, CoreSumTemplate):
-        #     return EXPRS['sum']([-other).terms + [self])
         return EXPRS['sum']([other, -self])
 
     def __mul__(self, other):
@@ -166,25 +162,11 @@ class CoreBaseSum(CoreBaseExpr):
             return EXPRS['sum'](other.terms + self.terms)
         return EXPRS['sum']([other] + self.terms)
 
-    def __iadd__(self, other):
-        if isinstance(other, EXPRS['sum']):
-            self.terms.extend(other.terms)
-        self.terms.append(other)
-        return self
-
     def __sub__(self, other):
-        # if isinstance(other, CoreSumTemplate):
-        #     return EXPRS['sum'](self.terms + (-other).terms)
         return EXPRS['sum'](self.terms + [-other])
 
     def __rsub__(self, other):
-        # if isinstance(other, CoreSumTemplate):
-        #     return EXPRS['sum'](other.terms + (-self).terms)
         return EXPRS['sum']([other] + (-self).terms)
-
-    def __isub__(self, other):
-        self.terms.append(-other)
-        return self
 
 
 class CoreBaseProd(CoreBaseExpr):
@@ -209,12 +191,6 @@ class CoreBaseProd(CoreBaseExpr):
         if isinstance(other, EXPRS['prod']):
             return EXPRS['prod'](other.factors + self.factors)
         return EXPRS['prod']([other] + self.factors)
-
-    def __imul__(self, other):
-        if isinstance(other, EXPRS['prod']):
-            self.factors.extend(other.factors)
-        self.factors.append(other)
-        return self
 
 
 class CoreBaseFrac(CoreBaseExpr):
