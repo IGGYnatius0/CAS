@@ -1,6 +1,10 @@
 from itertools import pairwise
 from CAS.core.classes import *
 
+from math import inf as inf
+ninf = -inf
+
+
 
 __all__ = ['Interval', 'MultiInterval', 'REALS', 'from_str']
 

@@ -1,12 +1,14 @@
 from .registry import EXPRS
 from .base import CoreBaseExpr
+from .utils import *
+
 import CAS.core.expr.num
 import CAS.core.expr.var
 import CAS.core.expr.sum
 import CAS.core.expr.prod
 import CAS.core.expr.frac
 import CAS.core.expr.exp
-from .utils import *
+import CAS.core.expr.eqn
 
 
 Num = EXPRS['num']
@@ -15,7 +17,13 @@ Sum = EXPRS['sum']
 Prod = EXPRS['prod']
 Frac = EXPRS['frac']
 Exp = EXPRS['exp']
+Eqn = EXPRS['eqn']
+
+zero = Num(0)
+one = Num(1)
+neg_one = Num(-1)
 
 
-__all__ = ['CoreBaseExpr', 'Num', 'Var', 'Sum', 'Prod', 'Frac', 'Exp',
+__all__ = ['CoreBaseExpr', 'Num', 'Var', 'Sum', 'Prod', 'Frac', 'Exp', 'Eqn',
+           'zero', 'one', 'neg_one',
            'decomp2prod']

@@ -14,3 +14,7 @@ class Num(CoreBaseNum):
     @cached_property
     def isnum(self):
         return True
+
+    @staticmethod
+    def is_num(x):
+        return isinstance(x, (int, float))
