@@ -1,5 +1,5 @@
 from itertools import product
-from CAS.core.classes import *
+from CAS.core.expr import *
 from CAS.rewrite.expr_rules.base import RewriteRule
 
 

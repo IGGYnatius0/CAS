@@ -1,5 +1,5 @@
 from functools import singledispatch
-from CAS.core.classes import *
+from CAS.core.expr import *
 
 
 __all__ = ['isrational']

@@ -1,7 +1,7 @@
 from functools import singledispatch, lru_cache
 from collections import Counter
 
-from CAS.core.classes import *
+from CAS.core.expr import *
 from CAS.polynomial import Poly
 
 
@@ -13,11 +13,11 @@ __all__ = ['is_rational_expr', 'rational_flatten']
 
 @lru_cache
 @singledispatch
-def is_rational_expr(expr: CORE_EXPR) -> bool:
+def is_rational_expr(expr: CoreBaseExpr) -> bool:
     return True
 
 
-def rational_flatten(expr: CORE_EXPR) -> CORE_EXPR:
+def rational_flatten(expr: CoreBaseExpr) -> CoreBaseExpr:
     while not Poly.is_poly_expr(expr):
         denoms = get_denoms(expr)
         factors = []
@@ -32,7 +32,7 @@ def rational_flatten(expr: CORE_EXPR) -> CORE_EXPR:
 
 
 @singledispatch
-def get_denoms(expr: CORE_EXPR) -> Counter:
+def get_denoms(expr: CoreBaseExpr) -> Counter:
     return Counter()
 
 ####################

@@ -1,4 +1,4 @@
-from CAS.core.classes import *
+from CAS.core.expr import *
 from CAS.forms.classes import FormWild
 from CAS.forms.abc import *
 from CAS.rewrite.expr_rules.base import *

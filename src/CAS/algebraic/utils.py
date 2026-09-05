@@ -1,7 +1,7 @@
 from functools import singledispatch, lru_cache
 from itertools import count
 
-from CAS.core.classes import *
+from CAS.core.expr import *
 from CAS.core.utils import isrational
 from CAS.rational import *
 
@@ -10,18 +10,18 @@ __all__ = ['canonicalize', 'is_algebraic_expr', 'get_bases']
 
 
 @singledispatch
-def canonicalize(expr: CORE_EXPR) -> CORE_EXPR:
+def canonicalize(expr: CoreBaseExpr) -> CoreBaseExpr:
     """Canonicalizes expressions to not have nested powers"""
     return expr
 
 
 @lru_cache
 @singledispatch
-def is_algebraic_expr(expr: CORE_EXPR) -> bool:
+def is_algebraic_expr(expr: CoreBaseExpr) -> bool:
     return True
 
 
-def get_bases(expr: CORE_EXPR):
+def get_bases(expr: CoreBaseExpr):
     var_map = {}
     bases = []
     _base = _get_bases(expr, var_map, bases, count())
@@ -30,7 +30,7 @@ def get_bases(expr: CORE_EXPR):
 
 
 @singledispatch
-def _get_bases(expr: CORE_EXPR, var_map: dict, bases: list, counter) -> None:
+def _get_bases(expr: CoreBaseExpr, var_map: dict, bases: list, counter) -> None:
     return expr
 
 

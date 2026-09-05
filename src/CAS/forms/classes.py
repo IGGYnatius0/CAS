@@ -1,7 +1,7 @@
 from decimal import Decimal
 from itertools import product, chain
 from functools import cached_property
-from CAS.core.classes import *
+from CAS.core.expr import *
 from CAS.core.intervals import REALS, from_str
 
 # READ BEFORE ADDING!!
@@ -585,7 +585,7 @@ class FormVar(_FormVarTemplate):
 
 
 class FormWild(_FormWildTemplate):
-    def __init__(self, sym, whitelist=(), blacklist=(), types=CORE_TYPES):
+    def __init__(self, sym, whitelist=(), blacklist=(), types=CoreBaseExpr):
         self.sym = sym
         self.whitelist = tuple(whitelist)
         self.blacklist = tuple(blacklist)

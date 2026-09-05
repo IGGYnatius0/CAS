@@ -1,4 +1,4 @@
-from CAS.core.classes import *
+from CAS.core.expr import *
 from CAS.rewrite.expr import rewrite as expr_rewrite
 from CAS.rewrite.eqn import rewrite as eqn_rewrite
 

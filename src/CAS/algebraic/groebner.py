@@ -3,7 +3,7 @@ from collections import Counter
 from functools import cached_property
 from itertools import groupby
 
-from CAS.core.classes import *
+from CAS.core.expr import *
 from CAS.core.abc import a, b, c, x
 
 
@@ -63,7 +63,7 @@ def lex_cmp(term1: Counter, term2: Counter, ordering) -> bool:
 
 
 class MultiVariatePolynomial(Sum):
-    def __init__(self, expr: CORE_EXPR | list, ordering):
+    def __init__(self, expr: CoreBaseExpr | list, ordering):
         if isinstance(expr, list):
             expr = Sum(expr)
         if set(ordering) < expr.get_vars:

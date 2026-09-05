@@ -1,4 +1,4 @@
-from CAS.core.classes import *
+from CAS.core.expr import *
 from CAS.forms.classes import *
 import CAS.forms.matcher as matcher
 

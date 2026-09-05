@@ -1,5 +1,5 @@
 from itertools import pairwise
-from CAS.core.classes import *
+from CAS.core.expr import *
 
 from math import inf as inf
 ninf = -inf

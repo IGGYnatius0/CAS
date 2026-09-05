@@ -1,4 +1,4 @@
-from CAS.core.classes import *
+from CAS.core.expr import *
 from CAS.rewrite import rewrite
 from CAS.solver import RULES
 

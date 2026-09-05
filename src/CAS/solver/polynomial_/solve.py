@@ -1,11 +1,11 @@
-from CAS.core.classes import *
+from CAS.core.expr import *
 from CAS.polynomial import Poly
 from CAS.solver.polynomial_.rules import rules
 from CAS.solver.polynomial_.solvers import *
 from CAS.solver.zero_prod import solve as zero_solve
 
 
-def solve(expr: CORE_EXPR, main_solve):
+def solve(expr: CoreBaseExpr, main_solve):
     expr = expr.expand().simplify()
     expr = expr.factorize().simplify() # Global factorize
     if not Poly.is_poly_expr(expr):

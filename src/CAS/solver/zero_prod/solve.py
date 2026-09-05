@@ -1,7 +1,7 @@
-from CAS.core.classes import *
+from CAS.core.expr import *
 
 
-def solve(expr: CORE_EXPR, main_solve):
+def solve(expr: CoreBaseExpr, main_solve):
     if isinstance(expr, Prod):
         solns = []
         for factor in expr.factors:

@@ -1,7 +1,7 @@
 from itertools import product
 from collections import Counter
 
-from CAS.core.classes import *
+from CAS.core.expr import *
 from CAS.forms.matcher import match
 from CAS.forms.abc import A, B, x
 
@@ -11,7 +11,7 @@ __all__ = ['Polynomial', 'Poly', 'poly_div', 'get_rational_roots']
 
 class Polynomial:
     def __init__(self, poly, var=None):
-        if isinstance(poly, CORE_EXPR):
+        if isinstance(poly, CoreBaseExpr):
             if Polynomial.is_poly_expr(poly):
                 self.coeffs = poly_to_coeffs(poly)
                 self.deg = len(self.coeffs) - 1

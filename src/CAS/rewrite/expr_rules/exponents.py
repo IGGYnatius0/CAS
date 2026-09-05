@@ -1,4 +1,4 @@
-from CAS.core.classes import *
+from CAS.core.expr import *
 from CAS.forms.abc import *
 from CAS.rewrite.expr_rules.base import *
 
@@ -107,7 +107,7 @@ rules = RewriteGroup((
 
 
 if __name__ == '__main__':
-    from CAS.core.classes import *
+    from CAS.core.expr import *
     x = Var('x')
     expr = x**3*x**2*x**-4
     print(expr)

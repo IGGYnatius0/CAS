@@ -1,4 +1,4 @@
-from CAS.core.classes import *
+from CAS.core.expr import *
 from CAS.solver.zero_prod import solve as zero_solve
 from CAS.solver.polynomial_ import solve as poly_solve
 from CAS.solver.rational_ import solve as rational_solve

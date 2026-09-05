@@ -1,4 +1,4 @@
-from CAS.core.classes import Var
+from CAS.core.expr import Var
 
 
 __all__ = ['a', 'b', 'c', 'd', 'f', 'g', 'h', 'i', 'j',

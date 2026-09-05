@@ -69,6 +69,7 @@ def _pfactor(n):
 
 
 def pfactor(n):
+    n = n.simplify()
     if n == 0:
         return Counter({0: 1})
     if n == 1:

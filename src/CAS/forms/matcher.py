@@ -1,5 +1,5 @@
 from collections import Counter
-from CAS.core.classes import *
+from CAS.core.expr import *
 from CAS.forms.classes import *
 from CAS.forms.classes import SingleConstraint
 

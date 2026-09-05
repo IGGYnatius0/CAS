@@ -1,4 +1,4 @@
-from CAS.core.classes import *
+from CAS.core.expr import *
 from CAS.core.abc import x, t
 from CAS.polynomial import *
 

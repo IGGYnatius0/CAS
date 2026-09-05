@@ -1,5 +1,5 @@
 from itertools import chain, combinations
-from CAS.core.classes import *
+from CAS.core.expr import *
 
 
 def rewrite(eqn: Eqn):
