@@ -23,4 +23,4 @@ class Var(CoreBaseVar):
         return False
 
     def copy(self):
-        return EXPRS['var'](self.sym)
+        return EXPRS.var(self.sym)

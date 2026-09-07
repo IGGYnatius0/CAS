@@ -6,8 +6,8 @@ from .registry import EXPRS
 @EXPRS.register('eqn')
 class Eqn:
     def __init__(self, lhs, rhs):
-        self.lhs = EXPRS['num'](lhs) if EXPRS['num'].is_num(lhs) else lhs
-        self.rhs = EXPRS['num'](rhs) if EXPRS['num'].is_num(rhs) else rhs
+        self.lhs = EXPRS.num(lhs) if EXPRS.num.is_num(lhs) else lhs
+        self.rhs = EXPRS.num(rhs) if EXPRS.num.is_num(rhs) else rhs
 
     def expand(self):
         return Eqn(self.lhs.expand(), self.rhs.expand())

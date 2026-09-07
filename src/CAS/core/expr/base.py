@@ -1,7 +1,5 @@
-import math
-from decimal import Decimal
 from collections import Counter
-from functools import cached_property
+from functools import cached_property, total_ordering
 
 from .registry import EXPRS
 
@@ -18,44 +16,44 @@ class CoreBaseExpr:
         return hash(self) == hash(other)
 
     def __add__(self, other):
-        if isinstance(other, EXPRS['sum']):
-            return EXPRS['sum']([self] + other.terms)
-        return EXPRS['sum']([self, other])
+        if isinstance(other, EXPRS.sum):
+            return EXPRS.sum([self] + other.terms)
+        return EXPRS.sum([self, other])
 
     def __radd__(self, other):
-        if isinstance(other, EXPRS['sum']):
-            return EXPRS['sum'](other.terms + [self])
-        return EXPRS['sum']([other, self])
+        if isinstance(other, EXPRS.sum):
+            return EXPRS.sum(other.terms + [self])
+        return EXPRS.sum([other, self])
 
     def __sub__(self, other):
-        return EXPRS['sum']([self, -other])
+        return EXPRS.sum([self, -other])
 
     def __rsub__(self, other):
-        return EXPRS['sum']([other, -self])
+        return EXPRS.sum([other, -self])
 
     def __mul__(self, other):
-        if isinstance(other, EXPRS['prod']):
-            return EXPRS['prod']([self] + other.factors)
-        return EXPRS['prod']([self, other])
+        if isinstance(other, EXPRS.prod):
+            return EXPRS.prod([self] + other.factors)
+        return EXPRS.prod([self, other])
 
     def __rmul__(self, other):
-        if isinstance(other, EXPRS['prod']):
-            return EXPRS['prod'](other.factors + [self])
-        return EXPRS['prod']([other, self])
+        if isinstance(other, EXPRS.prod):
+            return EXPRS.prod(other.factors + [self])
+        return EXPRS.prod([other, self])
 
     def __truediv__(self, other):
-        return EXPRS['frac'](self, other)
+        return EXPRS.frac(self, other)
 
     def __rtruediv__(self, other):
-        return EXPRS['frac'](other, self)
+        return EXPRS.frac(other, self)
 
     def __pow__(self, power, modulo=None):
         if modulo is not None:
             raise NotImplementedError("Modulo functionality is not available")
-        return EXPRS['exp'](self, power)
+        return EXPRS.exp(self, power)
 
     def __rpow__(self, other):
-        return EXPRS['exp'](other, self)
+        return EXPRS.exp(other, self)
 
     def __neg__(self):
         return self * -1
@@ -132,20 +130,20 @@ class CoreBaseSum(CoreBaseExpr):
         return hash(('CoreSum',) + tuple(sorted(hashes)))
 
     def __add__(self, other):
-        if isinstance(other, EXPRS['sum']):
-            return EXPRS['sum'](self.terms + other.terms)
-        return EXPRS['sum'](self.terms + [other])
+        if isinstance(other, EXPRS.sum):
+            return EXPRS.sum(self.terms + other.terms)
+        return EXPRS.sum(self.terms + [other])
 
     def __radd__(self, other):
-        if isinstance(other, EXPRS['sum']):
-            return EXPRS['sum'](other.terms + self.terms)
-        return EXPRS['sum']([other] + self.terms)
+        if isinstance(other, EXPRS.sum):
+            return EXPRS.sum(other.terms + self.terms)
+        return EXPRS.sum([other] + self.terms)
 
     def __sub__(self, other):
-        return EXPRS['sum'](self.terms + [-other])
+        return EXPRS.sum(self.terms + [-other])
 
     def __rsub__(self, other):
-        return EXPRS['sum']([other] + (-self).terms)
+        return EXPRS.sum([other] + (-self).terms)
 
 
 class CoreBaseProd(CoreBaseExpr):
@@ -162,14 +160,14 @@ class CoreBaseProd(CoreBaseExpr):
         return hash(('CoreProd',) + tuple(sorted(hashes)))
 
     def __mul__(self, other):
-        if isinstance(other, EXPRS['prod']):
-            return EXPRS['prod'](self.factors + other.factors)
-        return EXPRS['prod'](self.factors + [other])
+        if isinstance(other, EXPRS.prod):
+            return EXPRS.prod(self.factors + other.factors)
+        return EXPRS.prod(self.factors + [other])
 
     def __rmul__(self, other):
-        if isinstance(other, EXPRS['prod']):
-            return EXPRS['prod'](other.factors + self.factors)
-        return EXPRS['prod']([other] + self.factors)
+        if isinstance(other, EXPRS.prod):
+            return EXPRS.prod(other.factors + self.factors)
+        return EXPRS.prod([other] + self.factors)
 
 
 class CoreBaseFrac(CoreBaseExpr):

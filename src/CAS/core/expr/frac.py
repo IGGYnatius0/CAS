@@ -8,8 +8,8 @@ from .utils import decomp2prod
 @EXPRS.register('frac')
 class Frac(CoreBaseFrac):
     def __init__(self, numer, denom):
-        self.numer = EXPRS['num'](numer) if EXPRS['num'].is_num(numer) else numer
-        self.denom = EXPRS['num'](denom) if EXPRS['num'].is_num(denom) else denom
+        self.numer = EXPRS.num(numer) if EXPRS.num.is_num(numer) else numer
+        self.denom = EXPRS.num(denom) if EXPRS.num.is_num(denom) else denom
 
     def decomp(self):
         """Decomposes the expression into its constituent factors"""
@@ -19,10 +19,10 @@ class Frac(CoreBaseFrac):
         return numers
 
     def expand(self):
-        return EXPRS['frac'](self.numer.expand(), self.denom.expand())
+        return EXPRS.frac(self.numer.expand(), self.denom.expand())
 
     def factorize(self):
-        return EXPRS['frac'](self.numer.factorize(), self.denom.factorize())
+        return EXPRS.frac(self.numer.factorize(), self.denom.factorize())
 
     def simplify(self):
         """Returns the fraction with simplified numerator and denominator"""
@@ -32,7 +32,7 @@ class Frac(CoreBaseFrac):
         return decomp2prod(numer).simplify()
 
     def substitute_vars(self, var_map):
-        return EXPRS['frac'](self.numer.substitute_vars(var_map),
+        return EXPRS.frac(self.numer.substitute_vars(var_map),
                     self.denom.substitute_vars(var_map))
 
     @cached_property
@@ -44,10 +44,10 @@ class Frac(CoreBaseFrac):
         return self.numer.isnum and self.denom.isnum
 
     def copy(self):
-        return EXPRS['frac'](self.numer.copy(), self.denom.copy())
+        return EXPRS.frac(self.numer.copy(), self.denom.copy())
 
     def eval_nums(self):
         return self.numer.eval_nums() / self.denom.eval_nums()
 
     def group_nums(self):
-        return EXPRS['frac'](self.numer.group_nums(), self.denom.group_nums())
+        return EXPRS.frac(self.numer.group_nums(), self.denom.group_nums())

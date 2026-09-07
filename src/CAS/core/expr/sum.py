@@ -10,9 +10,9 @@ class Sum(CoreBaseSum):
     def __init__(self, terms):
         self.terms = []
         for term in terms:
-            if EXPRS['num'].is_num(term):
-                self.terms.append(EXPRS['num'](term))
-            elif isinstance(term, EXPRS['sum']):
+            if is_ext_num(term):
+                self.terms.append(clean_num(term))
+            elif isinstance(term, EXPRS.sum):
                 self.terms.extend(term.terms)
             elif term is None or term == []:
                 continue
@@ -23,7 +23,7 @@ class Sum(CoreBaseSum):
             self.terms = [0]
 
     def expand(self):
-        return EXPRS['sum']([term.expand() for term in self.terms])
+        return Sum([term.expand() for term in self.terms])
 
     def factorize(self):
         decomps = [term.factorize().decomp() for term in self.terms]
@@ -44,11 +44,11 @@ class Sum(CoreBaseSum):
             temp = []
             for expr, power in decomp.items():
                 if power != 0:
-                    temp.append(EXPRS['exp'](expr, power))
-            terms_list.append(EXPRS['prod'](temp))
-        terms_sum = EXPRS['sum'](terms_list)
+                    temp.append(EXPRS.exp(expr, power))
+            terms_list.append(EXPRS.prod(temp))
+        terms_sum = Sum(terms_list)
 
-        return EXPRS['prod']([common_prod, terms_sum])
+        return EXPRS.prod([common_prod, terms_sum])
 
     @staticmethod
     def sum_fracs(fracs):
@@ -63,9 +63,9 @@ class Sum(CoreBaseSum):
                     temp *= frac[1]
             numer += temp
             denom *= d
-        return EXPRS['frac'](numer, denom).simplify()
+        return EXPRS.frac(numer, denom).simplify()
 
-    def simplify(self):  # TODO remove 0
+    def simplify(self): # TODO remove 0
         decomps = [term.simplify().decomp() for term in self.terms]
         terms_dict = defaultdict(list)
         for decomp in decomps:
@@ -80,19 +80,18 @@ class Sum(CoreBaseSum):
                     else:
                         numer *= base ** power
                 else:
-                    factors.append(EXPRS['exp'](base, power))
-            terms_dict[EXPRS['prod'](factors).simplify()].append((numer, denom))
-        terms = [(factors * self.sum_fracs(fracs)).simplify() for factors, fracs
-                 in terms_dict.items()]
+                    factors.append(EXPRS.exp(base, power))
+            terms_dict[EXPRS.prod(factors).simplify()].append((numer, denom))
+        terms = [(factors * self.sum_fracs(fracs)).simplify() for factors, fracs in terms_dict.items()]
         terms = [term for term in terms if term != 0]
         if len(terms) == 0:
             return 0
         if len(terms) == 1:
             return terms[0]
-        return EXPRS['sum'](terms)
+        return Sum(terms)
 
     def substitute_vars(self, var_map):
-        return EXPRS['sum']([term.substitute_vars(var_map) for term in self.terms])
+        return EXPRS.sum([term.substitute_vars(var_map) for term in self.terms])
 
     @cached_property
     def get_vars(self):
@@ -106,7 +105,7 @@ class Sum(CoreBaseSum):
         return True
 
     def copy(self):
-        return EXPRS['sum']([term.copy() for term in self.terms])
+        return EXPRS.sum([term.copy() for term in self.terms])
 
     def eval_nums(self):
         num = 0
@@ -120,22 +119,22 @@ class Sum(CoreBaseSum):
                 terms.append(term)
         if has_num:
             if len(terms) > 0:
-                return EXPRS['sum'](terms + [num])
+                return EXPRS.sum(terms + [num])
             return num
-        return EXPRS['sum'](terms)
+        return EXPRS.sum(terms)
 
     def group_nums(self):
         terms = [term.group_nums() for term in self.terms]
-        temp = EXPRS['sum'](terms)
+        temp = EXPRS.sum(terms)
         if temp.isnum:
             return temp
         nums = []
         for i, term in reversed(list(enumerate(terms))):
             if term.isnum:
                 nums.append(terms.pop(i))
-        sum_ = EXPRS['sum'](terms)
+        sum_ = EXPRS.sum(terms)
         if len(nums) == 1:
             sum_.terms.append(nums[0])
         elif len(nums) > 1:
-            sum_.terms.append(EXPRS['sum'](nums))
+            sum_.terms.append(EXPRS.sum(nums))
         return sum_

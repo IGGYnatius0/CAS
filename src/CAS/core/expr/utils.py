@@ -7,8 +7,8 @@ from .registry import EXPRS
 __all__ = ['decomp2prod', 'is_ext_num', 'clean_num']
 
 
-def decomp2prod(decomp: Counter) -> EXPRS['prod']:
-    return EXPRS['prod']([EXPRS['exp'](base, power) for base, power in decomp.items()])
+def decomp2prod(decomp: Counter) -> EXPRS.prod:
+    return EXPRS.prod([EXPRS.exp(base, power) for base, power in decomp.items()])
 
 
 def is_ext_num(expr):
@@ -17,8 +17,8 @@ def is_ext_num(expr):
 
 def clean_num(num: int | float | Decimal):
     if isinstance(num, int):
-        return EXPRS['num'](num)
+        return EXPRS.num(num)
     ratio = num.as_integer_ratio()
     if ratio[1] == 1:
-        return EXPRS['num'](int(num))
-    return EXPRS['frac'](*ratio)
+        return EXPRS.num(int(num))
+    return EXPRS.frac(*ratio)
