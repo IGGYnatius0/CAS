@@ -3,7 +3,6 @@ from functools import cached_property
 from .registry import EXPRS
 
 
-@EXPRS.register('eqn')
 class Eqn:
     def __init__(self, lhs, rhs):
         self.lhs = EXPRS.num(lhs) if EXPRS.num.is_num(lhs) else lhs
@@ -108,3 +107,6 @@ class Eqn:
     def __hash__(self):
         hashes = (hash(self.lhs), hash(self.rhs))
         return hash(('CoreEqn', min(hashes), max(hashes)))
+
+
+EXPRS.eqn = Eqn

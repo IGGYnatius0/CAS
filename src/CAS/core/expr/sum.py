@@ -6,7 +6,6 @@ from .base import CoreBaseExpr, CoreBaseSum
 from .utils import *
 
 
-@EXPRS.register('sum')
 class Sum(CoreBaseSum):
     def __init__(self, terms):
         self.terms = []
@@ -20,7 +19,15 @@ class Sum(CoreBaseSum):
             else:
                 raise ValueError("Terms must be core exprs or Python numbers")
         if not self.terms:
-            self.terms = [EXPRS.num(0)]
+            self.terms = [EXPRS.zero]
+
+    @staticmethod
+    def make_sum(terms):
+        if len(terms) == 0:
+            return EXPRS.zero
+        if len(terms) == 1:
+            return terms[0]
+        return Sum(terms)
 
     def expand(self):
         return Sum([term.expand() for term in self.terms])
@@ -33,11 +40,7 @@ class Sum(CoreBaseSum):
         for i in range(len(decomps)):
             decomps[i].subtract(common)
 
-        # Convert from Counter to list of EXPRS['exp']
-        common_list = []
-        for expr, power in common.items():
-            common_list.append(EXPRS['exp'](expr, power))
-        common_prod = EXPRS['prod'](common_list)
+        common_prod = decomp2prod(common)
 
         terms_list = []
         for decomp in decomps:
@@ -51,39 +54,90 @@ class Sum(CoreBaseSum):
         return EXPRS.prod([common_prod, terms_sum])
 
     @staticmethod
-    def sum_fracs(fracs):
-        numer = 0
-        denom = 1
-        for i, (_, d) in enumerate(fracs):
-            temp = 1
-            for j, frac in enumerate(fracs):
-                if i == j:
-                    temp *= frac[0]
-                else:
-                    temp *= frac[1]
-            numer += temp
-            denom *= d
-        return EXPRS.frac(numer, denom).simplify()
+    def _sum_nums(exprs):
+        const = 0
+        terms = []
+        for expr in exprs:
+            expr = expr.simplify()
+            if isinstance(expr, EXPRS.num):
+                const += expr.value
+            else:
+                terms.append(expr)
+        if len(terms) == 0:
+            return EXPRS.num(const)
+        if const == 0:
+            return Sum(terms)
+        terms.append(const)
+        return Sum(terms)
 
-    def simplify(self): # TODO remove 0
+    @staticmethod
+    def _sum_coeffs(coeffs: list[list[EXPRS.exp]]):
+        # This method is as complicated as it is because the combining of
+        # Nums either by addition or multiplication requires the separation
+        # of Nums and expressions that are isnum. Only after they are
+        # separated can the combining happen via .value .
+
+        # Sort expressions into numer and denom, numeric and symbolic
+        numers = []
+        denoms = []
+        for coeff in coeffs:
+            numer_num = 1
+            denom_num = 1
+            numer_exprs = []
+            denom_exprs = []
+            for exp in coeff:
+                if isinstance(exp.power, EXPRS.num) and exp.power < 0:
+                    if isinstance(exp.base, EXPRS.num):
+                        denom_num *= exp.base.value ** -exp.power.value
+                    else:
+                        denom_exprs.append(exp)
+                else:
+                    if isinstance(exp.base, EXPRS.num) and isinstance(exp.power, EXPRS.num):
+                        numer_num *= exp.base.value ** exp.power.value
+                    else:
+                        numer_exprs.append(exp)
+            numer_exprs.append(numer_num)
+            denom_exprs.append(denom_num)
+            numers.append(EXPRS.prod(numer_exprs))
+            denoms.append(EXPRS.prod(denom_exprs))
+
+        # Sum of fractions
+        numer = []
+        denom = []
+        for i, n in enumerate(numers):
+            temp = []
+            for j, d in enumerate(denoms):
+                if i == j:
+                    temp.append(n)
+                    denom.append(d)
+                else:
+                    temp.append(d)
+            numer.append(EXPRS.prod(temp))
+        return EXPRS.frac(Sum._sum_nums(numer), EXPRS.prod(denom)).simplify()
+
+    def simplify(self):
+        if len(self.terms) == 1:
+            return self.terms[0].simplify()
         decomps = [term.simplify().decomp() for term in self.terms]
         terms_dict = defaultdict(list)
         for decomp in decomps:
-            numer = 1
-            denom = 1
+            coeff = []
             factors = []
             for base, power in decomp.items():
-                if isinstance(base, EXPRS['num']) and isinstance(power, EXPRS['num']) and int(
-                        base) == base and int(power) == power:
-                    if power < 0:
-                        denom *= base ** -power
-                    else:
-                        numer *= base ** power
+                # Separate coefficients and variables
+                expr = EXPRS.exp(base, power)
+                if base.isnum and power.isnum:
+                    coeff.append(expr)
                 else:
-                    factors.append(EXPRS.exp(base, power))
-            terms_dict[EXPRS.prod(factors).simplify()].append((numer, denom))
-        terms = [(factors * self.sum_fracs(fracs)).simplify() for factors, fracs in terms_dict.items()]
-        terms = [term for term in terms if term != 0]
+                    factors.append(expr.simplify())
+            terms_dict[EXPRS.prod(factors)].append(coeff)
+
+        # Sum coefficients together
+        terms = []
+        for factors, coeffs in terms_dict.items():
+            term = (self._sum_coeffs(coeffs) * factors).simplify()
+            if term != 0:
+                terms.append(term)
         if len(terms) == 0:
             return 0
         if len(terms) == 1:
@@ -138,3 +192,6 @@ class Sum(CoreBaseSum):
         elif len(nums) > 1:
             sum_.terms.append(EXPRS.sum(nums))
         return sum_
+
+
+EXPRS.sum = Sum

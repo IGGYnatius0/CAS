@@ -11,19 +11,21 @@ import CAS.core.expr.exp
 import CAS.core.expr.eqn
 
 
-Num = EXPRS['num']
-Var = EXPRS['var']
-Sum = EXPRS['sum']
-Prod = EXPRS['prod']
-Frac = EXPRS['frac']
-Exp = EXPRS['exp']
-Eqn = EXPRS['eqn']
+Num = EXPRS.num
+Var = EXPRS.var
+Sum = EXPRS.sum
+Prod = EXPRS.prod
+Frac = EXPRS.frac
+Exp = EXPRS.exp
+Eqn = EXPRS.eqn
 
-zero = Num(0)
-one = Num(1)
-neg_one = Num(-1)
+zero = EXPRS.zero
+one = EXPRS.one
+neg_one = EXPRS.neg_one
+inf = EXPRS.inf
+ninf = EXPRS.ninf
 
 
 __all__ = ['CoreBaseExpr', 'Num', 'Var', 'Sum', 'Prod', 'Frac', 'Exp', 'Eqn',
-           'zero', 'one', 'neg_one',
+           'zero', 'one', 'neg_one', 'inf', 'ninf',
            'decomp2prod']

@@ -4,7 +4,6 @@ from .registry import EXPRS
 from .base import CoreBaseVar
 
 
-@EXPRS.register('var')
 class Var(CoreBaseVar):
     def __init__(self, symbol):
         self.sym = symbol
@@ -24,3 +23,6 @@ class Var(CoreBaseVar):
 
     def copy(self):
         return EXPRS.var(self.sym)
+
+
+EXPRS.var = Var

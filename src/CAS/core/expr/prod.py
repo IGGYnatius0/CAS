@@ -7,27 +7,26 @@ from .base import CoreBaseExpr, CoreBaseProd
 from .utils import *
 
 
-@EXPRS.register('prod')
 class Prod(CoreBaseProd):
     def __init__(self, factors):
         self.factors = []
         for factor in factors:
             if is_ext_num(factor):
                 self.factors.append(clean_num(factor))
-            elif isinstance(factor, EXPRS.sum):
+            elif isinstance(factor, EXPRS.prod):
                 self.factors.extend(factor.factors)
             elif isinstance(factor, CoreBaseExpr):
                 self.factors.append(factor)
             else:
                 raise ValueError("Factors must be core exprs or Python numbers")
         if not self.factors:
-            self.factors = [EXPRS.num(0)]
+            self.factors = [EXPRS.one]
 
     def decomp(self):
-        """Decomposes the expression into its constituent factors"""
         c = Counter()
         for factor in self.factors:
             c.update(factor.decomp())
+        c = simplify_decomp(c)
         return c
 
     def expand(self):
@@ -38,34 +37,54 @@ class Prod(CoreBaseProd):
                 to_expand.append(factor.terms)
             else:
                 to_expand.append([factor])
-        return EXPRS.sum([EXPRS.prod(term) for term in product(*to_expand)])
+        return EXPRS.sum([Prod(term) for term in product(*to_expand)])
 
     def factorize(self):
-        return EXPRS.prod([factor.factorize() for factor in self.factors])
+        return Prod([factor.factorize() for factor in self.factors])
 
     def simplify(self):
         """Simplifies the expression; if factors contain 0, returns 0"""
-        decomp = EXPRS.prod([factor.simplify() for factor in self.factors]).decomp()
-        const = 1
-        factors = []
+        if len(self.factors) == 1:
+            return self.factors[0].simplify()
+        decomp = Prod([factor.simplify() for factor in self.factors]).decomp()
+        numer = 1
+        denom = 1
+        factors = [] # non rational stuff
         for base, power in decomp.items():
-            expr = EXPRS.exp(base, power).simplify()
-            if isinstance(expr, EXPRS.num):
-                const *= expr
+            if isinstance(base, EXPRS.num) and isinstance(power, EXPRS.num):
+                if power > 0:
+                    numer *= base.value ** power.value
+                elif power < 0:
+                    denom *= base.value ** -power.value
             else:
-                factors.append(expr)
-        if const == 0:
-            return 0
+                factors.append(EXPRS.exp(base, power).simplify())
+        # DO NOT use Frac(numer, denom).simplify() as that uses Prod simplify, will cause RecursionError
+        # Also there is no need as the first line of this method already puts removes repeated factors and thus
+        # numer and denom will already be in the simplest form
+        if numer == 0:
+            return EXPRS.zero
+        if denom == 0:
+            raise ZeroDivisionError(f'{numer=}; {denom=}; {factors=}')
+
+        if numer == 1 and denom != 1:
+            const = EXPRS.exp(denom, -1)
+        elif numer != 1 and denom == 1:
+            const = EXPRS.num(numer)
+        elif numer == 1 and denom == 1:
+            const = EXPRS.one
+        else:
+            const = Prod([numer, EXPRS.exp(denom, -1)])
+
         if len(factors) == 0:
             return const
         if const == 1 and len(factors) == 1:
             return factors[0]
         if const == 1 and len(factors) > 1:
-            return EXPRS.prod(factors)
-        return const * EXPRS.prod(factors)
+            return Prod(factors)
+        return const * Prod(factors)
 
     def substitute_vars(self, var_map):
-        return EXPRS.prod([term.substitute_vars(var_map) for term in self.factors])
+        return Prod([term.substitute_vars(var_map) for term in self.factors])
 
     @cached_property
     def get_vars(self):
@@ -79,7 +98,7 @@ class Prod(CoreBaseProd):
         return True
 
     def copy(self):
-        return EXPRS.prod([factor.copy() for factor in self.factors])
+        return Prod([factor.copy() for factor in self.factors])
 
     def eval_nums(self):
         num = 1
@@ -93,22 +112,25 @@ class Prod(CoreBaseProd):
                 factors.append(factor)
         if has_num:
             if len(factors) > 0:
-                return EXPRS.prod(factors + [num])
+                return Prod(factors + [num])
             return num
-        return EXPRS.prod(factors)
+        return Prod(factors)
 
     def group_nums(self):
         factors = [factor.group_nums() for factor in self.factors]
-        temp = EXPRS.prod(factors)
+        temp = Prod(factors)
         if temp.isnum:
             return temp
         nums = []
         for i, factor in reversed(list(enumerate(factors))):
             if factor.isnum:
                 nums.append(factors.pop(i))
-        prod = EXPRS.prod(factors)
+        prod = Prod(factors)
         if len(nums) == 1:
             prod.factors.append(nums[0])
         elif len(nums) > 1:
-            prod.factors.append(EXPRS.prod(nums))
+            prod.factors.append(Prod(nums))
         return prod
+
+
+EXPRS.prod = Prod

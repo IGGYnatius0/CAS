@@ -6,10 +6,13 @@ from .base import CoreBaseNum
 from CAS.core.pfactor import pfactor
 
 
-@EXPRS.register('num')
 class Num(CoreBaseNum):
+    def __init__(self, value):
+        self.value = value
+
     def decomp(self):
-        return Counter({EXPRS['num'](base): EXPRS['num'](power) for base, power in pfactor(self).items()})
+        f = pfactor(self.value)
+        return Counter({Num(base): Num(power) for base, power in f.items()})
 
     @cached_property
     def isnum(self):
@@ -18,3 +21,12 @@ class Num(CoreBaseNum):
     @staticmethod
     def is_num(x):
         return isinstance(x, (int, float))
+
+
+EXPRS.num = Num
+
+EXPRS.zero = Num(0)
+EXPRS.one = Num(1)
+EXPRS.neg_one = Num(-1)
+EXPRS.inf = float('inf')
+EXPRS.ninf = float('-inf')

@@ -1,5 +1,6 @@
+from decimal import Decimal
 from collections import Counter
-from functools import cached_property, total_ordering
+from functools import cached_property, wraps
 
 from .registry import EXPRS
 
@@ -63,7 +64,7 @@ class CoreBaseExpr:
 
     def decomp(self):
         """Decomposes the expression into its constituent factors"""
-        return Counter({self: 1})
+        return Counter({self: EXPRS.one})
 
     def expand(self):
         return self
@@ -96,13 +97,54 @@ class CoreBaseExpr:
         return self
 
 
-class CoreBaseNum(CoreBaseExpr, int):
+def _int_autoconvert(func):
+    @wraps(func)
+    def wrapper(self, other):
+        if isinstance(other, (int, float, Decimal)):
+            return func(self, other)
+        if isinstance(other, EXPRS.num):
+            return func(self, other.value)
+        return NotImplemented
+    return wrapper
+
+
+class CoreBaseNum(CoreBaseExpr):
+    def __str__(self):
+        return str(self.value)
+
     def __repr__(self):
-        return f"Num({str(self)})"
+        return f"Num({self.value})"
 
     def __hash__(self):
         # hash('-1') = 357669246384252548
-        return super(int).__hash__() if self != -1 else 357669246384252548
+        return self.value if self.value != -1 else 357669246384252548
+
+    @_int_autoconvert
+    def __eq__(self, other):
+        return self.value == other
+
+    @_int_autoconvert
+    def __ne__(self, other):
+        return self.value != other
+
+    @_int_autoconvert
+    def __lt__(self, other):
+        return self.value < other
+
+    @_int_autoconvert
+    def __le__(self, other):
+        return self.value <= other
+
+    @_int_autoconvert
+    def __gt__(self, other):
+        return self.value > other
+
+    @_int_autoconvert
+    def __ge__(self, other):
+        return self.value >= other
+
+    def __neg__(self):
+        return EXPRS.num(-(self.value))
 
 
 class CoreBaseVar(CoreBaseExpr):
