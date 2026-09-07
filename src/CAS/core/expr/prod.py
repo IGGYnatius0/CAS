@@ -3,7 +3,8 @@ from functools import cached_property
 from itertools import product
 
 from .registry import EXPRS
-from .base import CoreBaseProd
+from .base import CoreBaseExpr, CoreBaseProd
+from .utils import *
 
 
 @EXPRS.register('prod')
@@ -11,17 +12,16 @@ class Prod(CoreBaseProd):
     def __init__(self, factors):
         self.factors = []
         for factor in factors:
-            if EXPRS.num.is_num(factor):
-                self.factors.append(EXPRS.num(factor))
-            elif isinstance(factor, EXPRS.prod):
+            if is_ext_num(factor):
+                self.factors.append(clean_num(factor))
+            elif isinstance(factor, EXPRS.sum):
                 self.factors.extend(factor.factors)
-            elif factor is None or factor == []:
-                continue
-            else:
+            elif isinstance(factor, CoreBaseExpr):
                 self.factors.append(factor)
-        # Empty case
+            else:
+                raise ValueError("Factors must be core exprs or Python numbers")
         if not self.factors:
-            self.factors = [1]
+            self.factors = [EXPRS.num(0)]
 
     def decomp(self):
         """Decomposes the expression into its constituent factors"""

@@ -3,13 +3,14 @@ from functools import cached_property
 
 from .registry import EXPRS
 from .base import CoreBaseExp
+from .utils import *
 
 
 @EXPRS.register('exp')
 class Exp(CoreBaseExp):
     def __init__(self, base, power):
-        self.base = EXPRS.num(base) if EXPRS.num.is_num(base) else base
-        self.power = EXPRS.num(power) if EXPRS.num.is_num(power) else power
+        self.base = clean_num(base) if is_ext_num(base) else base
+        self.power = clean_num(power) if is_ext_num(power) else power
 
     def decomp(self):
         """Decomposes the expression into its constituent factors"""

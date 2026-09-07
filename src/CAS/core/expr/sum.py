@@ -2,7 +2,8 @@ from collections import defaultdict
 from functools import cached_property
 
 from .registry import EXPRS
-from .base import CoreBaseSum
+from .base import CoreBaseExpr, CoreBaseSum
+from .utils import *
 
 
 @EXPRS.register('sum')
@@ -14,13 +15,12 @@ class Sum(CoreBaseSum):
                 self.terms.append(clean_num(term))
             elif isinstance(term, EXPRS.sum):
                 self.terms.extend(term.terms)
-            elif term is None or term == []:
-                continue
-            else:
+            elif isinstance(term, CoreBaseExpr):
                 self.terms.append(term)
-        # Empty case
+            else:
+                raise ValueError("Terms must be core exprs or Python numbers")
         if not self.terms:
-            self.terms = [0]
+            self.terms = [EXPRS.num(0)]
 
     def expand(self):
         return Sum([term.expand() for term in self.terms])
