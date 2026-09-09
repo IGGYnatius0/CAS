@@ -58,9 +58,10 @@ class Prod(CoreBaseProd):
                     denom *= base.value ** -power.value
             else:
                 factors.append(EXPRS.exp(base, power).simplify())
-        # DO NOT use Frac(numer, denom).simplify() as that uses Prod simplify, will cause RecursionError
-        # Also there is no need as the first line of this method already puts removes repeated factors and thus
-        # numer and denom will already be in the simplest form
+        # DO NOT use Frac(numer, denom).simplify() as that uses Prod simplify,
+        # will cause RecursionError. Also there is no need as the first line of
+        # this method already puts removes repeated factors and thus numer and
+        # denom will already be in the simplest form
         if numer == 0:
             return EXPRS.zero
         if denom == 0:
