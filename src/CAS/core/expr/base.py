@@ -5,12 +5,12 @@ from functools import cached_property, wraps
 from .registry import EXPRS
 
 
-__all__ = ['CoreBaseExpr',
-           'CoreBaseNum', 'CoreBaseVar', 'CoreBaseSum', 'CoreBaseProd',
-           'CoreBaseFrac', 'CoreBaseExp']
+__all__ = ['CoreExprBase',
+           'CoreNumBase', 'CoreVarBase', 'CoreSumBase', 'CoreProdBase',
+           'CoreFracBase', 'CoreExpBase']
 
 
-class CoreBaseExpr:
+class CoreExprBase:
     def __eq__(self, other):
         if type(other) is not type(self):
             return False
@@ -108,7 +108,7 @@ def _int_autoconvert(func):
     return wrapper
 
 
-class CoreBaseNum(CoreBaseExpr):
+class CoreNumBase(CoreExprBase):
     def __str__(self):
         return str(self.value)
 
@@ -147,7 +147,7 @@ class CoreBaseNum(CoreBaseExpr):
         return EXPRS.num(-(self.value))
 
 
-class CoreBaseVar(CoreBaseExpr):
+class CoreVarBase(CoreExprBase):
     def __str__(self):
         return self.sym
 
@@ -158,7 +158,7 @@ class CoreBaseVar(CoreBaseExpr):
         return hash(('CoreVar', self.sym))
 
 
-class CoreBaseSum(CoreBaseExpr):
+class CoreSumBase(CoreExprBase):
     def __str__(self):
         terms = [str(term) for term in self.terms]
         return f'({" + ".join(terms)})'
@@ -188,7 +188,7 @@ class CoreBaseSum(CoreBaseExpr):
         return EXPRS.sum([other] + (-self).terms)
 
 
-class CoreBaseProd(CoreBaseExpr):
+class CoreProdBase(CoreExprBase):
     def __str__(self):
         factors = [str(factor) for factor in self.factors]
         return f'({" * ".join(factors)})'
@@ -212,7 +212,7 @@ class CoreBaseProd(CoreBaseExpr):
         return EXPRS.prod([other] + self.factors)
 
 
-class CoreBaseFrac(CoreBaseExpr):
+class CoreFracBase(CoreExprBase):
     def __str__(self):
         return f'({str(self.numer)} / {str(self.denom)})'
 
@@ -223,7 +223,7 @@ class CoreBaseFrac(CoreBaseExpr):
         return hash(('CoreFrac', self.numer, self.denom))
 
 
-class CoreBaseExp(CoreBaseExpr):
+class CoreExpBase(CoreExprBase):
     def __str__(self):
         return f'({str(self.base)} ^ {str(self.power)})'
 

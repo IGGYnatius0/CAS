@@ -1,10 +1,10 @@
 from functools import cached_property
 
 from .registry import EXPRS
-from .base import CoreBaseVar
+from .base import CoreVarBase
 
 
-class Var(CoreBaseVar):
+class Var(CoreVarBase):
     def __init__(self, symbol):
         self.sym = symbol
 

@@ -1,11 +1,11 @@
 from functools import cached_property
 
 from .registry import EXPRS
-from .base import CoreBaseFrac
+from .base import CoreFracBase
 from .utils import *
 
 
-class Frac(CoreBaseFrac):
+class Frac(CoreFracBase):
     def __init__(self, numer, denom):
         self.numer = clean_num(numer) if is_ext_num(numer) else numer
         self.denom = clean_num(denom) if is_ext_num(denom) else denom

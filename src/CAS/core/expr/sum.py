@@ -2,11 +2,11 @@ from collections import defaultdict
 from functools import cached_property
 
 from .registry import EXPRS
-from .base import CoreBaseExpr, CoreBaseSum
+from .base import CoreExprBase, CoreSumBase
 from .utils import *
 
 
-class Sum(CoreBaseSum):
+class Sum(CoreSumBase):
     def __init__(self, terms):
         self.terms = []
         for term in terms:
@@ -14,7 +14,7 @@ class Sum(CoreBaseSum):
                 self.terms.append(clean_num(term))
             elif isinstance(term, EXPRS.sum):
                 self.terms.extend(term.terms)
-            elif isinstance(term, CoreBaseExpr):
+            elif isinstance(term, CoreExprBase):
                 self.terms.append(term)
             else:
                 raise ValueError("Terms must be core exprs or Python numbers")

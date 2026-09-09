@@ -2,11 +2,11 @@ from collections import Counter
 from functools import cached_property
 
 from .registry import EXPRS
-from .base import CoreBaseNum
+from .base import CoreNumBase
 from CAS.core.pfactor import pfactor
 
 
-class Num(CoreBaseNum):
+class Num(CoreNumBase):
     def __init__(self, value):
         self.value = value
 

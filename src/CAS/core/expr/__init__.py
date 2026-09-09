@@ -1,5 +1,5 @@
 from .registry import EXPRS
-from .base import CoreBaseExpr
+from .base import CoreExprBase
 from .utils import *
 
 import CAS.core.expr.num
@@ -26,6 +26,6 @@ inf = EXPRS.inf
 ninf = EXPRS.ninf
 
 
-__all__ = ['CoreBaseExpr', 'Num', 'Var', 'Sum', 'Prod', 'Frac', 'Exp', 'Eqn',
+__all__ = ['CoreExprBase', 'Num', 'Var', 'Sum', 'Prod', 'Frac', 'Exp', 'Eqn',
            'zero', 'one', 'neg_one', 'inf', 'ninf',
            'decomp2prod']

@@ -3,11 +3,11 @@ from functools import cached_property
 from itertools import product
 
 from .registry import EXPRS
-from .base import CoreBaseExpr, CoreBaseProd
+from .base import CoreExprBase, CoreProdBase
 from .utils import *
 
 
-class Prod(CoreBaseProd):
+class Prod(CoreProdBase):
     def __init__(self, factors):
         self.factors = []
         for factor in factors:
@@ -15,7 +15,7 @@ class Prod(CoreBaseProd):
                 self.factors.append(clean_num(factor))
             elif isinstance(factor, EXPRS.prod):
                 self.factors.extend(factor.factors)
-            elif isinstance(factor, CoreBaseExpr):
+            elif isinstance(factor, CoreExprBase):
                 self.factors.append(factor)
             else:
                 raise ValueError("Factors must be core exprs or Python numbers")
