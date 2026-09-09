@@ -5,6 +5,9 @@ from functools import lru_cache
 from decimal import Decimal
 
 
+__all__ = ['pfactor']
+
+
 # From https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test#Miller%E2%80%93Rabin_test
 def miller_rabin(n, k=4):
     if not n % 2:
@@ -18,7 +21,7 @@ def miller_rabin(n, k=4):
         d = q
         q = d / 2
         s += 1
-    # d = int(d)
+    d = int(d)
 
     for i in range(k):
         a = randint(2, int(n)-2)
@@ -49,6 +52,7 @@ def pollard_rho(n, c=1):
         d = gcd(int(abs(x-y)), int(n))
     if d != n:
         return Decimal(d)
+    return None
 
 
 @lru_cache(maxsize=1000)
@@ -69,7 +73,6 @@ def _pfactor(n):
 
 
 def pfactor(n):
-    n = n.simplify()
     if n == 0:
         return Counter({0: 1})
     if n == 1:
