@@ -1,9 +1,7 @@
 from itertools import pairwise
+from functools import wraps
+
 from CAS.core.expr import *
-
-from math import inf as inf
-ninf = -inf
-
 
 
 __all__ = ['Interval', 'MultiInterval', 'REALS', 'from_str']
@@ -57,8 +55,9 @@ def from_str(s):
 
 
 def _interval_typecheck(func):
+    wraps(func)
     def cmp(self, other):
-        if other.isnum:
+        if isinstance(other, Num):
             other = Interval(other, other, True, True)
         if not isinstance(other, Interval):
             return NotImplemented
@@ -162,7 +161,7 @@ class Interval(BaseInterval):
 
 def _multiinterval_typecheck(func):
     def cmp(self, other):
-        if other.isnum:
+        if isinstance(other, Num):
             other = Interval(other, other, True, True)
         if not isinstance(other, (Interval, MultiInterval)):
             return NotImplemented
