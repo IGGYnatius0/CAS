@@ -7,8 +7,8 @@ from .utils import *
 
 class Frac(CoreFracBase):
     def __init__(self, numer, denom):
-        self.numer = clean_num(numer) if is_ext_num(numer) else numer
-        self.denom = clean_num(denom) if is_ext_num(denom) else denom
+        self.numer = make_expr(numer)
+        self.denom = make_expr(denom)
 
     def decomp(self):
         numers = self.numer.decomp()
@@ -32,8 +32,7 @@ class Frac(CoreFracBase):
         return decomp2prod(numer).simplify()
 
     def substitute_vars(self, var_map):
-        return EXPRS.frac(self.numer.substitute_vars(var_map),
-                          self.denom.substitute_vars(var_map))
+        return EXPRS.frac(self.numer.substitute_vars(var_map), self.denom.substitute_vars(var_map))
 
     @cached_property
     def get_vars(self):

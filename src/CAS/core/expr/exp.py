@@ -3,14 +3,14 @@ from functools import cached_property
 
 from .registry import EXPRS
 from .base import CoreExpBase
-from .utils import *
+from .utils import make_expr, simplify_decomp
 from CAS.core.pfactor import pfactor
 
 
 class Exp(CoreExpBase):
     def __init__(self, base, power):
-        self.base = clean_num(base) if is_ext_num(base) else base
-        self.power = clean_num(power) if is_ext_num(power) else power
+        self.base = make_expr(base)
+        self.power = make_expr(power)
 
     def decomp(self):
         if not self.power.isnum:
@@ -74,8 +74,7 @@ class Exp(CoreExpBase):
         return Exp(base, power)
 
     def substitute_vars(self, var_map):
-        return self.base.substitute_vars(var_map) ** self.power.substitute_vars(
-            var_map)
+        return self.base.substitute_vars(var_map) ** self.power.substitute_vars(var_map)
 
     @cached_property
     def get_vars(self):

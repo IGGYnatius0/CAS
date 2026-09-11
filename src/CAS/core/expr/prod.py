@@ -3,7 +3,7 @@ from functools import cached_property
 from itertools import product
 
 from .registry import EXPRS
-from .base import CoreExprBase, CoreProdBase
+from .base import CoreProdBase
 from .utils import *
 
 
@@ -11,14 +11,10 @@ class Prod(CoreProdBase):
     def __init__(self, factors):
         self.factors = []
         for factor in factors:
-            if is_ext_num(factor):
-                self.factors.append(clean_num(factor))
-            elif isinstance(factor, EXPRS.prod):
+            if isinstance(factor, EXPRS.prod):
                 self.factors.extend(factor.factors)
-            elif isinstance(factor, CoreExprBase):
-                self.factors.append(factor)
             else:
-                raise ValueError("Factors must be core exprs or Python numbers")
+                self.factors.append(make_expr(factor))
         if not self.factors:
             self.factors = [EXPRS.one]
 
@@ -59,9 +55,7 @@ class Prod(CoreProdBase):
             else:
                 factors.append(EXPRS.exp(base, power).simplify())
         # DO NOT use Frac(numer, denom).simplify() as that uses Prod simplify,
-        # will cause RecursionError. Also there is no need as the first line of
-        # this method already puts removes repeated factors and thus numer and
-        # denom will already be in the simplest form
+        # which will cause RecursionError
         if numer == 0:
             return EXPRS.zero
         if denom == 0:

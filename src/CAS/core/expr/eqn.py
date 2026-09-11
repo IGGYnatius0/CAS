@@ -1,12 +1,13 @@
 from functools import cached_property
 
 from .registry import EXPRS
+from .utils import make_expr
 
 
 class Eqn:
     def __init__(self, lhs, rhs):
-        self.lhs = EXPRS.num(lhs) if EXPRS.num.is_num(lhs) else lhs
-        self.rhs = EXPRS.num(rhs) if EXPRS.num.is_num(rhs) else rhs
+        self.lhs = make_expr(lhs)
+        self.rhs = make_expr(rhs)
 
     def expand(self):
         return Eqn(self.lhs.expand(), self.rhs.expand())
