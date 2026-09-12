@@ -144,7 +144,7 @@ class CoreNumBase(CoreExprBase):
         return self.value >= other
 
     def __neg__(self):
-        return EXPRS.num(-(self.value))
+        return EXPRS.num(-self.value)
 
 
 class CoreVarBase(CoreExprBase):

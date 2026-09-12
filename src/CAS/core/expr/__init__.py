@@ -1,7 +1,7 @@
 from .registry import EXPRS
-from .base import CoreExprBase
 from .utils import *
 
+from .base import CoreExprBase
 import CAS.core.expr.num
 import CAS.core.expr.var
 import CAS.core.expr.sum
