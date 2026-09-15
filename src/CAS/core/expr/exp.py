@@ -84,11 +84,12 @@ class Exp(CoreExpBase):
     def isnum(self):
         return self.base.isnum and self.power.isnum
 
+    def eval_nums(self):
+        super().eval_nums()
+        return self.base.eval_nums() ** self.power.eval_nums()
+
     def copy(self):
         return Exp(self.base.copy(), self.power.copy())
-
-    def eval_nums(self):
-        return self.base.eval_nums() ** self.power.eval_nums()
 
     def group_nums(self):
         return Exp(self.base.group_nums(), self.power.group_nums())

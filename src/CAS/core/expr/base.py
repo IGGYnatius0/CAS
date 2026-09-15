@@ -91,7 +91,8 @@ class CoreExprBase:
         return False
 
     def eval_nums(self):
-        return self
+        if not self.isnum:
+            raise RuntimeError("Cannot evaluate non isnum expression")
 
     def group_nums(self):
         return self

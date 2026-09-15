@@ -42,11 +42,12 @@ class Frac(CoreFracBase):
     def isnum(self):
         return self.numer.isnum and self.denom.isnum
 
+    def eval_nums(self):
+        super().eval_nums()
+        return self.numer.eval_nums() / self.denom.eval_nums()
+
     def copy(self):
         return EXPRS.frac(self.numer.copy(), self.denom.copy())
-
-    def eval_nums(self):
-        return self.numer.eval_nums() / self.denom.eval_nums()
 
     def group_nums(self):
         return EXPRS.frac(self.numer.group_nums(), self.denom.group_nums())

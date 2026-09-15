@@ -92,24 +92,15 @@ class Prod(CoreProdBase):
                 return False
         return True
 
+    def eval_nums(self):
+        super().eval_nums()
+        num = 1
+        for factor in self.factors:
+            num *= factor.eval_nums()
+        return num
+
     def copy(self):
         return Prod([factor.copy() for factor in self.factors])
-
-    def eval_nums(self):
-        num = 1
-        factors = []
-        has_num = False
-        for factor in self.factors:
-            if factor.isnum:
-                num += factor.eval_nums()
-                has_num = True
-            else:
-                factors.append(factor)
-        if has_num:
-            if len(factors) > 0:
-                return Prod(factors + [num])
-            return num
-        return Prod(factors)
 
     def group_nums(self):
         factors = [factor.group_nums() for factor in self.factors]

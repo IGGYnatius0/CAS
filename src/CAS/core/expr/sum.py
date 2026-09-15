@@ -146,24 +146,12 @@ class Sum(CoreSumBase):
                 return False
         return True
 
+    def eval_nums(self):
+        super().eval_nums()
+        return sum([term.eval_nums() for term in self.terms])
+
     def copy(self):
         return EXPRS.sum([term.copy() for term in self.terms])
-
-    def eval_nums(self):
-        num = 0
-        terms = []
-        has_num = False
-        for term in self.terms:
-            if term.isnum:
-                num += term.eval_nums()
-                has_num = True
-            else:
-                terms.append(term)
-        if has_num:
-            if len(terms) > 0:
-                return EXPRS.sum(terms + [num])
-            return num
-        return EXPRS.sum(terms)
 
     def group_nums(self):
         terms = [term.group_nums() for term in self.terms]
