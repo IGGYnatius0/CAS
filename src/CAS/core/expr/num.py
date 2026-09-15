@@ -18,11 +18,14 @@ class Num(CoreNumBase):
     def isnum(self):
         return True
 
+    def eval_nums(self):
+        return self.value
+
 
 EXPRS.num = Num
 
 EXPRS.zero = Num(0)
 EXPRS.one = Num(1)
 EXPRS.neg_one = Num(-1)
-EXPRS.inf = float('inf')
-EXPRS.ninf = float('-inf')
+EXPRS.inf = Num(float('inf'))
+EXPRS.ninf = Num(float('-inf'))
