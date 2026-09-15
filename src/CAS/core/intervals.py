@@ -13,9 +13,9 @@ class BaseInterval:
 
 def cmp_lower(int1, int2):
     """Returns -1, 0 or +1 depending on int2.lower relative to int1.lower"""
-    if int2.lower > int1.lower:
+    if int2.lower.eval_nums() > int1.lower.eval_nums():
         return 1
-    if int2.lower < int1.lower:
+    if int2.lower.eval_nums() < int1.lower.eval_nums():
         return -1
     if int2.lo_inc == int1.lo_inc:
         return 0
@@ -27,9 +27,9 @@ def cmp_lower(int1, int2):
 
 def cmp_upper(int1, int2):
     """Returns -1, 0 or +1 depending on int2.upper relative to int1.upper"""
-    if int2.upper > int1.upper:
+    if int2.upper.eval_nums() > int1.upper.eval_nums():
         return 1
-    if int2.upper < int1.upper:
+    if int2.upper.eval_nums() < int1.upper.eval_nums():
         return -1
     if int2.up_inc == int1.up_inc:
         return 0
@@ -55,9 +55,9 @@ def from_str(s):
 
 
 def _interval_typecheck(func):
-    wraps(func)
+    @wraps(func)
     def cmp(self, other):
-        if isinstance(other, Num):
+        if isinstance(other, CoreExprBase) and other.isnum:
             other = Interval(other, other, True, True)
         if not isinstance(other, Interval):
             return NotImplemented
@@ -66,8 +66,7 @@ def _interval_typecheck(func):
 
 
 class Interval(BaseInterval):
-    def __init__(self, lower: Num = None, upper: Num = None,
-                 lo_inc: bool = False, up_inc: bool = False):
+    def __init__(self, lower=None, upper=None, lo_inc: bool = False, up_inc: bool = False):
         if lower == upper and lower is not None:
             self.lower = lower
             self.upper = upper
@@ -161,7 +160,7 @@ class Interval(BaseInterval):
 
 def _multiinterval_typecheck(func):
     def cmp(self, other):
-        if isinstance(other, Num):
+        if isinstance(other, CoreExprBase) and other.isnum:
             other = Interval(other, other, True, True)
         if not isinstance(other, (Interval, MultiInterval)):
             return NotImplemented
