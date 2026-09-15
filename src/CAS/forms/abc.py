@@ -1,4 +1,4 @@
-from CAS.forms.classes import FormVar, FormConst, FormWild
+from CAS.forms.expr import FormVar, FormConst, FormWild
 
 
 __all__ = ['a', 'b', 'c', 'd', 'f', 'g', 'h', 'i', 'j',

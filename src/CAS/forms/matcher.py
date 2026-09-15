@@ -1,7 +1,7 @@
 from collections import Counter
 from CAS.core.expr import *
-from CAS.forms.classes import *
-from CAS.forms.classes import SingleConstraint
+from CAS.forms.expr import *
+from CAS.forms.expr.constraints import SingleConstraint
 
 
 def solve_constraints(constrs, n_consts, n_vars):
@@ -32,7 +32,7 @@ def solve_constraints(constrs, n_consts, n_vars):
     if n_consts == 0:
         return {}, var_map
 
-    # Solving const_map from all the SingleConstraint.exprs and SingleConstraint.forms
+    # Solving const_map from all the SingleConstraint.form and SingleConstraint.value
     const_map = {}
     n_passes = len(constrs) - len(const_map)
     i = 0
@@ -42,7 +42,7 @@ def solve_constraints(constrs, n_consts, n_vars):
             if isinstance(constr.form, FormConst):
                 if constr.form in const_map:
                     return False
-                if constr.value.eval_nums() not in constr.form.domain:
+                if constr.value not in constr.form.domain:
                     return False
                 const_map[constr.form] = constr.value
         for j, constr in enumerate(constrs):
@@ -52,11 +52,13 @@ def solve_constraints(constrs, n_consts, n_vars):
             if constr.form is None:
                 continue
             constr = SingleConstraint(form=constr.form.substitute_consts(const_map),
-                                          value=constr.value)
+                                      value=constr.value)
             # Simplify
             constr.simplify()
             constrs[j] = constr
         i += 1
+    for const, value in const_map.items():
+        const_map[const] = value.simplify()
     if len(const_map) == n_consts:
         return const_map, var_map
     return False
