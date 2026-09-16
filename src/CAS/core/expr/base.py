@@ -148,6 +148,15 @@ class CoreNumBase(CoreExprBase):
     def __neg__(self):
         return EXPRS.num(-self.value)
 
+    def __abs__(self):
+        return EXPRS.num(abs(self.value))
+
+    def __int__(self):
+        return self.value
+
+    def __float__(self):
+        return float(self.value)
+
 
 class CoreVarBase(CoreExprBase):
     def __str__(self):
