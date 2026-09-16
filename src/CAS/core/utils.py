@@ -10,26 +10,26 @@ def isrational(expr):
     return False
 
 
-@isrational.register
-def _(expr: Num):
+@isrational.register(Num)
+def _(expr):
     return int(expr) == expr
 
 
-@isrational.register
-def _(expr: Sum):
+@isrational.register(Sum)
+def _(expr):
     return all(isrational(term) for term in expr.terms)
 
 
-@isrational.register
-def _(expr: Prod):
+@isrational.register(Prod)
+def _(expr):
     return all(isrational(factor) for factor in expr.factors)
 
 
-@isrational.register
-def _(expr: Frac):
+@isrational.register(Frac)
+def _(expr):
     return isrational(expr.numer) and isrational(expr.denom)
 
 
-@isrational.register
-def _(expr: Exp):
+@isrational.register(Exp)
+def _(expr):
     return int(expr.base) == expr.base and int(expr.power) == expr.power
