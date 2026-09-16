@@ -133,13 +133,16 @@ class Sum(CoreSumBase):
 
         # Sum coefficients together
         terms = []
-        for factors, coeffs in terms_dict.items():
-            if factors == 1:
-                term = self._sum_coeffs(coeffs)
+        for factor, coeffs in terms_dict.items():
+            coeff = self._sum_coeffs(coeffs)
+            if coeff == 0:
+                terms.append(EXPRS.zero)
+            elif coeff == 1:
+                terms.append(factor)
+            elif factor == 1:
+                terms.append(coeff)
             else:
-                term = self._sum_coeffs(coeffs) * factors
-            if term != 0:
-                terms.append(term)
+                terms.append(coeff * factor)
         if len(terms) == 0:
             return 0
         if len(terms) == 1:
