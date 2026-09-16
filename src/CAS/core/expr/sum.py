@@ -101,7 +101,18 @@ class Sum(CoreSumBase):
                 else:
                     temp.append(d)
             numer.append(EXPRS.prod(temp))
-        return EXPRS.frac(Sum._sum_nums(numer), EXPRS.prod(denom)).simplify()
+
+        # .simplify() is only used as a last resort here because if numer and denom contain sums,
+        # it is likely to cause RecursionError
+        numer = Sum._sum_nums(numer)
+        denom = EXPRS.prod(denom).simplify()
+        if denom == 1:
+            return numer
+        if denom == -1:
+            return numer * -1
+        decomp = numer.decomp()
+        decomp.subtract(denom.decomp())
+        return decomp2prod(decomp).simplify()
 
     def simplify(self):
         if len(self.terms) == 1:
@@ -117,13 +128,16 @@ class Sum(CoreSumBase):
                 if base.isnum and power.isnum:
                     coeff.append(expr)
                 else:
-                    factors.append(expr.simplify())
-            terms_dict[EXPRS.prod(factors)].append(coeff)
+                    factors.append(expr)
+            terms_dict[EXPRS.prod(factors).simplify()].append(coeff)
 
         # Sum coefficients together
         terms = []
         for factors, coeffs in terms_dict.items():
-            term = (self._sum_coeffs(coeffs) * factors).simplify()
+            if factors == 1:
+                term = self._sum_coeffs(coeffs)
+            else:
+                term = self._sum_coeffs(coeffs) * factors
             if term != 0:
                 terms.append(term)
         if len(terms) == 0:
@@ -133,7 +147,7 @@ class Sum(CoreSumBase):
         return Sum(terms)
 
     def substitute_vars(self, var_map):
-        return EXPRS.sum([term.substitute_vars(var_map) for term in self.terms])
+        return Sum([term.substitute_vars(var_map) for term in self.terms])
 
     @cached_property
     def get_vars(self):
@@ -151,22 +165,22 @@ class Sum(CoreSumBase):
         return sum([term.eval_nums() for term in self.terms])
 
     def copy(self):
-        return EXPRS.sum([term.copy() for term in self.terms])
+        return Sum([term.copy() for term in self.terms])
 
     def group_nums(self):
         terms = [term.group_nums() for term in self.terms]
-        temp = EXPRS.sum(terms)
+        temp = Sum(terms)
         if temp.isnum:
             return temp
         nums = []
         for i, term in reversed(list(enumerate(terms))):
             if term.isnum:
                 nums.append(terms.pop(i))
-        sum_ = EXPRS.sum(terms)
+        sum_ = Sum(terms)
         if len(nums) == 1:
             sum_.terms.append(nums[0])
         elif len(nums) > 1:
-            sum_.terms.append(EXPRS.sum(nums))
+            sum_.terms.append(Sum(nums))
         return sum_
 
 
