@@ -16,9 +16,45 @@ __all__ = ['is_rational_expr', 'rational_flatten']
 def is_rational_expr(expr: CoreExprBase) -> bool:
     return True
 
+@is_rational_expr.register(Sum)
+def _(expr) -> bool:
+    if Poly.is_poly_expr(expr):
+        return True
+    for term in expr.terms:
+        if not is_rational_expr(term):
+            return False
+    return True
+
+@is_rational_expr.register(Prod)
+def _(expr) -> bool:
+    if Poly.is_poly_expr(expr):
+        return True
+    for factor in expr.factors:
+        if not is_rational_expr(factor):
+            return False
+    return True
+
+@is_rational_expr.register(Frac)
+def _(expr) -> bool:
+    if not is_rational_expr(expr.numer):
+        return False
+    if not is_rational_expr(expr.denom):
+        return False
+    return True
+
+@is_rational_expr.register(Exp)
+def _(expr) -> bool:
+    if not isinstance(expr.power, Num):
+        return False
+    if not is_rational_expr(expr.base):
+        return False
+    return True
+
+
 
 def rational_flatten(expr: CoreExprBase) -> CoreExprBase:
-    while not Poly.is_poly_expr(expr):
+    denoms = True
+    while denoms:
         denoms = get_denoms(expr)
         factors = decomp2prod(denoms).simplify()
         if isinstance(expr, Sum):
@@ -26,6 +62,7 @@ def rational_flatten(expr: CoreExprBase) -> CoreExprBase:
         else:
             expr = (expr * factors).expand().simplify()
     return expr
+
 
 
 def get_denoms(expr: CoreExprBase) -> Counter:
@@ -41,49 +78,6 @@ def get_denoms(expr: CoreExprBase) -> Counter:
     if isinstance(expr, (Prod, Frac, Exp)):
         return -expr.decomp()
     return Counter()
-
-####################
-# is_rational_expr #
-####################
-
-@is_rational_expr.register(Sum)
-def _(expr) -> bool:
-    if Poly.is_poly_expr(expr):
-        return True
-    for term in expr.terms:
-        if not is_rational_expr(term):
-            return False
-    return True
-
-
-@is_rational_expr.register(Prod)
-def _(expr) -> bool:
-    if Poly.is_poly_expr(expr):
-        return True
-    for factor in expr.factors:
-        if not is_rational_expr(factor):
-            return False
-    return True
-
-
-@is_rational_expr.register(Frac)
-def _(expr) -> bool:
-    if not is_rational_expr(expr.numer):
-        return False
-    if not is_rational_expr(expr.denom):
-        return False
-    return True
-
-
-@is_rational_expr.register(Exp)
-def _(expr) -> bool:
-    if not expr.power.isnum:
-        return False
-    if not isinstance(expr.power, Num):
-        return False
-    if not is_rational_expr(expr.base):
-        return False
-    return True
 
 
 if __name__ == '__main__':

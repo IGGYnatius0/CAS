@@ -61,7 +61,7 @@ class Polynomial:
             if not result:
                 return False
             b = result['consts'][B]
-            if not (b == int(b) and b > 0):
+            if not (isinstance(b, Num) and b > 0):
                 return False
         return True
 

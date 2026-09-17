@@ -237,12 +237,11 @@ def groebner_basis(polys, ordering):
 
 
 if __name__ == '__main__':
-    ordering = [a, b, c, x]
+    ordering = [a, b, x]
     polys = [
-        a**3-x,
-        b**3-x-1,
-        c**3-2*x-1,
-        a+b-c
+        a**2-x,
+        b**3-x,
+        b-a+a*b*x-a*b
     ]
 
     # ordering = [x, y]
