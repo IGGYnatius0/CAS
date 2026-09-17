@@ -17,8 +17,8 @@ class FormExp(FormExpBase):
                 b1 = self.base.match(one, var_map.copy())
                 if expr == 1 and b1:
                     return b1
-                b0 = self.base.match(0, var_map.copy())
-                p0 = self.power.match(0, var_map.copy())
+                b0 = self.base.match(zero, var_map.copy())
+                p0 = self.power.match(zero, var_map.copy())
                 if expr == 0 and b0 and not p0:
                     return b0
             if self.isconst:
