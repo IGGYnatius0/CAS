@@ -249,8 +249,8 @@ class MultiInterval(BaseInterval):
 
     def __invert__(self):
         # TODO optimize this by going through self.intervals and directly
-        # creating new intervals in between the existing ones instead of
-        # and'ing the complement of every interval together
+        #  creating new intervals in between the existing ones instead of
+        #  and'ing the complement of every interval together
         result = Interval()
         for interval in self.intervals:
             result &= ~interval
