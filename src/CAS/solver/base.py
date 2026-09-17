@@ -1,4 +1,4 @@
-from CAS.forms.classes import FORM_TYPES, FormEqn
+from CAS.forms.expr import FormExprBase, FormEqn
 import CAS.forms.matcher as matcher
 
 
@@ -8,11 +8,11 @@ __all__ = ['SolveRule', 'SolveGroup']
 class SolveRule:
     def __init__(self, target_form, formula):
         if target_form is not None:
-            if isinstance(target_form, FORM_TYPES) and not isinstance(target_form, FormEqn):
+            if isinstance(target_form, FormExprBase) and not isinstance(target_form, FormEqn):
                 self.target_form = FormEqn(target_form, 0).group_consts()
             else:
                 self.target_form = target_form.group_consts()
-            if isinstance(formula, FORM_TYPES):
+            if isinstance(formula, FormExprBase):
                 formula = (formula,)
             formula = tuple(formula)
             for formula_ in formula:

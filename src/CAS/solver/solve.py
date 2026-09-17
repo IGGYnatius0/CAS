@@ -1,8 +1,8 @@
 from CAS.core.expr import *
 from CAS.solver.zero_prod import solve as zero_solve
-from CAS.solver.polynomial_ import solve as poly_solve
-from CAS.solver.rational_ import solve as rational_solve
-from CAS.solver.algebraic_ import solve as alg_solve
+from CAS.solver.polynomial import solve as poly_solve
+from CAS.solver.rational import solve as rational_solve
+from CAS.solver.algebraic import solve as alg_solve
 
 
 solvers = (

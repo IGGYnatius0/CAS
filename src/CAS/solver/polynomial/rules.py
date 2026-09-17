@@ -1,4 +1,3 @@
-from CAS.forms.classes import FormEqn
 from CAS.forms.abc import *
 from CAS.solver.base import *
 
