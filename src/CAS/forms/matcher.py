@@ -4,6 +4,9 @@ from CAS.forms.expr import *
 from CAS.forms.expr.constraints import SingleConstraint
 
 
+__all__ = ['match']
+
+
 def solve_constraints(constrs, n_consts, n_vars):
     constrs = list(constrs)
     # Constructing a merged var_map from all the var_maps from the SingleConstraints
