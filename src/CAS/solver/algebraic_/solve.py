@@ -5,7 +5,7 @@ from CAS.algebraic import *
 __all__ = ['solve']
 
 
-def solve(expr: CoreBaseExpr, main_solve): # TODO FORGOT TO FLATTEN!!
+def solve(expr: CoreExprBase, main_solve): # TODO FORGOT TO FLATTEN!!
     expr = canonicalize(expr)
     if not is_algebraic_expr(expr):
         return []

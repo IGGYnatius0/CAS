@@ -10,27 +10,27 @@ __all__ = ['canonicalize', 'is_algebraic_expr', 'get_bases']
 
 
 @singledispatch
-def canonicalize(expr: CoreBaseExpr) -> CoreBaseExpr:
+def canonicalize(expr: CoreExprBase) -> CoreExprBase:
     """Canonicalizes expressions to not have nested powers"""
     return expr
 
 
 @lru_cache
 @singledispatch
-def is_algebraic_expr(expr: CoreBaseExpr) -> bool:
+def is_algebraic_expr(expr: CoreExprBase) -> bool:
     return True
 
 
-def get_bases(expr: CoreBaseExpr):
+def get_bases(expr: CoreExprBase):
     var_map = {}
     bases = []
-    _base = _get_bases(expr, var_map, bases, count())
-    bases.append(_base.simplify())
+    base = _get_bases(expr, var_map, bases, count())
+    bases.append(base.simplify())
     return bases, var_map
 
 
 @singledispatch
-def _get_bases(expr: CoreBaseExpr, var_map: dict, bases: list, counter) -> None:
+def _get_bases(expr: CoreExprBase, var_map: dict, bases: list, counter) -> None:
     return expr
 
 
@@ -38,26 +38,27 @@ def _get_bases(expr: CoreBaseExpr, var_map: dict, bases: list, counter) -> None:
 # canonicalize #
 ################
 
-@canonicalize.register
-def _(expr: Sum) -> Sum:
+@canonicalize.register(Sum)
+def _(expr) -> Sum:
     return Sum([canonicalize(term) for term in expr.terms])
 
 
-@canonicalize.register
-def _(expr: Prod) -> Prod:
+@canonicalize.register(Prod)
+def _(expr) -> Prod:
     return Prod([canonicalize(factor) for factor in expr.factors])
 
 
 # Frac doesnt really matter because simplify will convert all Fracs to Exps
-@canonicalize.register
-def _(expr: Frac) -> Frac:
+@canonicalize.register(Frac)
+def _(expr) -> Frac:
     return Frac(canonicalize(expr.numer), canonicalize(expr.denom))
 
 
-# TODO have an option whether to apply the product rule here, depending on whether to prioritise simpler expressions
-# or less variables in get_temp_vars
-@canonicalize.register
-def _(expr: Exp) -> Prod | Exp:
+# TODO have an option whether to apply the product rule
+#  depending on whether to prioritise simpler expressions
+#  or less variables in get_temp_vars
+@canonicalize.register(Exp)
+def _(expr) -> Prod | Exp:
     # if isinstance(expr.base, Prod):
     #     return Prod([canonicalize(Exp(factor, expr.power)) for factor in expr.base.factors])
     if isinstance(expr.base, Exp):
@@ -70,7 +71,7 @@ def _(expr: Exp) -> Prod | Exp:
 #####################
 
 @is_algebraic_expr.register(Sum)
-def _(expr: Sum) -> bool:
+def _(expr) -> bool:
     if is_rational_expr(expr):
         return True
     for term in expr.terms:
@@ -80,7 +81,7 @@ def _(expr: Sum) -> bool:
 
 
 @is_algebraic_expr.register(Prod)
-def _(expr: Prod) -> bool:
+def _(expr) -> bool:
     if is_rational_expr(expr):
         return True
     for factor in expr.factors:
@@ -90,7 +91,7 @@ def _(expr: Prod) -> bool:
 
 
 @is_algebraic_expr.register(Frac)
-def _(expr: Frac) -> bool:
+def _(expr) -> bool:
     if not is_algebraic_expr(expr.numer):
         return False
     if not is_algebraic_expr(expr.denom):
@@ -99,7 +100,7 @@ def _(expr: Frac) -> bool:
 
 
 @is_algebraic_expr.register(Exp)
-def _(expr: Exp) -> bool:
+def _(expr) -> bool:
     if not isrational(expr.power):
         return False
     if not is_algebraic_expr(expr.base):
@@ -107,9 +108,9 @@ def _(expr: Exp) -> bool:
     return True
 
 
-#################
-# get_temp_vars #
-#################
+#############
+# get_bases #
+#############
 
 @_get_bases.register(Sum)
 def _(expr: Sum, var_map: dict, bases: list, counter) -> Sum:
@@ -123,14 +124,12 @@ def _(expr: Prod, var_map: dict, bases: list, counter) -> Prod:
 
 @_get_bases.register(Frac)
 def _(expr: Frac, var_map: dict, bases: list, counter) -> Frac:
-    return Frac(
-        _get_bases(expr.numer, var_map, bases, counter),
-        _get_bases(expr.denom, var_map, bases, counter)
-    )
+    return Frac(_get_bases(expr.numer, var_map, bases, counter),
+                _get_bases(expr.denom, var_map, bases, counter))
 
 
 # TODO have an option to prioritise simpler expressions or less variables
-# Right now it is prioritising less variables
+#  Right now it is prioritising less variables
 @_get_bases.register(Exp)
 def _(expr: Exp, var_map: dict, bases: list, counter) -> Exp:
     base = expr.base.expand().simplify()
@@ -141,6 +140,8 @@ def _(expr: Exp, var_map: dict, bases: list, counter) -> Exp:
             power_numer *= p ** n
         elif n < 0:
             power_denom *= p ** -n
+    power_numer = power_numer.simplify()
+    power_denom = power_denom.simplify()
     base_with_pow = Exp(base, Exp(power_denom, neg_one))
     if base_with_pow in var_map:
         return Exp(var_map[base_with_pow], power_numer)
@@ -156,4 +157,7 @@ def _(expr: Exp, var_map: dict, bases: list, counter) -> Exp:
 if __name__ == '__main__':
     x = Var('x')
     y = Var('y')
-    print(get_bases((x+1)**Frac(1, 3) + (x-1)**Frac(1,3) - x**Frac(1,3)))
+    bases, var_map = get_bases((x+1)**Frac(1, 3) + (x-1)**Frac(1,3) - x**Frac(1,3))
+    print(var_map)
+    for base in bases:
+        print(base)

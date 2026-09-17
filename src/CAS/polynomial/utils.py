@@ -11,7 +11,7 @@ __all__ = ['Polynomial', 'Poly', 'poly_div', 'get_rational_roots']
 
 class Polynomial:
     def __init__(self, poly, var=None):
-        if isinstance(poly, CoreBaseExpr):
+        if isinstance(poly, CoreExprBase):
             if Polynomial.is_poly_expr(poly):
                 self.coeffs = poly_to_coeffs(poly)
                 self.deg = len(self.coeffs) - 1
@@ -22,10 +22,10 @@ class Polynomial:
             else:
                 raise ValueError('Input must be polynomial or coefficient list')
         elif isinstance(poly, list):
-            self.coeffs = [Num(i) if Num.is_num(i) else i for i in poly]
+            self.coeffs = [make_expr(i) for i in poly]
             self.deg = len(self.coeffs) - 1
             if var is None:
-                self.var = Var('x')
+                self.var = Var('x') # Do not change!!
             else:
                 self.var = var
         elif isinstance(poly, Polynomial):
@@ -53,7 +53,7 @@ class Polynomial:
                 if not result:
                     return False
                 b = result['consts'][B]
-                if not (b == int(b) and b > 0):
+                if not (isinstance(b, Num) and b.value > 0):
                     return False
 
         else:
@@ -84,15 +84,17 @@ def poly_to_coeffs(poly):
         if not result:
             raise ValueError('Input is not a polynomial')
         temp[result['consts'][B]] = result['consts'][A]
-    coeffs = [zero] * int(max(temp.keys()) + 1)
+    coeffs = [zero] * (max(temp.keys()).value + 1)
     for i, coeff in temp.items():
-        coeffs[int(i)] = coeff
+        coeffs[i.value] = coeff
     return coeffs[::-1]
 
 
 def poly_div(poly1, poly2):
     poly1 = Polynomial(poly1)
     poly2 = Polynomial(poly2)
+    if poly1.var != poly2.var:
+        raise ValueError()
     if poly1.deg < poly2.deg:
         return poly1
     q_coeffs = [zero] * (poly1.deg - poly2.deg + 1)
@@ -105,6 +107,7 @@ def poly_div(poly1, poly2):
 
 def get_rational_roots(poly):
     # Preprocess coefficients, I might turn this into a separate function in future
+    # TODO pre check if coefficients are rational
     coeffs = poly.coeffs.copy()
     denom = Counter()
     for coeff in coeffs:
@@ -112,15 +115,20 @@ def get_rational_roots(poly):
         decomp = coeff.decomp()
         for base, power in decomp.items():
             if power < 0:
-                denom.update({base: -power})
+                denom_.update({base: -power.value})
         denom |= denom_
-    first = abs(poly.coeffs[0]).decomp() + denom
-    last = abs(poly.coeffs[-1]).decomp() + denom
-    # Original code
-    # first = abs(poly.coeffs[0]).decomp()
-    # last = abs(poly.coeffs[-1]).decomp()
-    numer_temp = [range(int(n) + 1) for n in last.values()]
-    denom_temp = [range(int(n) + 1) for n in first.values()]
+    denom = {base: Num(power) for base, power, in denom.items()}
+    first = +coeffs[0].decomp()
+    last = +coeffs[-1].decomp()
+    first.pop(neg_one, None)
+    last.pop(neg_one, None)
+    first.update(denom)
+    last.update(denom)
+    first = simplify_decomp(first)
+    last = simplify_decomp(last)
+    # Actual computation
+    numer_temp = [range(n.value + 1) for n in last.values()]
+    denom_temp = [range(n.value + 1) for n in first.values()]
     numer_powers = product(*numer_temp)
     denom_powers = product(*denom_temp)
     numer_factors = []
@@ -146,5 +154,7 @@ def get_rational_roots(poly):
 
 if __name__ == '__main__':
     y = Var('y')
-    expr = (y + 1) ** Frac(1, 3) + (y + 2) ** Frac(1, 3) - (2 * y + 3) ** Frac(1, 3)
-    print(Poly.is_poly_expr(expr))
+    poly = Poly(-Frac(2,3)*y**2+y-Frac(4,5))
+    r = get_rational_roots(poly)
+    [print(i) for i in r]
+    print(len(r))

@@ -63,7 +63,7 @@ def lex_cmp(term1: Counter, term2: Counter, ordering) -> bool:
 
 
 class MultiVariatePolynomial(Sum):
-    def __init__(self, expr: CoreBaseExpr | list, ordering):
+    def __init__(self, expr: CoreExprBase | list, ordering):
         if isinstance(expr, list):
             expr = Sum(expr)
         if set(ordering) < expr.get_vars:
@@ -74,21 +74,22 @@ class MultiVariatePolynomial(Sum):
             terms = [expr]
 
         decomp = []
-        num = None
+        const = None
         for term in terms:
             if term.isnum:
-                num = term
+                const = term
             else:
                 decomp.append(term.decomp())
         terms = lex_sort(decomp, ordering)
         terms = [decomp2prod(term).simplify() for term in terms]
-        if num is not None:
-            terms.append(num)
+        if const is not None:
+            terms.append(const)
         super().__init__(terms)
         self.ordering = ordering
 
     @cached_property
     def LT(self) -> Counter:
+        # decomp = self.terms[0].decomp()
         return self.terms[0].decomp()
 
     @cached_property
@@ -97,7 +98,7 @@ class MultiVariatePolynomial(Sum):
 
     @cached_property
     def LC(self) -> Counter:
-        return Counter({base: power for base, power in self.LT.items() if base.isnum})
+        return Counter({base: power for base, power in self.LT.items() if isinstance(base, Num)})
 
     def copy(self):
         return MultiVariatePolynomial(super().copy(), self.ordering)
@@ -163,7 +164,7 @@ def chain_criterion(G, i, j, reduced):
 
 
 def lcm_size(f: MVP, g: MVP) -> int:
-    return sum((f.LM | g.LT).values())
+    return sum((f.LM | g.LM).values()).simplify()
 
 
 def buchberger(F, ordering):

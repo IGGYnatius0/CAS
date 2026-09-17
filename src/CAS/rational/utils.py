@@ -13,17 +13,14 @@ __all__ = ['is_rational_expr', 'rational_flatten']
 
 @lru_cache
 @singledispatch
-def is_rational_expr(expr: CoreBaseExpr) -> bool:
+def is_rational_expr(expr: CoreExprBase) -> bool:
     return True
 
 
-def rational_flatten(expr: CoreBaseExpr) -> CoreBaseExpr:
+def rational_flatten(expr: CoreExprBase) -> CoreExprBase:
     while not Poly.is_poly_expr(expr):
         denoms = get_denoms(expr)
-        factors = []
-        for base, power in denoms.items():
-            factors.append(Exp(base, power))
-        factors = Prod(factors).simplify()
+        factors = decomp2prod(denoms).simplify()
         if isinstance(expr, Sum):
             expr = Sum([(term * factors).simplify() for term in expr.terms]).expand().simplify()
         else:
@@ -31,8 +28,18 @@ def rational_flatten(expr: CoreBaseExpr) -> CoreBaseExpr:
     return expr
 
 
-@singledispatch
-def get_denoms(expr: CoreBaseExpr) -> Counter:
+def get_denoms(expr: CoreExprBase) -> Counter:
+    if isinstance(expr, Sum):
+        denoms = Counter()
+        for term in expr.terms:
+            new_denoms = get_denoms(term)
+            new_denoms = simplify_decomp(new_denoms)
+            for base, power in new_denoms.items():
+                new_denoms[base] = power.value
+            denoms |= new_denoms
+        return denoms
+    if isinstance(expr, (Prod, Frac, Exp)):
+        return -expr.decomp()
     return Counter()
 
 ####################
@@ -40,7 +47,7 @@ def get_denoms(expr: CoreBaseExpr) -> Counter:
 ####################
 
 @is_rational_expr.register(Sum)
-def _(expr: Sum) -> bool:
+def _(expr) -> bool:
     if Poly.is_poly_expr(expr):
         return True
     for term in expr.terms:
@@ -50,7 +57,7 @@ def _(expr: Sum) -> bool:
 
 
 @is_rational_expr.register(Prod)
-def _(expr: Prod) -> bool:
+def _(expr) -> bool:
     if Poly.is_poly_expr(expr):
         return True
     for factor in expr.factors:
@@ -60,7 +67,7 @@ def _(expr: Prod) -> bool:
 
 
 @is_rational_expr.register(Frac)
-def _(expr: Frac) -> bool:
+def _(expr) -> bool:
     if not is_rational_expr(expr.numer):
         return False
     if not is_rational_expr(expr.denom):
@@ -69,48 +76,19 @@ def _(expr: Frac) -> bool:
 
 
 @is_rational_expr.register(Exp)
-def _(expr: Exp) -> bool:
+def _(expr) -> bool:
     if not expr.power.isnum:
         return False
-    if expr.power != int(expr.power):
+    if not isinstance(expr.power, Num):
         return False
     if not is_rational_expr(expr.base):
         return False
     return True
 
-##############
-# get_denoms #
-##############
-
-@get_denoms.register(Sum)
-def _(expr: Sum) -> Counter:
-    denom = Counter()
-    for term in expr.terms:
-        denom |= get_denoms(term)
-    return denom
-
-
-@get_denoms.register(Prod)
-@get_denoms.register(Frac)
-@get_denoms.register(Exp)
-def _(expr: Prod | Exp) -> Counter:
-    return -expr.decomp()
-
 
 if __name__ == '__main__':
     x = Var('x')
-    expr = (
-             ((2 * x ** 3 - 5 * x ** 2 + 3 * x - 1) / (x ** 2 + 2 * x + 1)) +
-             ((x ** 4 - 3 * x ** 3 + 2 * x ** 2 - x + 4) / (2 * x ** 3 - x ** 2 + 3 * x - 2)) *
-             ((3 * x ** 2 - 4 * x + 1) / (x ** 2 - x + 2))
-     ) / (
-             ((x ** 2 + 3 * x - 1) / (x - 2)) +
-             ((2 * x ** 2 - x + 3) / (x ** 2 + 1))
-     ) - (
-             (x ** 3 - 2 * x ** 2 + 4 * x - 3) /
-             ((x ** 2 + 1) * (x - 1) + 2 * x)
-     )
-    # expr = ((1+x)/(2+x)+3*x) / ((2+x)/(3+x)+4*x) + 5*x
+    expr = ((1+x)/(2+x)+3*x) / ((2+x)/(3+x)+4*x) + 5*x
     expr = expr.simplify()
     print(expr)
     print(rational_flatten(expr))

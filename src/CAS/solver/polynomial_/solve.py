@@ -5,7 +5,7 @@ from CAS.solver.polynomial_.solvers import *
 from CAS.solver.zero_prod import solve as zero_solve
 
 
-def solve(expr: CoreBaseExpr, main_solve):
+def solve(expr: CoreExprBase, main_solve):
     expr = expr.expand().simplify()
     expr = expr.factorize().simplify() # Global factorize
     if not Poly.is_poly_expr(expr):
