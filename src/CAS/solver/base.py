@@ -1,4 +1,4 @@
-from CAS.forms.expr import FormExprBase, FormEqn
+from CAS.forms.expr import FormExprBase, FormEqn, form2core
 import CAS.forms.matcher as matcher
 
 
@@ -27,7 +27,8 @@ class SolveRule:
         solns = []
         for formula in self.formula:
             soln = formula.substitute_consts(result['consts'])
-            solns.append(soln.to_coretype(result['consts']).simplify())
+            soln_core = form2core(soln, const_map=result['consts']).simplify()
+            solns.append(soln_core)
         return solns
 
 
