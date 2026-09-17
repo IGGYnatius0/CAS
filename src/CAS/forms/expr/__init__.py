@@ -1,6 +1,7 @@
 from .registry import FORMS
 
 from .base import FormExprBase
+from .utils import *
 import CAS.forms.expr.num
 import CAS.forms.expr.const
 import CAS.forms.expr.wild
@@ -31,4 +32,5 @@ fneg_one = FORMS.neg_one
 __all__ = ['FormExprBase',
            'FormNum', 'FormConst', 'FormVar', 'FormWild',
            'FormSum', 'FormProd', 'FormFrac', 'FormExp', 'FormEqn',
-           'fzero', 'fone', 'fneg_one']
+           'fzero', 'fone', 'fneg_one',
+           'make_form', 'core2form', 'form2core']
