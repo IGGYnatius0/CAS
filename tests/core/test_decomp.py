@@ -1,5 +1,4 @@
-import pytest
-from CAS.core.expr import *
+from CAS.core import *
 
 from collections import Counter
 
@@ -23,6 +22,8 @@ class TestNumDecomp:
                        Num(13): Num(1),
                        Num(17): Num(1),
                        Num(19): Num(1)})
+
+        # 20 factorial
         assert Num(2432902008176640000).decomp() == ans
 
 
@@ -34,6 +35,11 @@ class TestVarDecomp:
 class TestSumDecomp:
     def test(self, x):
         assert Sum([x, 1]).decomp() == Counter({Sum([x, 1]): Num(1)})
+
+
+class TestProdDecomp:
+    def test(self, x, y):
+        assert decomp(x * y * x**3 * y**-3) == Counter({x: Num(4), y: Num(-2)})
 
 
 class TestExpDecomp:
