@@ -1,7 +1,7 @@
 from collections import Counter
-from CAS.core.expr import *
-from CAS.forms.expr import *
-from CAS.forms.expr.constraints import SingleConstraint
+from CAS.core import *
+from .expr import *
+from .expr.constraints import SingleConstraint
 
 
 __all__ = ['match']
@@ -61,7 +61,7 @@ def solve_constraints(constrs, n_consts, n_vars):
             constrs[j] = constr
         i += 1
     for const, value in const_map.items():
-        const_map[const] = value.simplify()
+        const_map[const] = simplify(value)
     if len(const_map) == n_consts:
         return const_map, var_map
     return False

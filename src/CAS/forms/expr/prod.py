@@ -3,7 +3,7 @@ from functools import cached_property
 from .registry import FORMS
 from .base import FormProdBase
 from .utils import make_form
-from CAS.core.expr import *
+from CAS.core import *
 
 
 class FormProd(FormProdBase):

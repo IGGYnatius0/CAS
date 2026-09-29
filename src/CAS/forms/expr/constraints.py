@@ -1,7 +1,7 @@
 from itertools import product, chain
 
 from .registry import FORMS
-from CAS.core.expr import *
+from CAS.core import *
 
 
 class SingleConstraint:

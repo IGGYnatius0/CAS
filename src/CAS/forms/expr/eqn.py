@@ -2,7 +2,7 @@ from functools import cached_property
 
 from .registry import FORMS
 from .utils import make_form
-from CAS.core.expr import Eqn
+from CAS.core import Eqn
 
 
 class FormEqn:

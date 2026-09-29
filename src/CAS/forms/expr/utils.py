@@ -3,7 +3,7 @@ from functools import singledispatch
 
 from .registry import FORMS
 from .base import FormExprBase
-from CAS.core.expr import *
+from CAS.core import *
 
 
 __all__ = ['make_form', 'core2form', 'form2core']

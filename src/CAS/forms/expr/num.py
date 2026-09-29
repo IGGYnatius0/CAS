@@ -2,7 +2,7 @@ from functools import cached_property
 
 from .registry import FORMS
 from .base import FormNumBase
-from CAS.core.expr import Num
+from CAS.core import Num
 
 
 class FormNum(FormNumBase):

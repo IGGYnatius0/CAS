@@ -2,7 +2,7 @@ from functools import cached_property
 
 from .registry import FORMS
 from .base import FormWildBase
-from CAS.core.expr import *
+from CAS.core import *
 
 
 class FormWild(FormWildBase):
