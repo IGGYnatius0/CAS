@@ -32,4 +32,4 @@ def _(expr):
 
 @isrational.register(Exp)
 def _(expr):
-    return int(expr.base) == expr.base and int(expr.power) == expr.power
+    return isinstance(expr.base, Num) and expr.base > 0 and isinstance(expr.power, Num)
