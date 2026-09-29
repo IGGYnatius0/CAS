@@ -10,9 +10,9 @@ class Num(CoreNumBase):
     def __init__(self, value):
         self.value = value
 
-    def decomp(self):
-        f = pfactor(self.value)
-        return Counter({Num(base): Num(power) for base, power in f.items()})
+    # def decomp(self):
+    #     f = pfactor(self.value)
+    #     return Counter({Num(base): Num(power) for base, power in f.items()})
 
     @cached_property
     def isnum(self):

@@ -10,12 +10,12 @@ class Frac(CoreFracBase):
         self.numer = make_expr(numer)
         self.denom = make_expr(denom)
 
-    def decomp(self):
-        numers = self.numer.decomp()
-        denoms = self.denom.decomp()
-        numers.subtract(denoms)
-        numers = simplify_decomp(numers)
-        return numers
+    # def decomp(self):
+    #     numers = self.numer.decomp()
+    #     denoms = self.denom.decomp()
+    #     numers.subtract(denoms)
+    #     numers = simplify_decomp(numers)
+    #     return numers
 
     def expand(self):
         return EXPRS.frac(self.numer.expand(), self.denom.expand())
@@ -23,13 +23,13 @@ class Frac(CoreFracBase):
     def factorize(self):
         return EXPRS.frac(self.numer.factorize(), self.denom.factorize())
 
-    def simplify(self):
-        """Returns the fraction with simplified numerator and denominator"""
-        numer = self.numer.simplify().decomp()
-        denom = self.denom.simplify().decomp()
-        numer.subtract(denom)
-        numer = simplify_decomp(numer)
-        return decomp2prod(numer).simplify()
+    # def simplify(self):
+    #     """Returns the fraction with simplified numerator and denominator"""
+    #     numer = self.numer.simplify().decomp()
+    #     denom = self.denom.simplify().decomp()
+    #     numer.subtract(denom)
+    #     numer = simplify_decomp(numer)
+    #     return decomp2prod(numer).simplify()
 
     def substitute_vars(self, var_map):
         return EXPRS.frac(self.numer.substitute_vars(var_map), self.denom.substitute_vars(var_map))

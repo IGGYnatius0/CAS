@@ -5,7 +5,7 @@ from .registry import EXPRS
 from .base import CoreExprBase
 
 
-__all__ = ['simplify_decomp', 'decomp2prod', 'make_expr']
+__all__ = ['decomp2prod', 'make_expr']
 
 
 def simplify_decomp(decomp: Counter) -> Counter:

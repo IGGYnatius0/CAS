@@ -18,12 +18,12 @@ class Prod(CoreProdBase):
         if not self.factors:
             self.factors = [EXPRS.one]
 
-    def decomp(self):
-        c = Counter()
-        for factor in self.factors:
-            c.update(factor.decomp())
-        c = simplify_decomp(c)
-        return c
+    # def decomp(self):
+    #     c = Counter()
+    #     for factor in self.factors:
+    #         c.update(factor.decomp())
+    #     c = simplify_decomp(c)
+    #     return c
 
     def expand(self):
         to_expand = []
@@ -38,45 +38,45 @@ class Prod(CoreProdBase):
     def factorize(self):
         return Prod([factor.factorize() for factor in self.factors])
 
-    def simplify(self):
-        """Simplifies the expression; if factors contain 0, returns 0"""
-        if len(self.factors) == 1:
-            return self.factors[0].simplify()
-        decomp = Prod([factor.simplify() for factor in self.factors]).decomp()
-        numer = 1
-        denom = 1
-        factors = [] # non rational stuff
-        for base, power in decomp.items():
-            if isinstance(base, EXPRS.num) and isinstance(power, EXPRS.num):
-                if power > 0:
-                    numer *= base.value ** power.value
-                elif power < 0:
-                    denom *= base.value ** -power.value
-            else:
-                factors.append(EXPRS.exp(base, power).simplify())
-        # DO NOT use Frac(numer, denom).simplify() as that uses Prod simplify,
-        # which will cause RecursionError
-        if numer == 0:
-            return EXPRS.zero
-        if denom == 0:
-            raise ZeroDivisionError(f'{numer=}; {denom=}; {factors=}')
-
-        if numer == 1 and denom != 1:
-            const = EXPRS.exp(denom, -1)
-        elif numer != 1 and denom == 1:
-            const = EXPRS.num(numer)
-        elif numer == 1 and denom == 1:
-            const = EXPRS.one
-        else:
-            const = Prod([numer, EXPRS.exp(denom, -1)])
-
-        if len(factors) == 0:
-            return const
-        if const == 1 and len(factors) == 1:
-            return factors[0]
-        if const == 1 and len(factors) > 1:
-            return Prod(factors)
-        return const * Prod(factors)
+    # def simplify(self):
+    #     """Simplifies the expression; if factors contain 0, returns 0"""
+    #     if len(self.factors) == 1:
+    #         return self.factors[0].simplify()
+    #     decomp = Prod([factor.simplify() for factor in self.factors]).decomp()
+    #     numer = 1
+    #     denom = 1
+    #     factors = [] # non rational stuff
+    #     for base, power in decomp.items():
+    #         if isinstance(base, EXPRS.num) and isinstance(power, EXPRS.num):
+    #             if power > 0:
+    #                 numer *= base.value ** power.value
+    #             elif power < 0:
+    #                 denom *= base.value ** -power.value
+    #         else:
+    #             factors.append(EXPRS.exp(base, power).simplify())
+    #     # DO NOT use Frac(numer, denom).simplify() as that uses Prod simplify,
+    #     # which will cause RecursionError
+    #     if numer == 0:
+    #         return EXPRS.zero
+    #     if denom == 0:
+    #         raise ZeroDivisionError(f'{numer=}; {denom=}; {factors=}')
+    #
+    #     if numer == 1 and denom != 1:
+    #         const = EXPRS.exp(denom, -1)
+    #     elif numer != 1 and denom == 1:
+    #         const = EXPRS.num(numer)
+    #     elif numer == 1 and denom == 1:
+    #         const = EXPRS.one
+    #     else:
+    #         const = Prod([numer, EXPRS.exp(denom, -1)])
+    #
+    #     if len(factors) == 0:
+    #         return const
+    #     if const == 1 and len(factors) == 1:
+    #         return factors[0]
+    #     if const == 1 and len(factors) > 1:
+    #         return Prod(factors)
+    #     return const * Prod(factors)
 
     def substitute_vars(self, var_map):
         return Prod([term.substitute_vars(var_map) for term in self.factors])

@@ -3,7 +3,7 @@ from functools import cached_property
 
 from .registry import EXPRS
 from .base import CoreExpBase
-from .utils import make_expr, simplify_decomp
+from .utils import make_expr # , simplify_decomp
 from CAS.core.pfactor import pfactor
 
 
@@ -12,18 +12,18 @@ class Exp(CoreExpBase):
         self.base = make_expr(base)
         self.power = make_expr(power)
 
-    def decomp(self):
-        if not self.power.isnum:
-            return Counter({self: EXPRS.one})
-        decomp = self.base.decomp()
-        if isinstance(self.power, EXPRS.num):
-            power = self.power.value
-        else:
-            power = self.power
-        for expr in decomp:
-            decomp[expr] *= power
-        decomp = simplify_decomp(decomp)
-        return decomp
+    # def decomp(self):
+    #     if not self.power.isnum:
+    #         return Counter({self: EXPRS.one})
+    #     decomp = self.base.decomp()
+    #     if isinstance(self.power, EXPRS.num):
+    #         power = self.power.value
+    #     else:
+    #         power = self.power
+    #     for expr in decomp:
+    #         decomp[expr] *= power
+    #     decomp = simplify_decomp(decomp)
+    #     return decomp
 
     def expand(self):
         if isinstance(self.power, EXPRS.num) and int(
@@ -47,31 +47,31 @@ class Exp(CoreExpBase):
             result *= p ** n
         return EXPRS.num(result)
 
-    def simplify(self):
-        """Simplifies the expression"""
-        base = self.base.simplify()
-        power = self.power.simplify()
-        if isinstance(base, EXPRS.exp):
-            power = (base.power * power).simplify()
-            base = base.base
-        if power == 1:
-            return base
-        if base == 1 or (power == 0 and base != 0):
-            return EXPRS.one
-        if base == 0 and power != 0:
-            return EXPRS.zero
-        if base == 0 and power == 0:
-            return Exp(0, 0)
-        if isinstance(base, EXPRS.num):
-            if isinstance(power, EXPRS.num) and power > 0:
-                # a^b where a and b are integers
-                return EXPRS.num(base.value ** power.value)
-            if isinstance(power, EXPRS.exp) and isinstance(power.base, EXPRS.num) and power.power == -1:
-                # a^b where a is integer and b=1/int
-                result = self._pow_int_test(base, power)
-                if result:
-                    return result
-        return Exp(base, power)
+    # def simplify(self):
+    #     """Simplifies the expression"""
+    #     base = self.base.simplify()
+    #     power = self.power.simplify()
+    #     if isinstance(base, EXPRS.exp):
+    #         power = (base.power * power).simplify()
+    #         base = base.base
+    #     if power == 1:
+    #         return base
+    #     if base == 1 or (power == 0 and base != 0):
+    #         return EXPRS.one
+    #     if base == 0 and power != 0:
+    #         return EXPRS.zero
+    #     if base == 0 and power == 0:
+    #         return Exp(0, 0)
+    #     if isinstance(base, EXPRS.num):
+    #         if isinstance(power, EXPRS.num) and power > 0:
+    #             # a^b where a and b are integers
+    #             return EXPRS.num(base.value ** power.value)
+    #         if isinstance(power, EXPRS.exp) and isinstance(power.base, EXPRS.num) and power.power == -1:
+    #             # a^b where a is integer and b=1/int
+    #             result = self._pow_int_test(base, power)
+    #             if result:
+    #                 return result
+    #     return Exp(base, power)
 
     def substitute_vars(self, var_map):
         return self.base.substitute_vars(var_map) ** self.power.substitute_vars(var_map)

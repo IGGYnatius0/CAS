@@ -1,6 +1,6 @@
 from .expr import *
 from .pfactor import pfactor
-from .simplify import decomp, simplify
+from .simplify import *
 from .utils import isrational
 
 

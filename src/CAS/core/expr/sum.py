@@ -41,113 +41,113 @@ class Sum(CoreSumBase):
 
         return EXPRS.prod([common_prod, terms_sum])
 
-    @staticmethod
-    def _sum_nums(exprs):
-        const = 0
-        terms = []
-        for expr in exprs:
-            expr = expr.simplify()
-            if isinstance(expr, EXPRS.num):
-                const += expr.value
-            else:
-                terms.append(expr)
-        if len(terms) == 0:
-            return EXPRS.num(const)
-        if const == 0:
-            return Sum(terms)
-        terms.append(const)
-        return Sum(terms)
-
-    @staticmethod
-    def _sum_coeffs(coeffs: list[list[EXPRS.exp]]):
-        # This method is as complicated as it is because the combining of
-        # Nums either by addition or multiplication requires the separation
-        # of Nums and expressions that are isnum. Only after they are
-        # separated can the combining happen via .value .
-
-        # Sort expressions into numer and denom, numeric and symbolic
-        numers = []
-        denoms = []
-        for coeff in coeffs:
-            numer_num = 1
-            denom_num = 1
-            numer_exprs = []
-            denom_exprs = []
-            for exp in coeff:
-                if isinstance(exp.power, EXPRS.num) and exp.power < 0:
-                    if isinstance(exp.base, EXPRS.num):
-                        denom_num *= exp.base.value ** -exp.power.value
-                    else:
-                        denom_exprs.append(exp)
-                else:
-                    if isinstance(exp.base, EXPRS.num) and isinstance(exp.power, EXPRS.num):
-                        numer_num *= exp.base.value ** exp.power.value
-                    else:
-                        numer_exprs.append(exp)
-            numer_exprs.append(numer_num)
-            denom_exprs.append(denom_num)
-            numers.append(EXPRS.prod(numer_exprs))
-            denoms.append(EXPRS.prod(denom_exprs))
-
-        # Sum of fractions
-        numer = []
-        denom = []
-        for i, n in enumerate(numers):
-            temp = []
-            for j, d in enumerate(denoms):
-                if i == j:
-                    temp.append(n)
-                    denom.append(d)
-                else:
-                    temp.append(d)
-            numer.append(EXPRS.prod(temp))
-
-        # .simplify() is only used as a last resort here because if numer and denom contain sums,
-        # it is likely to cause RecursionError
-        numer = Sum._sum_nums(numer)
-        denom = EXPRS.prod(denom).simplify()
-        if denom == 1:
-            return numer
-        if denom == -1:
-            return numer * -1
-        decomp = numer.decomp()
-        decomp.subtract(denom.decomp())
-        return decomp2prod(decomp).simplify()
-
-    def simplify(self):
-        if len(self.terms) == 1:
-            return self.terms[0].simplify()
-        decomps = [term.simplify().decomp() for term in self.terms]
-        terms_dict = defaultdict(list)
-        for decomp in decomps:
-            coeff = []
-            factors = []
-            for base, power in decomp.items():
-                # Separate coefficients and variables
-                expr = EXPRS.exp(base, power)
-                if base.isnum and power.isnum:
-                    coeff.append(expr)
-                else:
-                    factors.append(expr)
-            terms_dict[EXPRS.prod(factors).simplify()].append(coeff)
-
-        # Sum coefficients together
-        terms = []
-        for factor, coeffs in terms_dict.items():
-            coeff = self._sum_coeffs(coeffs)
-            if coeff == 0:
-                terms.append(EXPRS.zero)
-            elif coeff == 1:
-                terms.append(factor)
-            elif factor == 1:
-                terms.append(coeff)
-            else:
-                terms.append(coeff * factor)
-        if len(terms) == 0:
-            return 0
-        if len(terms) == 1:
-            return terms[0]
-        return Sum(terms)
+    # @staticmethod
+    # def _sum_nums(exprs):
+    #     const = 0
+    #     terms = []
+    #     for expr in exprs:
+    #         expr = expr.simplify()
+    #         if isinstance(expr, EXPRS.num):
+    #             const += expr.value
+    #         else:
+    #             terms.append(expr)
+    #     if len(terms) == 0:
+    #         return EXPRS.num(const)
+    #     if const == 0:
+    #         return Sum(terms)
+    #     terms.append(const)
+    #     return Sum(terms)
+    #
+    # @staticmethod
+    # def _sum_coeffs(coeffs: list[list[EXPRS.exp]]):
+    #     # This method is as complicated as it is because the combining of
+    #     # Nums either by addition or multiplication requires the separation
+    #     # of Nums and expressions that are isnum. Only after they are
+    #     # separated can the combining happen via .value .
+    #
+    #     # Sort expressions into numer and denom, numeric and symbolic
+    #     numers = []
+    #     denoms = []
+    #     for coeff in coeffs:
+    #         numer_num = 1
+    #         denom_num = 1
+    #         numer_exprs = []
+    #         denom_exprs = []
+    #         for exp in coeff:
+    #             if isinstance(exp.power, EXPRS.num) and exp.power < 0:
+    #                 if isinstance(exp.base, EXPRS.num):
+    #                     denom_num *= exp.base.value ** -exp.power.value
+    #                 else:
+    #                     denom_exprs.append(exp)
+    #             else:
+    #                 if isinstance(exp.base, EXPRS.num) and isinstance(exp.power, EXPRS.num):
+    #                     numer_num *= exp.base.value ** exp.power.value
+    #                 else:
+    #                     numer_exprs.append(exp)
+    #         numer_exprs.append(numer_num)
+    #         denom_exprs.append(denom_num)
+    #         numers.append(EXPRS.prod(numer_exprs))
+    #         denoms.append(EXPRS.prod(denom_exprs))
+    #
+    #     # Sum of fractions
+    #     numer = []
+    #     denom = []
+    #     for i, n in enumerate(numers):
+    #         temp = []
+    #         for j, d in enumerate(denoms):
+    #             if i == j:
+    #                 temp.append(n)
+    #                 denom.append(d)
+    #             else:
+    #                 temp.append(d)
+    #         numer.append(EXPRS.prod(temp))
+    #
+    #     # .simplify() is only used as a last resort here because if numer and denom contain sums,
+    #     # it is likely to cause RecursionError
+    #     numer = Sum._sum_nums(numer)
+    #     denom = EXPRS.prod(denom).simplify()
+    #     if denom == 1:
+    #         return numer
+    #     if denom == -1:
+    #         return numer * -1
+    #     decomp = numer.decomp()
+    #     decomp.subtract(denom.decomp())
+    #     return decomp2prod(decomp).simplify()
+    #
+    # def simplify(self):
+    #     if len(self.terms) == 1:
+    #         return self.terms[0].simplify()
+    #     decomps = [term.simplify().decomp() for term in self.terms]
+    #     terms_dict = defaultdict(list)
+    #     for decomp in decomps:
+    #         coeff = []
+    #         factors = []
+    #         for base, power in decomp.items():
+    #             # Separate coefficients and variables
+    #             expr = EXPRS.exp(base, power)
+    #             if base.isnum and power.isnum:
+    #                 coeff.append(expr)
+    #             else:
+    #                 factors.append(expr)
+    #         terms_dict[EXPRS.prod(factors).simplify()].append(coeff)
+    #
+    #     # Sum coefficients together
+    #     terms = []
+    #     for factor, coeffs in terms_dict.items():
+    #         coeff = self._sum_coeffs(coeffs)
+    #         if coeff == 0:
+    #             terms.append(EXPRS.zero)
+    #         elif coeff == 1:
+    #             terms.append(factor)
+    #         elif factor == 1:
+    #             terms.append(coeff)
+    #         else:
+    #             terms.append(coeff * factor)
+    #     if len(terms) == 0:
+    #         return 0
+    #     if len(terms) == 1:
+    #         return terms[0]
+    #     return Sum(terms)
 
     def substitute_vars(self, var_map):
         return Sum([term.substitute_vars(var_map) for term in self.terms])

@@ -6,10 +6,10 @@ from .pfactor import pfactor
 from .utils import isrational # TODO to be replaced by intervals
 
 
-__all__ = ['decomp', 'simplify']
+__all__ = ['decomp', 'simplify', 'simplify_decomp']
 
 
-def _simplify_decomp(counter):
+def simplify_decomp(counter):
     new_decomp = Counter()
     for base, power in counter.items():
         new_decomp[base] = simplify(power)
@@ -18,22 +18,27 @@ def _simplify_decomp(counter):
 
 @lru_cache
 @singledispatch
-def decomp(expr):
-    return Counter({expr: Num(1)})
+def decomp(expr, top=True):
+    if top:
+        return Counter({expr: one})
+    return Counter({expr: 1})
 
 
 @decomp.register(Num)
-def _(num):
+def _(num, top=True):
     f = pfactor(num.value)
-    f = Counter({Num(base): power for base, power in f.items()})
+    if top:
+        f = Counter({Num(base): Num(power) for base, power in f.items()})
+    else:
+        f = Counter({Num(base): power for base, power in f.items()})
     return f
 
 
 @decomp.register(Exp)
-def _(exp):
+def _(exp, top=True):
     if not exp.power.isnum:
         return Counter({exp: one})
-    d = decomp(exp.base).copy()
+    d = decomp(exp.base, top=False).copy()
     if isinstance(exp.power, Num):
         power = exp.power.value
     else:
@@ -44,20 +49,20 @@ def _(exp):
 
 
 @decomp.register(Frac)
-def _(frac):
-    numers = decomp(frac.numer).copy()
-    denoms = decomp(frac.denom)
+def _(frac, top=True):
+    numers = decomp(frac.numer, top=False).copy()
+    denoms = decomp(frac.denom, top=False)
     numers.subtract(denoms)
-    numers = _simplify_decomp(numers)
+    numers = simplify_decomp(numers)
     return numers
 
 
 @decomp.register(Prod)
-def _(prod):
+def _(prod, top=True):
     c = Counter()
     for factor in prod.factors:
-        c.update(decomp(factor))
-    c = _simplify_decomp(c)
+        c.update(decomp(factor, top=False))
+    c = simplify_decomp(c)
     return c
 
 
@@ -112,7 +117,7 @@ def _(frac):
     numer = decomp(simplify(frac.numer)).copy()
     denom = decomp(simplify(frac.denom))
     numer.subtract(denom)
-    numer = _simplify_decomp(numer)
+    numer = simplify_decomp(numer)
     s = simplify(decomp2prod(numer))
     return s
 
