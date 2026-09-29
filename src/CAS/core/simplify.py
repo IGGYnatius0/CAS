@@ -1,10 +1,22 @@
+from collections import Counter, defaultdict
 from functools import singledispatch, lru_cache
-from collections import Counter
 
 from .expr import *
 from .pfactor import pfactor
+from .utils import isrational # TODO to be replaced by intervals
 
 
+__all__ = ['decomp', 'simplify']
+
+
+def _simplify_decomp(counter):
+    new_decomp = Counter()
+    for base, power in counter.items():
+        new_decomp[base] = simplify(power)
+    return new_decomp
+
+
+@lru_cache
 @singledispatch
 def decomp(expr):
     return Counter({expr: Num(1)})
@@ -12,7 +24,268 @@ def decomp(expr):
 
 @decomp.register(Num)
 def _(num):
-    return pfactor(num)
+    f = pfactor(num.value)
+    f = Counter({Num(base): power for base, power in f.items()})
+    return f
 
 
 @decomp.register(Exp)
+def _(exp):
+    if not exp.power.isnum:
+        return Counter({exp: one})
+    d = decomp(exp.base).copy()
+    if isinstance(exp.power, Num):
+        power = exp.power.value
+    else:
+        power = exp.power
+    for expr in d:
+        d[expr] = simplify(d[expr] * power)
+    return d
+
+
+@decomp.register(Frac)
+def _(frac):
+    numers = decomp(frac.numer).copy()
+    denoms = decomp(frac.denom)
+    numers.subtract(denoms)
+    numers = _simplify_decomp(numers)
+    return numers
+
+
+@decomp.register(Prod)
+def _(prod):
+    c = Counter()
+    for factor in prod.factors:
+        c.update(decomp(factor))
+    c = _simplify_decomp(c)
+    return c
+
+
+@lru_cache
+@singledispatch
+def simplify(expr):
+    return expr
+
+
+def _pow_int_test(base: Num, power: Exp):
+    f = pfactor(base.value)
+    f_new = {}
+    for p, n in f.items():
+        if n % power.base.value != 0:
+            return None
+        f_new.update({p: n // power.base.value})
+    result = 1
+    for p, n in f_new.items():
+        result *= p ** n
+    return Num(result)
+
+
+@simplify.register(Exp)
+def _(exp):
+    base = simplify(exp.base)
+    power = simplify(exp.power)
+    if isinstance(base, Exp):
+        power = simplify(base.power * power)
+        base = base.base
+    if power == 1:
+        return base
+    if base == 1 or (power == 0 and base != 0):
+        return one
+    if base == 0 and power != 0:
+        return zero
+    if base == 0 and power == 0:
+        return Exp(0, 0)
+    if isinstance(base, Num):
+        if isinstance(power, Num) and power > 0:
+            # a^b where a and b are integers
+            return Num(base.value ** power.value)
+        if isinstance(power, Exp) and isinstance(power.base, Num) and power.power == -1:
+            # a^b where a is integer and b=1/int
+            result = _pow_int_test(base, power)
+            if result:
+                return result
+    return Exp(base, power)
+
+
+@simplify.register(Frac)
+def _(frac):
+    numer = decomp(simplify(frac.numer)).copy()
+    denom = decomp(simplify(frac.denom))
+    numer.subtract(denom)
+    numer = _simplify_decomp(numer)
+    s = simplify(decomp2prod(numer))
+    return s
+
+
+def _get_int_value(num):
+    if isinstance(num, Num):
+        return num.value
+    return num
+
+
+@simplify.register(Prod)
+def _(prod):
+    if len(prod.factors) == 1:
+        return simplify(prod.factors[0])
+    d = decomp(Prod([simplify(factor) for factor in prod.factors]))
+    numer = 1
+    denom = 1
+    factors = [] # non rational stuff
+    for base, power in d.items():
+        if isinstance(base, (Num, int)) and isinstance(power, (Num, int)):
+            if power > 0:
+                numer *= _get_int_value(base) ** _get_int_value(power)
+            elif power < 0:
+                denom *= _get_int_value(base) ** -_get_int_value(power)
+        else:
+            factors.append(simplify(Exp(base, power)))
+    # DO NOT use Frac(numer, denom).simplify() as that uses Prod simplify,
+    # which will cause RecursionError
+    if numer == 0:
+        return zero
+    if denom == 0:
+        raise ZeroDivisionError(f'{numer=}; {denom=}; {factors=}')
+
+    if numer == 1 and denom != 1:
+        const = Exp(denom, -1)
+    elif numer != 1 and denom == 1:
+        const = Num(numer)
+    elif numer == 1 and denom == 1:
+        const = one
+    else:
+        const = Prod([numer, Exp(denom, -1)])
+
+    if len(factors) == 0:
+        return const
+    if const == 1 and len(factors) == 1:
+        return factors[0]
+    if const == 1 and len(factors) > 1:
+        return Prod(factors)
+    return const * Prod(factors)
+
+
+def _get_frac(expr):
+    if isinstance(expr, Prod):
+        if isinstance(expr.factors[0], Exp):
+            return (expr.factors[1], expr.factors[0].base)
+        return (expr.factors[0], expr.factors[1].base)
+    if isinstance(expr, Exp):
+        return (one, expr.base)
+    raise ValueError(f"Cannot turn expr into fraction: {expr}")
+
+
+def _sum_fracs(coeffs: list):
+    numers = []
+    denoms = []
+    int_ = 0
+    for coeff in coeffs:
+        if isinstance(coeff, Num):
+            int_ += coeff.value
+            continue
+        n, d = _get_frac(coeff)
+        numers.append(n)
+        denoms.append(d)
+    if len(numers) == 0:
+        return Num(int_)
+    numers.append(Num(int_))
+    denoms.append(one)
+    numer = 0
+    denom = 1
+    for i, n in enumerate(numers):
+        numer_ = 1
+        for j, d in enumerate(denoms):
+            if i == j:
+                numer_ *= n.value
+                denom *= d.value
+            else:
+                numer_ *= d.value
+        numer += numer_
+    return simplify(Frac(numer, denom))
+
+
+def _simplify_term(coeff, expr):
+    if coeff == 0 or expr  == 0:
+        return zero
+    if coeff == 1 and expr == 1:
+        return one
+    if coeff == 1:
+        return expr
+    if expr == 1:
+        return coeff
+    return simplify(coeff * expr)
+
+
+def _sum_no_vars(decomps: list[Counter]):
+    terms = defaultdict(list)
+    # Extract rational and irrational numbers
+    for d in decomps:
+        expr = []
+        coeff = []
+        for base, power in d.items():
+            temp = simplify(Exp(base, power))
+            if isrational(temp):
+                coeff.append(temp)
+            else:
+                expr.append(temp)
+        terms[simplify(Prod(expr))].append(simplify(Prod(coeff)))
+    output = []
+    for expr, coeff in terms.items():
+        # Sum rationals together
+        coeff_simplify = _sum_fracs(coeff)
+        term = _simplify_term(coeff_simplify, expr)
+        output.append(term)
+    if len(output) == 0:
+        return 0
+    if len(output) == 1:
+        return output[0]
+    return Sum(output)
+
+
+
+def _sum_with_vars(decomps: list[Counter]):
+    terms = defaultdict(list)
+    # Extract variables and coefficients
+    for d in decomps:
+        expr = []
+        coeff = []
+        for base, power in d.items():
+            temp = simplify(Exp(base, power))
+            if temp.isnum:
+                coeff.append(temp)
+            else:
+                expr.append(temp)
+        terms[simplify(Prod(expr))].append(simplify(Prod(coeff)))
+    output = []
+    for expr, coeff in terms.items():
+        # Simplify coefficients which will run via _sum_no_vars
+        coeff_simplify = simplify(Sum(coeff))
+        term = _simplify_term(coeff_simplify, expr)
+        output.append(term)
+    if len(output) == 0:
+        return 0
+    if len(output) == 1:
+        return output[0]
+    return Sum(output)
+
+
+@simplify.register(Sum)
+def _(sum):
+    if len(sum.terms) == 1:
+        return simplify(sum.terms[0])
+    decomps = []
+    for term in sum.terms:
+        s = simplify(term)
+        if s != 0:
+            decomps.append(decomp(s))
+    if sum.isnum:
+        return _sum_no_vars(decomps)
+    else:
+        return _sum_with_vars(decomps)
+
+
+if __name__ == '__main__':
+    x = Var('x')
+    y = Var('y')
+    print(decomp(x * y * x ** 3 * y ** -3))
+    # sqrt2 = Exp(2, Exp(2, -1))
+    # print(simplify(2 * sqrt2))
