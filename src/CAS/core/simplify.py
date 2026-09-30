@@ -9,10 +9,17 @@ from .utils import isrational # TODO to be replaced by intervals
 __all__ = ['decomp', 'simplify', 'simplify_decomp']
 
 
-def simplify_decomp(counter):
+def simplify_decomp(counter: Counter):
     new_decomp = Counter()
     for base, power in counter.items():
         new_decomp[base] = simplify(power)
+    return new_decomp
+
+
+def _exprize_decomp(counter: Counter):
+    new_decomp = Counter()
+    for base, power in counter.items():
+        new_decomp[base] = make_expr(power)
     return new_decomp
 
 
@@ -37,7 +44,9 @@ def _(num, top=True):
 @decomp.register(Exp)
 def _(exp, top=True):
     if not exp.power.isnum:
-        return Counter({exp: one})
+        if top:
+            return Counter({exp: one})
+        return Counter({exp: 1})
     d = decomp(exp.base, top=False).copy()
     if isinstance(exp.power, Num):
         power = exp.power.value
@@ -45,6 +54,8 @@ def _(exp, top=True):
         power = exp.power
     for expr in d:
         d[expr] = simplify(d[expr] * power)
+    if top:
+        d = _exprize_decomp(d)
     return d
 
 
@@ -54,6 +65,8 @@ def _(frac, top=True):
     denoms = decomp(frac.denom, top=False)
     numers.subtract(denoms)
     numers = simplify_decomp(numers)
+    if top:
+        numers = _exprize_decomp(numers)
     return numers
 
 
@@ -63,6 +76,8 @@ def _(prod, top=True):
     for factor in prod.factors:
         c.update(decomp(factor, top=False))
     c = simplify_decomp(c)
+    if top:
+        c = _exprize_decomp(c)
     return c
 
 
@@ -94,6 +109,8 @@ def _(exp):
         base = base.base
     if power == 1:
         return base
+    if base == -1 and isinstance(power, Num):
+        return Num(base.value ** power.value)
     if base == 1 or (power == 0 and base != 0):
         return one
     if base == 0 and power != 0:
@@ -101,9 +118,12 @@ def _(exp):
     if base == 0 and power == 0:
         return Exp(0, 0)
     if isinstance(base, Num):
-        if isinstance(power, Num) and power > 0:
-            # a^b where a and b are integers
-            return Num(base.value ** power.value)
+        if isinstance(power, Num):
+            if power > 0:
+                # a^b where a and b are integers
+                return Num(base.value ** power.value)
+            if power < 0:
+                return Exp(Num(base.value ** -power.value), -1)
         if isinstance(power, Exp) and isinstance(power.base, Num) and power.power == -1:
             # a^b where a is integer and b=1/int
             result = _pow_int_test(base, power)
