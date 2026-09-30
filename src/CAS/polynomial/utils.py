@@ -1,8 +1,8 @@
 from itertools import product
 from collections import Counter
 
-from CAS.core.expr import *
-from CAS.forms.matcher import match
+from CAS.core import *
+from CAS.forms import match
 from CAS.forms.abc import A, B, x
 
 
@@ -39,7 +39,7 @@ class Polynomial:
         terms = []
         for power, coeff in zip(range(self.deg, -1, -1), self.coeffs):
             terms.append(coeff * self.var ** power)
-        return Sum(terms).simplify()
+        return simplify(Sum(terms))
 
     @staticmethod
     def is_poly_expr(expr):
@@ -99,10 +99,10 @@ def poly_div(poly1, poly2):
         return poly1
     q_coeffs = [zero] * (poly1.deg - poly2.deg + 1)
     for i in range(len(q_coeffs)):
-        q_coeffs[i] = Frac(poly1.coeffs[i], poly2.coeffs[0]).simplify()
+        q_coeffs[i] = simplify(Frac(poly1.coeffs[i], poly2.coeffs[0]))
         for j in range(poly2.deg + 1):
             poly1.coeffs[j+i] -= poly2.coeffs[j] * q_coeffs[i]
-    return (Polynomial(q_coeffs).to_expr() + Frac(poly1.to_expr(), poly2.to_expr())).simplify()
+    return simplify(Polynomial(q_coeffs).to_expr() + Frac(poly1.to_expr(), poly2.to_expr()))
 
 
 def get_rational_roots(poly):
@@ -112,14 +112,15 @@ def get_rational_roots(poly):
     denom = Counter()
     for coeff in coeffs:
         denom_ = Counter()
-        decomp = coeff.decomp()
-        for base, power in decomp.items():
+        d = decomp(coeff)
+        for base, power in d.items():
             if power < 0:
                 denom_.update({base: -power.value})
         denom |= denom_
     denom = {base: Num(power) for base, power, in denom.items()}
-    first = +coeffs[0].decomp()
-    last = +coeffs[-1].decomp()
+    # Results from decomp cannot be modified in place because they are cached and mutable
+    first = decomp(+coeffs[0]).copy()
+    last = decomp(+coeffs[-1]).copy()
     first.pop(neg_one, None)
     last.pop(neg_one, None)
     first.update(denom)
@@ -146,9 +147,9 @@ def get_rational_roots(poly):
     roots = []
     for numer_factor in numer_factors:
         for denom_factor in denom_factors:
-            roots.append(Frac(numer_factor, denom_factor).simplify())
+            roots.append(simplify(Frac(numer_factor, denom_factor)))
     roots = list(dict.fromkeys(roots))
-    roots.extend([(-root).simplify() for root in roots])
+    roots.extend([simplify(-root) for root in roots])
     return roots
 
 

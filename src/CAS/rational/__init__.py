@@ -1,4 +1,4 @@
-from CAS.rational.utils import *
+from .utils import *
 
 
 __all__ = ['is_rational_expr', 'rational_flatten']

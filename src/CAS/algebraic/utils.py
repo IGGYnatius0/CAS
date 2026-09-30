@@ -1,8 +1,7 @@
 from functools import singledispatch, lru_cache
 from itertools import count
 
-from CAS.core.expr import *
-from CAS.core.utils import isrational
+from CAS.core import *
 from CAS.rational import is_rational_expr
 
 
@@ -35,7 +34,7 @@ def _(expr) -> Prod | Exp:
     # if isinstance(expr.base, Prod):
     #     return Prod([canonicalize(Exp(factor, expr.power)) for factor in expr.base.factors])
     if isinstance(expr.base, Exp):
-        return Exp(expr.base.base, (expr.base.power * expr.power).simplify())
+        return Exp(expr.base.base, simplify(expr.base.power * expr.power))
     return expr
 
 
@@ -85,7 +84,7 @@ def get_bases(expr: CoreExprBase):
     var_map = {}
     bases = []
     base = _get_bases(expr, var_map, bases, count())
-    bases.append(base.simplify())
+    bases.append(simplify(base))
     return bases, var_map
 
 
@@ -111,16 +110,16 @@ def _(expr: Frac, var_map: dict, bases: list, counter) -> Frac:
 #  Right now it is prioritising less variables
 @_get_bases.register(Exp)
 def _(expr: Exp, var_map: dict, bases: list, counter) -> Exp:
-    base = expr.base.expand().simplify()
+    base = simplify(expand(expr.base))
     power_numer = one
     power_denom = one
-    for p, n in expr.power.decomp().items():
+    for p, n in decomp(expr.power).items():
         if n > 0:
             power_numer *= p ** n
         elif n < 0:
             power_denom *= p ** -n
-    power_numer = power_numer.simplify()
-    power_denom = power_denom.simplify()
+    power_numer = simplify(power_numer)
+    power_denom = simplify(power_denom)
     base_with_pow = Exp(base, Exp(power_denom, neg_one))
     if base_with_pow in var_map:
         return Exp(var_map[base_with_pow], power_numer)
@@ -128,7 +127,7 @@ def _(expr: Exp, var_map: dict, bases: list, counter) -> Exp:
     n = next(counter)
     new_var = Var(f'x{n}')
     var_map[base_with_pow] = new_var
-    new_base = new_var ** power_denom + (-base).expand().simplify()
+    new_base = new_var ** power_denom + simplify(expand(-base))
     bases.append(new_base)
     return Exp(var_map[base_with_pow], power_numer)
 

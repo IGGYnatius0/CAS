@@ -3,7 +3,7 @@ from collections import Counter
 from functools import cached_property
 from itertools import groupby
 
-from CAS.core.expr import *
+from CAS.core import *
 from CAS.core.abc import a, b, c, x
 
 
@@ -42,8 +42,8 @@ def lex_sort(terms, ordering):
             # Recursive
             temp = lex_sort(terms__, ordering[i + 1:])
             # Add back variable
-            for term in temp:
-                term.update({var: power})
+            for j, term in enumerate(temp):
+                term[var] = power
             lexsorted.extend(temp)
     return lexsorted + no_var
 
@@ -73,15 +73,15 @@ class MultiVariatePolynomial(Sum):
         else:
             terms = [expr]
 
-        decomp = []
+        d = []
         const = None
         for term in terms:
             if term.isnum:
                 const = term
             else:
-                decomp.append(term.decomp())
-        terms = lex_sort(decomp, ordering)
-        terms = [decomp2prod(term).simplify() for term in terms]
+                d.append(decomp(term).copy())
+        terms = lex_sort(d, ordering)
+        terms = [simplify(decomp2prod(term)) for term in terms]
         if const is not None:
             terms.append(const)
         super().__init__(terms)
@@ -89,8 +89,7 @@ class MultiVariatePolynomial(Sum):
 
     @cached_property
     def LT(self) -> Counter:
-        # decomp = self.terms[0].decomp()
-        return self.terms[0].decomp()
+        return decomp(self.terms[0]).copy()
 
     @cached_property
     def LM(self) -> Counter:
@@ -109,7 +108,7 @@ MVP = MultiVariatePolynomial
 
 def s_poly(p: MVP, q: MVP):
     temp = decomp2prod(p.LM | q.LM) * (p / decomp2prod(p.LT) - q / decomp2prod(q.LT))
-    temp = temp.simplify().expand().simplify()
+    temp = simplify(expand(simplify(temp)))
     return MVP(temp, p.ordering)
 
 
@@ -125,17 +124,18 @@ def reduce(expr: MVP, polys):
             # Multiply divisor by appropriate amount and subtract result from original polynomial
             mul = expr.LT.copy()
             mul.subtract(poly.LT)
+            mul = simplify_decomp(mul)
             q[i].append(mul)
-            new_poly = (poly * decomp2prod(mul)).expand().simplify()
+            new_poly = simplify(expand(poly * decomp2prod(mul)))
             ordering = expr.ordering
-            expr = (expr - new_poly).expand().simplify()
+            expr = simplify(expand(expr - new_poly))
             expr = MVP(expr, ordering)
             break
         else:
             # Transfer to remainder
             r.append(decomp2prod(expr.LT))
             expr = MVP(expr.terms[1:], expr.ordering)
-    return Sum(r).simplify()
+    return simplify(Sum(r))
 
 
 def product_criterion(f, g):
@@ -164,7 +164,7 @@ def chain_criterion(G, i, j, reduced):
 
 
 def lcm_size(f: MVP, g: MVP) -> int:
-    return sum((f.LM | g.LM).values()).simplify()
+    return simplify(sum((f.LM | g.LM).values()))
 
 
 def buchberger(F, ordering):
@@ -201,7 +201,7 @@ def buchberger(F, ordering):
 def reduced_gb(G, ordering):
     # Converting leading coefficient to 1
     for i, poly in enumerate(G):
-        G[i] = MVP((poly * (1/decomp2prod(poly.LC))).expand().simplify(), ordering)
+        G[i] = MVP(simplify(expand(poly * (1/decomp2prod(poly.LC)))), ordering)
     # Minimise
     idxs = list(range(len(G)))
     for i, poly in enumerate(G):

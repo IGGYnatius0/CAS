@@ -1,7 +1,7 @@
 from functools import singledispatch, lru_cache
 from collections import Counter
 
-from CAS.core.expr import *
+from CAS.core import *
 from CAS.polynomial import Poly
 
 
@@ -16,6 +16,7 @@ __all__ = ['is_rational_expr', 'rational_flatten']
 def is_rational_expr(expr: CoreExprBase) -> bool:
     return True
 
+
 @is_rational_expr.register(Sum)
 def _(expr) -> bool:
     if Poly.is_poly_expr(expr):
@@ -24,6 +25,7 @@ def _(expr) -> bool:
         if not is_rational_expr(term):
             return False
     return True
+
 
 @is_rational_expr.register(Prod)
 def _(expr) -> bool:
@@ -34,6 +36,7 @@ def _(expr) -> bool:
             return False
     return True
 
+
 @is_rational_expr.register(Frac)
 def _(expr) -> bool:
     if not is_rational_expr(expr.numer):
@@ -41,6 +44,7 @@ def _(expr) -> bool:
     if not is_rational_expr(expr.denom):
         return False
     return True
+
 
 @is_rational_expr.register(Exp)
 def _(expr) -> bool:
@@ -51,18 +55,16 @@ def _(expr) -> bool:
     return True
 
 
-
 def rational_flatten(expr: CoreExprBase) -> CoreExprBase:
     denoms = True
     while denoms:
         denoms = get_denoms(expr)
-        factors = decomp2prod(denoms).simplify()
+        factors = simplify(decomp2prod(denoms))
         if isinstance(expr, Sum):
-            expr = Sum([(term * factors).simplify() for term in expr.terms]).expand().simplify()
+            expr = simplify(expand(Sum([simplify(term * factors) for term in expr.terms])))
         else:
-            expr = (expr * factors).expand().simplify()
+            expr = simplify(expand(expr * factors))
     return expr
-
 
 
 def get_denoms(expr: CoreExprBase) -> Counter:
@@ -76,13 +78,13 @@ def get_denoms(expr: CoreExprBase) -> Counter:
             denoms |= new_denoms
         return denoms
     if isinstance(expr, (Prod, Frac, Exp)):
-        return -expr.decomp()
+        return decomp(-expr).copy()
     return Counter()
 
 
 if __name__ == '__main__':
     x = Var('x')
     expr = ((1+x)/(2+x)+3*x) / ((2+x)/(3+x)+4*x) + 5*x
-    expr = expr.simplify()
+    expr = simplify(expr)
     print(expr)
     print(rational_flatten(expr))

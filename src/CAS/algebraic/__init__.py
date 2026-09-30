@@ -1,5 +1,5 @@
-from CAS.algebraic.utils import *
-from CAS.algebraic.groebner import *
+from .utils import *
+from .groebner import *
 
 
 __all__ = ['flatten_pows', 'is_algebraic_expr', 'get_bases',
