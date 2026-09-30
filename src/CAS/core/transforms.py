@@ -4,6 +4,9 @@ from itertools import product
 from .expr import *
 
 
+__all__ = ['expand', 'factorize']
+
+
 @singledispatch
 def expand(expr):
     return expr
@@ -21,16 +24,23 @@ def _(frac):
 
 @expand.register(Exp)
 def _(exp):
-    return Exp(expand(exp.base), expand(exp.power))
+    if isinstance(exp.power, Num) and exp.power > 0:
+        return Prod([exp.base] * exp.power.value).expand()
+    return exp
 
 
 @expand.register(Prod)
 def _(prod):
     to_expand = []
     for factor in prod.factors:
-        factor = factor.expand()
+        factor = expand(factor)
         if isinstance(factor, Sum):
             to_expand.append(factor.terms)
         else:
             to_expand.append([factor])
     return Sum([Prod(term) for term in product(*to_expand)])
+
+
+@singledispatch
+def factorize(expr):
+    pass
