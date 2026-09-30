@@ -71,7 +71,7 @@ def make_num(num):
     ratio = Decimal(str(num)).as_integer_ratio()
     if ratio[1] == 1:
         return EXPRS.num(int(num))
-    return EXPRS.frac(*ratio)
+    return EXPRS.frac(int(ratio[0]), int(ratio[1]))
 
 
 def make_expr(expr):

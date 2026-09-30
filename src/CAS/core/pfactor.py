@@ -2,7 +2,6 @@ from math import gcd
 from random import randint
 from collections import Counter
 from functools import lru_cache
-from decimal import Decimal
 
 
 __all__ = ['pfactor']
@@ -39,9 +38,9 @@ def miller_rabin(n, k=4):
 # From https://en.wikipedia.org/wiki/Pollard%27s_rho_algorithm#Algorithm
 def pollard_rho(n, c=1):
     if not n % 2:
-        return Decimal(2)
+        return 2
     if not n % 3:
-        return Decimal(3)
+        return 3
     x = 2
     y = x
     d = 1
@@ -51,7 +50,7 @@ def pollard_rho(n, c=1):
         y = (y*y+c) % n
         d = gcd(int(abs(x-y)), int(n))
     if d != n:
-        return Decimal(d)
+        return d
     return None
 
 
@@ -86,4 +85,5 @@ def pfactor(n):
 
 if __name__ == '__main__':
     # print(pfactor(Decimal(-1350851717672992095)))
-    print(pollard_rho(Decimal(8186980107109043)))
+    f= pfactor(24)
+    print(f)
