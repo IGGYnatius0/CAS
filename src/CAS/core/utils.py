@@ -1,5 +1,5 @@
 from functools import singledispatch
-from CAS.core.expr import *
+from CAS.core import *
 
 
 __all__ = ['isrational']
@@ -12,7 +12,7 @@ def isrational(expr):
 
 @isrational.register(Num)
 def _(expr):
-    return int(expr) == expr
+    return True
 
 
 @isrational.register(Sum)
