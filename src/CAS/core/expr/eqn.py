@@ -9,15 +9,6 @@ class Eqn:
         self.lhs = make_expr(lhs)
         self.rhs = make_expr(rhs)
 
-    def expand(self):
-        return Eqn(self.lhs.expand(), self.rhs.expand())
-
-    def factorize(self):
-        return Eqn(self.lhs.factorize(), self.rhs.factorize())
-
-    def simplify(self):
-        return Eqn(self.lhs.simplify(), self.rhs.simplify())
-
     def swap(self):
         return Eqn(self.rhs, self.lhs)
 

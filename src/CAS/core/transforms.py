@@ -26,8 +26,13 @@ def _(frac):
 @expand.register(Exp)
 def _(exp):
     if isinstance(exp.power, Num) and exp.power > 0:
-        return Prod([exp.base] * exp.power.value).expand()
+        return expand(Prod([exp.base] * exp.power.value))
     return exp
+
+
+@expand.register(Eqn)
+def _(eqn):
+    return Eqn(expand(eqn.lhs), expand(eqn.rhs))
 
 
 @expand.register(Prod)
@@ -60,6 +65,11 @@ def _(frac):
 @factorize.register(Exp)
 def _(exp):
     return Exp(factorize(exp.base), factorize(exp.power))
+
+
+@factorize.register(Eqn)
+def _(eqn):
+    return Eqn(factorize(eqn.lhs), factorize(eqn.rhs))
 
 
 @factorize.register(Sum)

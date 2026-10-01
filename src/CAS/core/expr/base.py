@@ -62,20 +62,6 @@ class CoreExprBase:
     def __pos__(self):
         return self
 
-    def decomp(self):
-        """Decomposes the expression into its constituent factors"""
-        return Counter({self: EXPRS.one})
-
-    def expand(self):
-        return self
-
-    def factorize(self):
-        return self
-
-    def simplify(self):
-        """Simplifies the expression"""
-        return self
-
     def substitute_vars(self, var_map):
         return self
 

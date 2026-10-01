@@ -81,6 +81,11 @@ def _(prod, top=True):
     return c
 
 
+@decomp.register(Eqn)
+def _(eqn, top=True):
+    raise TypeError("Cannot decomp an Eqn")
+
+
 @lru_cache
 @singledispatch
 def simplify(expr):
@@ -140,6 +145,11 @@ def _(frac):
     numer = simplify_decomp(numer)
     s = simplify(decomp2prod(numer))
     return s
+
+
+@simplify.register(Eqn)
+def _(eqn):
+    return Eqn(simplify(eqn.lhs), simplify(eqn.rhs))
 
 
 def _get_int_value(num):
