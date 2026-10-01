@@ -103,8 +103,7 @@ class CoreNumBase(CoreExprBase):
         return f"Num({self.value})"
 
     def __hash__(self):
-        # hash('-1') = 357669246384252548
-        return hash(self.value) if self.value != -1 else 357669246384252548
+        return hash(('CoreNum', str(self.value)))
 
     @_int_autoconvert
     def __eq__(self, other):

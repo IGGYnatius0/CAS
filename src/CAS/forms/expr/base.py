@@ -92,9 +92,7 @@ class FormNumBase(FormExprBase):
         return f"FormNum({self.value})"
 
     def __hash__(self):
-        # hash('-1') = 357669246384252548
-        h = hash(self.value)
-        return h if h != -1 else 357669246384252548
+        return hash(('FormNum', str(self.value)))
 
     def __neg__(self):
         return FORMS.num(-self.value)
