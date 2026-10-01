@@ -78,7 +78,7 @@ def get_denoms(expr: CoreExprBase) -> Counter:
             denoms |= new_denoms
         return denoms
     if isinstance(expr, (Prod, Frac, Exp)):
-        return decomp(-expr).copy()
+        return (-decomp(expr)).copy()
     return Counter()
 
 
