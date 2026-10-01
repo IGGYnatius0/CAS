@@ -9,6 +9,7 @@ from CAS.core.abc import a, b, c, x
 
 __all__ = ['groebner_basis']
 
+# TODO use tuple-based lexicographical sorting?
 # TODO add more types of ordering lex, grlex, grevlex, degrevlex
 def lex_sort(terms, ordering):
     # Split into buckets by leading variable
