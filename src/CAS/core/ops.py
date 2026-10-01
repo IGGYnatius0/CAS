@@ -5,7 +5,7 @@ from .expr import *
 from .simplify import decomp, simplify_decomp
 
 
-__all__ = ['expand', 'factorize']
+__all__ = ['expand', 'factorize', 'substitute_vars', 'evaluate', 'group_nums']
 
 
 @singledispatch
@@ -94,3 +94,21 @@ def _(sum):
     terms_sum = Sum(terms_list)
 
     return Prod([common_prod, terms_sum])
+
+
+@singledispatch
+def substitute_vars(expr, var_map):
+    pass
+
+
+
+
+
+@singledispatch
+def evaluate(expr):
+    pass
+
+
+@singledispatch
+def group_nums(expr):
+    pass
