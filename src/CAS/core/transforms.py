@@ -2,6 +2,7 @@ from functools import singledispatch
 from itertools import product
 
 from .expr import *
+from .simplify import decomp, simplify_decomp
 
 
 __all__ = ['expand', 'factorize']
@@ -43,4 +44,43 @@ def _(prod):
 
 @singledispatch
 def factorize(expr):
-    pass
+    return expr
+
+
+@factorize.register(Prod)
+def _(prod):
+    return Prod([factorize(factor) for factor in prod.factors])
+
+
+@factorize.register(Frac)
+def _(frac):
+    return Frac(factorize(frac.numer), factorize(frac.denom))
+
+
+@factorize.register(Exp)
+def _(exp):
+    return Exp(factorize(exp.base), factorize(exp.power))
+
+
+@factorize.register(Sum)
+def _(sum):
+    decomps = [decomp(term).copy() for term in sum.terms]
+    common = decomps[0].copy()
+    for d in decomps[1:]:
+        common &= d
+    common = simplify_decomp(common)
+    for i in range(len(decomps)):
+        decomps[i].subtract(common)
+
+    common_prod = decomp2prod(common)
+
+    terms_list = []
+    for d in decomps:
+        temp = []
+        for expr, power in d.items():
+            if power != 0:
+                temp.append(Exp(expr, power))
+        terms_list.append(Prod(temp))
+    terms_sum = Sum(terms_list)
+
+    return Prod([common_prod, terms_sum])
