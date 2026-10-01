@@ -18,9 +18,6 @@ class Prod(CoreProdBase):
         if not self.factors:
             self.factors = [EXPRS.one]
 
-    def substitute_vars(self, var_map):
-        return Prod([term.substitute_vars(var_map) for term in self.factors])
-
     @cached_property
     def get_vars(self):
         return set.union(*[factor.get_vars for factor in self.factors])
@@ -32,31 +29,11 @@ class Prod(CoreProdBase):
                 return False
         return True
 
-    def eval_nums(self):
-        super().eval_nums()
-        num = 1
-        for factor in self.factors:
-            num *= factor.eval_nums()
-        return num
-
     def copy(self):
         return Prod([factor.copy() for factor in self.factors])
 
-    def group_nums(self):
-        factors = [factor.group_nums() for factor in self.factors]
-        temp = Prod(factors)
-        if temp.isnum:
-            return temp
-        nums = []
-        for i, factor in reversed(list(enumerate(factors))):
-            if factor.isnum:
-                nums.append(factors.pop(i))
-        prod = Prod(factors)
-        if len(nums) == 1:
-            prod.factors.append(nums[0])
-        elif len(nums) > 1:
-            prod.factors.append(Prod(nums))
-        return prod
+    def apply(self, func, args):
+        return Prod([func(factor, *args) for factor in self.factors])
 
 
 EXPRS.prod = Prod

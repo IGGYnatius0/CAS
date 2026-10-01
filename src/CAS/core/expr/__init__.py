@@ -9,6 +9,7 @@ import CAS.core.expr.prod
 import CAS.core.expr.frac
 import CAS.core.expr.exp
 import CAS.core.expr.eqn
+import CAS.core.expr.func
 
 
 Num = EXPRS.num
@@ -18,6 +19,7 @@ Prod = EXPRS.prod
 Frac = EXPRS.frac
 Exp = EXPRS.exp
 Eqn = EXPRS.eqn
+Func = EXPRS.func
 
 zero = EXPRS.zero
 one = EXPRS.one
@@ -26,6 +28,6 @@ inf = EXPRS.inf
 ninf = EXPRS.ninf
 
 
-__all__ = ['CoreExprBase', 'Num', 'Var', 'Sum', 'Prod', 'Frac', 'Exp', 'Eqn',
+__all__ = ['CoreExprBase', 'Num', 'Var', 'Sum', 'Prod', 'Frac', 'Exp', 'Eqn', 'Func',
            'zero', 'one', 'neg_one', 'inf', 'ninf',
            'decomp2prod', 'make_expr']

@@ -227,3 +227,16 @@ class CoreExpBase(CoreExprBase):
 
     def __hash__(self):
         return hash(('CoreExp', self.base, self.power))
+
+
+class CoreFuncBase(CoreExprBase):
+    def __str__(self):
+        args = [str(arg) for arg in self.args]
+        return f'{self.name}({", ".join(args)})'
+
+    def __repr__(self):
+        args = [repr(arg) for arg in self.args]
+        return f'Func[{self.name}]({", ".join(args)})'
+
+    def __hash__(self):
+        return hash(('Func', self.name) + tuple(self.args))
