@@ -2,16 +2,16 @@ from .registry import FORMS
 
 from .base import FormExprBase
 from .utils import *
-import CAS.forms.expr.num
-import CAS.forms.expr.const
-import CAS.forms.expr.wild
-import CAS.forms.expr.var
-import CAS.forms.expr.sum
-import CAS.forms.expr.prod
-import CAS.forms.expr.frac
-import CAS.forms.expr.exp
-import CAS.forms.expr.eqn
-import CAS.forms.expr.constraints
+import CAS.form.expr.num
+import CAS.form.expr.const
+import CAS.form.expr.wild
+import CAS.form.expr.var
+import CAS.form.expr.sum
+import CAS.form.expr.prod
+import CAS.form.expr.frac
+import CAS.form.expr.exp
+import CAS.form.expr.eqn
+import CAS.form.expr.constraints
 
 
 FormNum = FORMS.num

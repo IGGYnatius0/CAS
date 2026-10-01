@@ -1,5 +1,5 @@
 from CAS.core import simplify
-from CAS.forms import FormExprBase, FormEqn, form2core, match
+from CAS.form import FormExprBase, FormEqn, form2core, match
 
 
 __all__ = ['SolveRule', 'SolveGroup']

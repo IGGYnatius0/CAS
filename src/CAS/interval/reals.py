@@ -1,4 +1,4 @@
-from .intervals import Interval
+from .interval import Interval
 
 
 def RealInterval(Interval):

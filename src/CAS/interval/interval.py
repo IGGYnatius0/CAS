@@ -1,7 +1,7 @@
 from itertools import pairwise
 from functools import wraps
 
-from CAS.core.expr import *
+from CAS.core import *
 
 
 __all__ = ['Interval', 'MultiInterval', 'REALS', 'from_str']

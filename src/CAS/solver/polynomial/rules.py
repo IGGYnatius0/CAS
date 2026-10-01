@@ -1,4 +1,4 @@
-from CAS.forms.abc import *
+from CAS.form.abc import *
 from ..base import *
 
 

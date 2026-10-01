@@ -3,7 +3,7 @@ from functools import cached_property
 from .registry import FORMS
 from .base import FormConstBase
 from .utils import core2form
-from CAS.intervals import REALS, from_str
+from CAS.interval import REALS, from_str
 
 
 class FormConst(FormConstBase):

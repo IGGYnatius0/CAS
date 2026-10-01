@@ -2,8 +2,8 @@ from itertools import product
 from collections import Counter
 
 from CAS.core import *
-from CAS.forms import match
-from CAS.forms.abc import A, B, x
+from CAS.form import match
+from CAS.form.abc import A, B, x
 
 
 __all__ = ['Polynomial', 'Poly', 'poly_div', 'get_rational_roots']
