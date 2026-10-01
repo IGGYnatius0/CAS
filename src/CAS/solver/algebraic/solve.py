@@ -1,4 +1,4 @@
-from CAS.core.expr import *
+from CAS.core import *
 from CAS.algebraic import *
 from CAS.rational import rational_flatten
 

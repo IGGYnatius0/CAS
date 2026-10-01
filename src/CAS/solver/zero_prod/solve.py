@@ -1,4 +1,4 @@
-from CAS.core.expr import *
+from CAS.core import *
 
 
 def solve(expr: CoreExprBase, main_solve):

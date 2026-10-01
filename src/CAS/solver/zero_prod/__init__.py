@@ -1,4 +1,4 @@
-from CAS.solver.zero_prod.solve import solve
+from .solve import solve
 
 
 __all__ = ['solve']

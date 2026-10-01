@@ -1,4 +1,4 @@
-from CAS.solver.rational.solve import solve
+from .solve import solve
 
 
 __all__ = ['solve']

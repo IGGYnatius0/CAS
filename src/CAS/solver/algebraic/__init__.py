@@ -1,4 +1,4 @@
-from CAS.solver.algebraic.solve import solve
+from .solve import solve
 
 
 __all__ = ['solve']

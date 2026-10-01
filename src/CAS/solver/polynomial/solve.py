@@ -1,15 +1,15 @@
-from CAS.core.expr import *
+from CAS.core import *
 from CAS.polynomial import Poly
-from CAS.solver.polynomial.rules import rules
-from CAS.solver.polynomial.solvers import *
+from .rules import rules
+from .solvers import *
 from CAS.solver.zero_prod import solve as zero_solve
 
 
 def solve(expr: CoreExprBase, main_solve):
-    expr = expr.expand().simplify()
+    expr = simplify(expand(expr))
     if not Poly.is_poly_expr(expr):
         return []
-    expr = expr.factorize().simplify() # Global factorize
+    expr = simplify(factorize(expr)) # Global factorize
     if not Poly.is_poly_expr(expr):
         return zero_solve(expr, main_solve)
     solns = rules.solve(Eqn(expr, zero))

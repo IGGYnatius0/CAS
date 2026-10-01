@@ -1,4 +1,4 @@
-from CAS.core.expr import CoreExprBase
+from CAS.core import CoreExprBase
 from CAS.rational import *
 
 

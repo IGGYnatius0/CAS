@@ -1,5 +1,5 @@
-from CAS.forms.expr import FormExprBase, FormEqn, form2core
-import CAS.forms.matcher as matcher
+from CAS.core import simplify
+from CAS.forms import FormExprBase, FormEqn, form2core, match
 
 
 __all__ = ['SolveRule', 'SolveGroup']
@@ -21,13 +21,13 @@ class SolveRule:
             self.formula = tuple(formula)
 
     def solve(self, expr, first_result=True):
-        result = matcher.match(self.target_form, expr)
+        result = match(self.target_form, expr)
         if not result:
             return None
         solns = []
         for formula in self.formula:
             soln = formula.substitute_consts(result['consts'])
-            soln_core = form2core(soln, const_map=result['consts']).simplify()
+            soln_core = simplify(form2core(soln, const_map=result['consts']))
             solns.append(soln_core)
         return solns
 

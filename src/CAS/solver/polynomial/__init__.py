@@ -1,4 +1,4 @@
-from CAS.solver.polynomial.solve import solve
+from .solve import solve
 
 
 __all__ = ['solve']

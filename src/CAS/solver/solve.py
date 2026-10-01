@@ -1,8 +1,8 @@
-from CAS.core.expr import *
-from CAS.solver.zero_prod import solve as zero_solve
-from CAS.solver.polynomial import solve as poly_solve
-from CAS.solver.rational import solve as rational_solve
-from CAS.solver.algebraic import solve as alg_solve
+from CAS.core import *
+from .zero_prod import solve as zero_solve
+from .polynomial import solve as poly_solve
+from .rational import solve as rational_solve
+from .algebraic import solve as alg_solve
 
 
 solvers = (
@@ -14,15 +14,15 @@ solvers = (
 
 
 def solve(expr): # TODO use SolveGroup?
-    expr = expr.simplify()
+    expr = simplify(expr)
     for solver in solvers:
         result = solver(expr, solve)
         if result:
-            return [r.simplify() for r in result]
+            return [simplify(r) for r in result]
     return []
 
 
 if __name__ == '__main__':
     x = Var('x')
-    expr = 1/x**0.5 - 1/x**Frac(1,3) + x - 1
+    expr = (x+1)**Frac(1,3) + (x-1)**Frac(1,3) - x**Frac(1,3)
     print(solve(expr))

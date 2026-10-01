@@ -1,4 +1,4 @@
-from CAS.core.expr import *
+from CAS.core import *
 from CAS.core.abc import x, t
 from CAS.polynomial import *
 
@@ -22,7 +22,7 @@ def rational_root_solve(poly):
     roots = []
     test_roots = get_rational_roots(poly)
     for root in test_roots:
-        result = poly_div(poly, (poly.var - root).simplify())
+        result = poly_div(poly, simplify(poly.var - root))
         if result == one:
             roots.append(root)
             break
@@ -52,5 +52,5 @@ def rational_root_solve(poly):
 
 
 if __name__ == '__main__':
-    cubic = ((x-1)*(x-2)*(x-3)).expand().simplify()
+    cubic = simplify(((x-1)*(x-2)*(x-3)).expand())
     # print(cardano_cubic(cubic))

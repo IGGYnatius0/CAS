@@ -1,5 +1,5 @@
 from CAS.forms.abc import *
-from CAS.solver.base import *
+from ..base import *
 
 
 rules = SolveGroup(( # TODO cubic, quartic and general case
