@@ -40,7 +40,7 @@ def core2form(expr):
 
 @core2form.register(Num)
 def _(expr):
-    return FORMS.num(expr)
+    return FORMS.num(expr.value)
 
 @core2form.register(Var)
 def _(expr):
