@@ -62,9 +62,6 @@ class CoreExprBase:
     def __pos__(self):
         return self
 
-    def substitute_vars(self, var_map):
-        return self
-
     def copy(self):
         return self
 
@@ -75,13 +72,6 @@ class CoreExprBase:
     @cached_property
     def isnum(self):
         return False
-
-    def eval_nums(self):
-        if not self.isnum:
-            raise RuntimeError("Cannot evaluate non isnum expression")
-
-    def group_nums(self):
-        return self
 
 
 def _int_autoconvert(func):
