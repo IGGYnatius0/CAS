@@ -28,7 +28,7 @@ class Sum(CoreSumBase):
                 return False
         return True
 
-    def apply(self, func, args):
+    def apply(self, func, *args):
         return Sum([func(term, *args) for term in self.terms])
 
     def copy(self):

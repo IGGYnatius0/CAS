@@ -17,7 +17,7 @@ class Func(CoreFuncBase):
     def isnum(self):
         return False
 
-    def apply(self, func, args):
+    def apply(self, func, *args):
         return type(self)(*[func(arg, *args) for arg in self.args])
 
 

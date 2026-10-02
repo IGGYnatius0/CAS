@@ -23,7 +23,7 @@ class Exp(CoreExpBase):
     def copy(self):
         return Exp(self.base.copy(), self.power.copy())
 
-    def apply(self, func, args):
+    def apply(self, func, *args):
         return Exp(func(self.base, *args), func(self.power, *args))
 
 

@@ -32,7 +32,7 @@ class Prod(CoreProdBase):
     def copy(self):
         return Prod([factor.copy() for factor in self.factors])
 
-    def apply(self, func, args):
+    def apply(self, func, *args):
         return Prod([func(factor, *args) for factor in self.factors])
 
 

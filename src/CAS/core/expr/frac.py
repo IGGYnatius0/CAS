@@ -21,7 +21,7 @@ class Frac(CoreFracBase):
     def copy(self):
         return EXPRS.frac(self.numer.copy(), self.denom.copy())
 
-    def apply(self, func, args):
+    def apply(self, func, *args):
         return Frac(func(self.numer, *args), func(self.denom, *args))
 
 

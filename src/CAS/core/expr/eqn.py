@@ -12,9 +12,6 @@ class Eqn:
     def swap(self):
         return Eqn(self.rhs, self.lhs)
 
-    def substitute_vars(self):
-        pass
-
     @cached_property
     def get_vars(self):
         return self.lhs.get_vars | self.rhs.get_vars
@@ -22,8 +19,8 @@ class Eqn:
     def copy(self):
         return Eqn(self.lhs.copy, self.rhs.copy)
 
-    def group_nums(self):
-        return Eqn(self.lhs.group_nums(), self.rhs.group_nums())
+    def apply(self, func, *args):
+        return Eqn(func(self.lhs, *args), func(self.rhs, *args))
 
 
 
