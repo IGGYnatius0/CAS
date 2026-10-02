@@ -2,5 +2,5 @@ class CASError(Exception):
     pass
 
 
-class ApplyError(CASError):
+class InvalidSubroutineError(CASError):
     pass
