@@ -4,3 +4,7 @@ class CASError(Exception):
 
 class InvalidSubroutineError(CASError):
     pass
+
+
+class MissingVariableError(CASError):
+    pass
