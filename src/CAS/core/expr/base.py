@@ -62,17 +62,6 @@ class CoreExprBase:
     def __pos__(self):
         return self
 
-    def copy(self):
-        return self
-
-    @cached_property
-    def get_vars(self):
-        return set()
-
-    @cached_property
-    def isnum(self):
-        return False
-
 
 def _int_autoconvert(func):
     @wraps(func)

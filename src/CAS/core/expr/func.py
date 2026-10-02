@@ -6,8 +6,6 @@ from .utils import *
 
 
 class Func(CoreFuncBase):
-    def copy(self):
-        return self
 
     @cached_property
     def get_vars(self):
@@ -16,6 +14,9 @@ class Func(CoreFuncBase):
     @cached_property
     def isnum(self):
         return False
+
+    def copy(self):
+        return type(self)(*[arg.copy() for arg in self.args])
 
     def apply(self, func, *args):
         return type(self)(*[func(arg, *args) for arg in self.args])

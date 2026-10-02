@@ -1,10 +1,8 @@
-from collections import Counter
 from functools import cached_property
 
 from .registry import EXPRS
 from .base import CoreExpBase
-from .utils import make_expr # , simplify_decomp
-from CAS.core.pfactor import pfactor
+from .utils import make_expr
 
 
 class Exp(CoreExpBase):
@@ -23,8 +21,11 @@ class Exp(CoreExpBase):
     def copy(self):
         return Exp(self.base.copy(), self.power.copy())
 
-    def apply(self, func, *args):
-        return Exp(func(self.base, *args), func(self.power, *args))
+    def apply(self, func, *args, to_list=False):
+        exp = Exp(func(self.base, *args), func(self.power, *args))
+        if to_list:
+            return exp.base, exp.power
+        return exp
 
 
 EXPRS.exp = Exp

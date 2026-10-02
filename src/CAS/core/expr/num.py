@@ -1,25 +1,27 @@
-from collections import Counter
 from functools import cached_property
 
 from .registry import EXPRS
 from .base import CoreNumBase
-from CAS.core.pfactor import pfactor
+from CAS.exceptions import InvalidSubroutineError
 
 
 class Num(CoreNumBase):
     def __init__(self, value):
         self.value = value
 
-    # def decomp(self):
-    #     f = pfactor(self.value)
-    #     return Counter({Num(base): Num(power) for base, power in f.items()})
+    @cached_property
+    def get_vars(self):
+        return set()
 
     @cached_property
     def isnum(self):
         return True
 
-    def eval_nums(self):
-        return self.value
+    def copy(self):
+        return self # Can do this because ints are immutable
+
+    def apply(self, func, *args, to_list=False):
+        raise InvalidSubroutineError("Cannot use .apply method on Num")
 
 
 EXPRS.num = Num

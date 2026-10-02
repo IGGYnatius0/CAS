@@ -2,6 +2,7 @@ from functools import cached_property
 
 from .registry import EXPRS
 from .utils import make_expr
+from CAS.exceptions import InvalidSubroutineError
 
 
 class Eqn:
@@ -13,15 +14,21 @@ class Eqn:
         return Eqn(self.rhs, self.lhs)
 
     @cached_property
+    def isnum(self):
+        raise InvalidSubroutineError("Cannot use .isnum method on Eqn")
+
+    @cached_property
     def get_vars(self):
         return self.lhs.get_vars | self.rhs.get_vars
 
     def copy(self):
         return Eqn(self.lhs.copy, self.rhs.copy)
 
-    def apply(self, func, *args):
-        return Eqn(func(self.lhs, *args), func(self.rhs, *args))
-
+    def apply(self, func, *args, to_list=False):
+        eqn = Eqn(func(self.lhs, *args), func(self.rhs, *args))
+        if to_list:
+            return eqn.lhs, eqn.rhs
+        return eqn
 
 
     def __eq__(self, other):

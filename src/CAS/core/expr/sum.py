@@ -1,4 +1,3 @@
-from collections import defaultdict
 from functools import cached_property
 
 from .registry import EXPRS
@@ -28,11 +27,14 @@ class Sum(CoreSumBase):
                 return False
         return True
 
-    def apply(self, func, *args):
-        return Sum([func(term, *args) for term in self.terms])
-
     def copy(self):
         return Sum([term.copy() for term in self.terms])
+
+    def apply(self, func, *args, to_list=False):
+        sum = Sum([func(term, *args) for term in self.terms])
+        if to_list:
+            return sum.terms
+        return sum
 
 
 EXPRS.sum = Sum

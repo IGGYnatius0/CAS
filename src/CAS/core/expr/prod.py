@@ -1,6 +1,4 @@
-from collections import Counter
 from functools import cached_property
-from itertools import product
 
 from .registry import EXPRS
 from .base import CoreProdBase
@@ -32,8 +30,11 @@ class Prod(CoreProdBase):
     def copy(self):
         return Prod([factor.copy() for factor in self.factors])
 
-    def apply(self, func, *args):
-        return Prod([func(factor, *args) for factor in self.factors])
+    def apply(self, func, *args, to_list=False):
+        prod = Prod([func(factor, *args) for factor in self.factors])
+        if to_list:
+            return prod.factors
+        return prod
 
 
 EXPRS.prod = Prod
