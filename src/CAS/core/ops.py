@@ -15,12 +15,22 @@ __all__ = ['expand', 'factorize', 'substitute_vars', 'evaluate', 'group_nums']
 
 @singledispatch
 def expand(expr):
+    pass
+
+
+@expand.register(Num)
+@expand.register(Var)
+def _(expr):
     return expr
 
 
 @expand.register(Sum)
-def _(sum):
-    return Sum([expand(term) for term in sum.terms])
+@expand.register(Frac)
+@expand.register(Exp)
+@expand.register(Func)
+@expand.register(Eqn)
+def _(expr):
+    return expr.apply(expand)
 
 
 @expand.register(Prod)
@@ -35,51 +45,29 @@ def _(prod):
     return Sum([Prod(term) for term in product(*to_expand)])
 
 
-@expand.register(Frac)
-def _(frac):
-    return Frac(expand(frac.numer), expand(frac.denom))
-
-
-@expand.register(Exp)
-def _(exp):
-    if isinstance(exp.power, Num) and exp.power > 0:
-        return expand(Prod([exp.base] * exp.power.value))
-    return exp
-
-
-@expand.register(Eqn)
-def _(eqn):
-    return Eqn(expand(eqn.lhs), expand(eqn.rhs))
-
-
-@expand.register(Func)
-def _(func):
-    return type(func)(*[expand(arg) for arg in func.args])
+#############
+# FACTORIZE #
+#############
 
 
 @singledispatch
 def factorize(expr):
+    pass
+
+
+@factorize.register(Num)
+@factorize.register(Var)
+def _(expr):
     return expr
 
 
 @factorize.register(Prod)
-def _(prod):
-    return Prod([factorize(factor) for factor in prod.factors])
-
-
 @factorize.register(Frac)
-def _(frac):
-    return Frac(factorize(frac.numer), factorize(frac.denom))
-
-
 @factorize.register(Exp)
-def _(exp):
-    return Exp(factorize(exp.base), factorize(exp.power))
-
-
+@factorize.register(Func)
 @factorize.register(Eqn)
-def _(eqn):
-    return Eqn(factorize(eqn.lhs), factorize(eqn.rhs))
+def _(expr):
+    return expr.apply(factorize)
 
 
 @factorize.register(Sum)
@@ -106,29 +94,41 @@ def _(sum):
     return Prod([common_prod, terms_sum])
 
 
+###################
+# SUBSTITUTE_VARS #
+###################
+
+
 @singledispatch
 def substitute_vars(expr, var_map):
     pass
 
 
+@substitute_vars.register(Num)
+def _(num, var_map):
+    return num
+
+
+@substitute_vars.register(Var)
+def _(var, var_map):
+    if var in var_map:
+        return var_map[var]
+    return var
+
+
 @substitute_vars.register(Sum)
-def _(sum, var_map):
-    return Sum([substitute_vars(term, var_map) for term in sum.terms])
-
-
 @substitute_vars.register(Prod)
-def _(prod, var_map):
-    return Prod([substitute_vars(factor, var_map) for factor in prod.factors])
-
-
 @substitute_vars.register(Frac)
-def _(frac, var_map):
-    return Frac(substitute_vars(frac.numer, var_map), substitute_vars(frac.denom, var_map))
-
-
 @substitute_vars.register(Exp)
-def _(exp, var_map):
-    return Exp(substitute_vars(exp.base, var_map), substitute_vars(exp.power, var_map))
+@substitute_vars.register(Func)
+@substitute_vars.register(Eqn)
+def _(expr, var_map):
+    return expr.apply(substitute_vars, var_map)
+
+
+############
+# EVALUATE #
+############
 
 
 def evaluate(expr):
@@ -139,6 +139,12 @@ def evaluate(expr):
 
 @singledispatch
 def _evaluate(expr):
+    pass
+
+
+@_evaluate.register(Num)
+# No need Var because isnum ensures there is no Var
+def _(expr):
     return expr
 
 
@@ -164,8 +170,22 @@ def _(exp):
     return _evaluate(exp.base) ** _evaluate(exp.power)
 
 
+# TODO Eqn and Func
+
+
+##############
+# GROUP_NUMS #
+##############
+
+
 @singledispatch
 def group_nums(expr):
+    pass
+
+
+@group_nums.register(Num)
+@group_nums.register(Var)
+def _(expr):
     return expr
 
 
@@ -206,10 +226,8 @@ def _(prod):
 
 
 @group_nums.register(Frac)
-def _(frac):
-    return Frac(group_nums(frac.numer), group_nums(frac.denom))
-
-
 @group_nums.register(Exp)
-def _(exp):
-    return Exp(group_nums(exp.base), group_nums(exp.power))
+@group_nums.register(Func)
+@group_nums.register(Eqn)
+def _(expr):
+    return expr.apply(group_nums)
