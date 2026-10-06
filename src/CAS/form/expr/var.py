@@ -1,9 +1,10 @@
 from functools import cached_property
 
-
 from .registry import FORMS
 from .base import FormVarBase
-from CAS.core import *
+
+from CAS.core import Var
+from CAS.exceptions import BadMethodError
 
 
 class FormVar(FormVarBase):
@@ -33,6 +34,9 @@ class FormVar(FormVarBase):
     @cached_property
     def get_vars(self):
         return {self}
+
+    def apply(self, func, args, to_iter=False):
+        raise BadMethodError("Cannot use .apply on FormVar")
 
     def group_consts(self):
         return self

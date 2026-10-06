@@ -3,7 +3,7 @@ from functools import cached_property
 from .registry import FORMS
 from .base import FormProdBase
 from .utils import make_form
-from CAS.core import *
+from CAS.core import zero, one, Prod
 
 
 class FormProd(FormProdBase):
@@ -58,6 +58,13 @@ class FormProd(FormProdBase):
     @cached_property
     def get_vars(self):
         return set.union(*[factor.get_vars for factor in self.factors])
+
+    def apply(self, func, args, to_iter=False):
+        prod = FormProd([func(factor, *args) for factor in self.factors])
+        if to_iter:
+            return prod.factors
+        return prod
+
 
     def group_consts(self):
         """Groups all constants in this FormProd into a single FormProd"""

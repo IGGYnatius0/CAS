@@ -3,7 +3,7 @@ from functools import cached_property
 from .registry import FORMS
 from .base import FormSumBase
 from .utils import make_form
-from CAS.core import *
+from CAS.core import zero, Sum
 
 
 class FormSum(FormSumBase):
@@ -57,6 +57,13 @@ class FormSum(FormSumBase):
     @cached_property
     def get_vars(self):
         return set.union(*[term.get_vars for term in self.terms])
+
+    def apply(self, func, args, to_iter=False):
+        sum = FormSum([func(term, *args) for term in self.terms])
+        if to_iter:
+            return sum.terms
+        return sum
+
 
     def group_consts(self):
         """Groups all constants in this FormSum into a single FormSum"""

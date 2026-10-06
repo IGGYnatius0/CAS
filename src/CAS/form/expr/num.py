@@ -2,7 +2,9 @@ from functools import cached_property
 
 from .registry import FORMS
 from .base import FormNumBase
+
 from CAS.core import Num
+from CAS.exceptions import BadMethodError
 
 
 class FormNum(FormNumBase):
@@ -25,6 +27,9 @@ class FormNum(FormNumBase):
     @cached_property
     def get_vars(self):
         return set()
+
+    def apply(self, func, args, to_iter=False):
+        raise BadMethodError("Cannot use .apply on FormNum")
 
     def group_consts(self):
         return self

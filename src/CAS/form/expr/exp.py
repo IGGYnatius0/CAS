@@ -3,7 +3,7 @@ from functools import cached_property
 from .registry import FORMS
 from .base import FormExpBase
 from .utils import make_form
-from CAS.core import *
+from CAS.core import zero, one, Exp
 
 
 class FormExp(FormExpBase):
@@ -48,6 +48,12 @@ class FormExp(FormExpBase):
     @cached_property
     def get_vars(self):
         return self.base.get_vars | self.power.get_vars
+
+    def apply(self, func, args, to_iter=False):
+        exp = FormExp(func(self.base, *args), func(self.power, *args))
+        if to_iter:
+            exp.base, exp.power
+        return exp
 
     def group_consts(self):
         return FormExp(self.base.group_consts(), self.power.group_consts())

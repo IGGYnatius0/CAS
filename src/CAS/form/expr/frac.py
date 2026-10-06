@@ -3,7 +3,7 @@ from functools import cached_property
 from .registry import FORMS
 from .base import FormFracBase
 from .utils import make_form
-from CAS.core import *
+from CAS.core import zero, one, Frac
 
 
 class FormFrac(FormFracBase):
@@ -42,6 +42,12 @@ class FormFrac(FormFracBase):
     @cached_property
     def get_vars(self):
         return self.numer.get_vars | self.denom.get_vars
+
+    def apply(self, func, args, to_iter=False):
+        frac = FormFrac(func(self.numer, *args), func(self.denom, *args))
+        if to_iter:
+            frac.numer, frac.denom
+        return frac
 
     def group_consts(self):
         return FormFrac(self.numer.group_consts(), self.denom.group_consts())

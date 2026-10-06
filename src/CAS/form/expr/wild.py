@@ -2,7 +2,9 @@ from functools import cached_property
 
 from .registry import FORMS
 from .base import FormWildBase
-from CAS.core import *
+
+from CAS.core import CoreExprBase
+from CAS.exceptions import BadMethodError
 
 
 class FormWild(FormWildBase):
@@ -37,6 +39,9 @@ class FormWild(FormWildBase):
     @cached_property
     def get_vars(self):
         return {self}
+
+    def apply(self, func, args, to_iter=False):
+        raise BadMethodError("Cannot use .apply on FormVar")
 
     def group_consts(self):
         return self

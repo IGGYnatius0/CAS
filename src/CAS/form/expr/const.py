@@ -2,8 +2,10 @@ from functools import cached_property
 
 from .registry import FORMS
 from .base import FormConstBase
+
 from CAS.core import Num
 from CAS.interval import REALS, from_str
+from CAS.exceptions import BadMethodError
 
 
 class FormConst(FormConstBase):
@@ -32,6 +34,9 @@ class FormConst(FormConstBase):
     @cached_property
     def get_vars(self):
         return set()
+
+    def apply(self, func, args, to_iter=False):
+        raise BadMethodError("Cannot use .apply method on FormConst")
 
     def group_consts(self):
         return self
