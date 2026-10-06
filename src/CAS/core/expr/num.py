@@ -2,7 +2,7 @@ from functools import cached_property
 
 from .registry import EXPRS
 from .base import CoreNumBase
-from CAS.exceptions import InvalidSubroutineError
+from CAS.exceptions import BadMethodError
 
 
 class Num(CoreNumBase):
@@ -21,7 +21,7 @@ class Num(CoreNumBase):
         return self # Can do this because ints are immutable
 
     def apply(self, func, *args, to_list=False):
-        raise InvalidSubroutineError("Cannot use .apply method on Num")
+        raise BadMethodError("Cannot use .apply method on Num")
 
 
 EXPRS.num = Num

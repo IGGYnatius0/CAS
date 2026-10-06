@@ -2,7 +2,6 @@ from functools import cached_property
 
 from .registry import EXPRS
 from .base import CoreFuncBase
-from .utils import *
 
 
 class Func(CoreFuncBase):

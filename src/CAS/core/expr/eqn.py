@@ -2,7 +2,7 @@ from functools import cached_property
 
 from .registry import EXPRS
 from .utils import make_expr
-from CAS.exceptions import InvalidSubroutineError
+from CAS.exceptions import BadMethodError
 
 
 class Eqn:
@@ -15,7 +15,7 @@ class Eqn:
 
     @cached_property
     def isnum(self):
-        raise InvalidSubroutineError("Cannot use .isnum method on Eqn")
+        raise BadMethodError("Cannot use .isnum method on Eqn")
 
     @cached_property
     def get_vars(self):

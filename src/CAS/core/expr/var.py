@@ -2,7 +2,7 @@ from functools import cached_property
 
 from .registry import EXPRS
 from .base import CoreVarBase
-from CAS.exceptions import InvalidSubroutineError
+from CAS.exceptions import BadMethodError
 
 
 class Var(CoreVarBase):
@@ -21,7 +21,7 @@ class Var(CoreVarBase):
         return self # Can do this because strings are immutable
 
     def apply(self, func, *args, to_list=False):
-        raise InvalidSubroutineError("Cannot use .apply method on Var")
+        raise BadMethodError("Cannot use .apply method on Var")
 
 
 EXPRS.var = Var

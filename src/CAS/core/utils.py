@@ -1,7 +1,7 @@
 from functools import singledispatch
 
 from .expr import *
-from CAS.exceptions import InvalidSubroutineError
+from CAS.exceptions import BadMethodError
 
 
 __all__ = ['isrational']
@@ -36,7 +36,7 @@ def _(expr):
 
 @isrational.register(Eqn)
 def _(eqn):
-    raise InvalidSubroutineError("Cannot use isrational function on Eqn")
+    raise BadMethodError("Cannot use isrational function on Eqn")
 
 
 @isrational.register(Func)

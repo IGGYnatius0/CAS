@@ -1,5 +1,6 @@
 from .base import *
 
 
-__all__ = ['InvalidSubroutineError',
+__all__ = ['BadFunctionError',
+           'BadMethodError',
            'MissingVariableError']

@@ -1,8 +1,19 @@
+__all__ = ['BadMethodError', 'BadFunctionError', 'MissingVariableError']
+
+
 class CASError(Exception):
     pass
 
 
-class InvalidSubroutineError(CASError):
+class BadSubroutineError(CASError):
+    pass
+
+
+class BadMethodError(BadSubroutineError):
+    pass
+
+
+class BadFunctionError(BadSubroutineError):
     pass
 
 
