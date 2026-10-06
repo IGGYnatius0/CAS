@@ -23,8 +23,22 @@ class FormVar(FormVarBase):
         return FORMS.SingleConstraint(self, expr, var_map)
 
     @cached_property
+    def isconst(self):
+        return False
+
+    @cached_property
+    def get_consts(self):
+        return set()
+
+    @cached_property
     def get_vars(self):
         return {self}
+
+    def group_consts(self):
+        return self
+
+    def substitute_consts(self, const_map):
+        return self
 
 
 FORMS.var = FormVar

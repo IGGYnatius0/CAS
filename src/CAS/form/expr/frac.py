@@ -35,9 +35,6 @@ class FormFrac(FormFracBase):
             return False
         return True
 
-    def group_consts(self):
-        return FormFrac(self.numer.group_consts(), self.denom.group_consts())
-
     @cached_property
     def get_consts(self):
         return self.numer.get_consts | self.denom.get_consts
@@ -45,6 +42,9 @@ class FormFrac(FormFracBase):
     @cached_property
     def get_vars(self):
         return self.numer.get_vars | self.denom.get_vars
+
+    def group_consts(self):
+        return FormFrac(self.numer.group_consts(), self.denom.group_consts())
 
     def substitute_consts(self, const_map):
         return FormFrac(self.numer.substitute_consts(const_map),

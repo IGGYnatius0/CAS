@@ -50,6 +50,14 @@ class FormSum(FormSumBase):
                 return False
         return True
 
+    @cached_property
+    def get_consts(self):
+        return set.union(*[term.get_consts for term in self.terms])
+
+    @cached_property
+    def get_vars(self):
+        return set.union(*[term.get_vars for term in self.terms])
+
     def group_consts(self):
         """Groups all constants in this FormSum into a single FormSum"""
         terms = [term.group_consts() for term in self.terms]
@@ -65,14 +73,6 @@ class FormSum(FormSumBase):
         elif len(consts) > 1:
             terms.append(FormSum(consts))
         return FormSum(terms)
-
-    @cached_property
-    def get_consts(self):
-        return set.union(*[term.get_consts for term in self.terms])
-
-    @cached_property
-    def get_vars(self):
-        return set.union(*[term.get_vars for term in self.terms])
 
     def substitute_consts(self, const_map):
         return FormSum([term.substitute_consts(const_map) for term in self.terms])

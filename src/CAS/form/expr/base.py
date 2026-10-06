@@ -65,25 +65,6 @@ class FormExprBase:
         return self
 
 
-    @cached_property
-    def isconst(self):
-        return False
-
-    def group_consts(self):
-        return self
-
-    @cached_property
-    def get_consts(self):
-        return set()
-
-    @cached_property
-    def get_vars(self):
-        return set()
-
-    def substitute_consts(self, const_map):
-        return self
-
-
 class FormNumBase(FormExprBase):
     def __str__(self):
         return str(self.value)
@@ -154,11 +135,11 @@ class FormSumBase(FormExprBase):
             return FORMS.sum(other.terms + self.terms)
         return FORMS.sum([other] + self.terms)
 
-    def __iadd__(self, other):
-        if isinstance(other, FORMS.sum):
-            self.terms.extend(other.terms)
-        self.terms.append(other)
-        return self
+    # def __iadd__(self, other):
+    #     if isinstance(other, FORMS.sum):
+    #         self.terms.extend(other.terms)
+    #     self.terms.append(other)
+    #     return self
 
     def __sub__(self, other):
         if isinstance(other, FORMS.sum):
@@ -170,9 +151,9 @@ class FormSumBase(FormExprBase):
             return FORMS.sum(other.terms + (-self).terms)
         return FORMS.sum([other] + (-self).terms)
 
-    def __isub__(self, other):
-        self.terms.append(-other)
-        return self
+    # def __isub__(self, other):
+    #     self.terms.append(-other)
+    #     return self
 
 
 class FormProdBase(FormExprBase):
@@ -198,11 +179,11 @@ class FormProdBase(FormExprBase):
             return FORMS.prod(other.factors + self.factors)
         return FORMS.prod([other] + self.factors)
 
-    def __imul__(self, other):
-        if isinstance(other, FORMS.prod):
-            self.factors.extend(other.factors)
-        self.factors.append(other)
-        return self
+    # def __imul__(self, other):
+    #     if isinstance(other, FORMS.prod):
+    #         self.factors.extend(other.factors)
+    #     self.factors.append(other)
+    #     return self
 
 
 class FormFracBase(FormExprBase):

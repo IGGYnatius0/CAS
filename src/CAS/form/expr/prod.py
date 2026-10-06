@@ -51,6 +51,14 @@ class FormProd(FormProdBase):
                 return False
         return True
 
+    @cached_property
+    def get_consts(self):
+        return set.union(*[factor.get_consts for factor in self.factors])
+
+    @cached_property
+    def get_vars(self):
+        return set.union(*[factor.get_vars for factor in self.factors])
+
     def group_consts(self):
         """Groups all constants in this FormProd into a single FormProd"""
         factors = [factor.group_consts() for factor in self.factors]
@@ -66,14 +74,6 @@ class FormProd(FormProdBase):
         elif len(consts) > 1:
             factors.append(FormProd(consts))
         return FormProd(factors)
-
-    @cached_property
-    def get_consts(self):
-        return set.union(*[factor.get_consts for factor in self.factors])
-
-    @cached_property
-    def get_vars(self):
-        return set.union(*[factor.get_vars for factor in self.factors])
 
     def substitute_consts(self, const_map):
         return FormProd([factor.substitute_consts(const_map) for factor in self.factors])

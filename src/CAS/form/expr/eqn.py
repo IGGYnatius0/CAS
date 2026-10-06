@@ -30,9 +30,6 @@ class FormEqn:
             return False
         return True
 
-    def group_consts(self):
-        return FormEqn(self.lhs.group_consts(), self.rhs.group_consts())
-
     @cached_property
     def get_consts(self):
         return self.lhs.get_consts | self.rhs.get_consts
@@ -41,12 +38,11 @@ class FormEqn:
     def get_vars(self):
         return self.lhs.get_vars | self.rhs.get_vars
 
+    def group_consts(self):
+        return FormEqn(self.lhs.group_consts(), self.rhs.group_consts())
+
     def substitute_consts(self, const_map):
         return FormEqn(self.lhs.substitute_consts(const_map), self.rhs.substitute_consts(const_map))
-
-    def to_coretype(self, const_map, var_map={}):
-        return Eqn(self.lhs.to_coretype(const_map, var_map),
-                   self.rhs.to_coretype(const_map, var_map))
 
 
     def __str__(self):

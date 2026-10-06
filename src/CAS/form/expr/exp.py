@@ -41,9 +41,6 @@ class FormExp(FormExpBase):
             return False
         return True
 
-    def group_consts(self):
-        return FormExp(self.base.group_consts(), self.power.group_consts())
-
     @cached_property
     def get_consts(self):
         return self.base.get_consts | self.power.get_consts
@@ -51,6 +48,9 @@ class FormExp(FormExpBase):
     @cached_property
     def get_vars(self):
         return self.base.get_vars | self.power.get_vars
+
+    def group_consts(self):
+        return FormExp(self.base.group_consts(), self.power.group_consts())
 
     def substitute_consts(self, const_map):
         return FormExp(self.base.substitute_consts(const_map),
