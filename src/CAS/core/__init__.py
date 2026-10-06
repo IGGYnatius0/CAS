@@ -10,5 +10,5 @@ __all__ = ['CoreExprBase', 'Num', 'Var', 'Sum', 'Prod', 'Frac', 'Exp', 'Eqn', 'F
            'decomp2prod', 'make_expr',
            'pfactor',
            'decomp', 'simplify', 'simplify_decomp',
-           'expand', 'factorize', 'evaluate', 'group_nums',
+           'expand', 'factorize', 'substitute_vars', 'evaluate', 'group_nums',
            'isrational']
