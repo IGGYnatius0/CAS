@@ -26,7 +26,7 @@ def _(var):
 @isrational.register(Prod)
 @isrational.register(Frac)
 def _(expr):
-    return all(expr.apply(isrational, to_list=True))
+    return all(expr.apply(isrational, to_iter=True))
 
 
 @isrational.register(Exp)

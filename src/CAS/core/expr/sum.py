@@ -30,9 +30,9 @@ class Sum(CoreSumBase):
     def copy(self):
         return Sum([term.copy() for term in self.terms])
 
-    def apply(self, func, *args, to_list=False):
+    def apply(self, func, *args, to_iter=False):
         sum = Sum([func(term, *args) for term in self.terms])
-        if to_list:
+        if to_iter:
             return sum.terms
         return sum
 

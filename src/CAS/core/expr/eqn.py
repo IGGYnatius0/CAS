@@ -24,9 +24,9 @@ class Eqn:
     def copy(self):
         return Eqn(self.lhs.copy, self.rhs.copy)
 
-    def apply(self, func, *args, to_list=False):
+    def apply(self, func, *args, to_iter=False):
         eqn = Eqn(func(self.lhs, *args), func(self.rhs, *args))
-        if to_list:
+        if to_iter:
             return eqn.lhs, eqn.rhs
         return eqn
 
