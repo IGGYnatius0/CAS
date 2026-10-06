@@ -135,12 +135,6 @@ class FormSumBase(FormExprBase):
             return FORMS.sum(other.terms + self.terms)
         return FORMS.sum([other] + self.terms)
 
-    # def __iadd__(self, other):
-    #     if isinstance(other, FORMS.sum):
-    #         self.terms.extend(other.terms)
-    #     self.terms.append(other)
-    #     return self
-
     def __sub__(self, other):
         if isinstance(other, FORMS.sum):
             return FORMS.sum(self.terms + (-other).terms)
@@ -150,10 +144,6 @@ class FormSumBase(FormExprBase):
         if isinstance(other, FORMS.sum):
             return FORMS.sum(other.terms + (-self).terms)
         return FORMS.sum([other] + (-self).terms)
-
-    # def __isub__(self, other):
-    #     self.terms.append(-other)
-    #     return self
 
 
 class FormProdBase(FormExprBase):
@@ -178,12 +168,6 @@ class FormProdBase(FormExprBase):
         if isinstance(other, FORMS.prod):
             return FORMS.prod(other.factors + self.factors)
         return FORMS.prod([other] + self.factors)
-
-    # def __imul__(self, other):
-    #     if isinstance(other, FORMS.prod):
-    #         self.factors.extend(other.factors)
-    #     self.factors.append(other)
-    #     return self
 
 
 class FormFracBase(FormExprBase):
