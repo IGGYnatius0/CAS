@@ -20,7 +20,7 @@ class Num(CoreNumBase):
     def copy(self):
         return self # Can do this because ints are immutable
 
-    def apply(self, func, *args, to_iter=False):
+    def apply(self, func, args, to_iter=False):
         raise BadMethodError("Cannot use .apply method on Num")
 
 
