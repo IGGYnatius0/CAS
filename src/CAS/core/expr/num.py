@@ -5,9 +5,12 @@ from .base import CoreNumBase
 from CAS.exceptions import BadMethodError
 
 
+inf = float('inf')
+ninf = float('-inf')
+
 class Num(CoreNumBase):
     def __init__(self, value):
-        if not isinstance(value, int):
+        if value not in (inf, ninf) and not isinstance(value, int):
             raise TypeError("Num can only be initialized with int")
         self.value = value
 
@@ -31,5 +34,5 @@ EXPRS.num = Num
 EXPRS.zero = Num(0)
 EXPRS.one = Num(1)
 EXPRS.neg_one = Num(-1)
-EXPRS.inf = Num(float('inf'))
-EXPRS.ninf = Num(float('-inf'))
+EXPRS.inf = Num(inf)
+EXPRS.ninf = Num(ninf)
