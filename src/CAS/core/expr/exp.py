@@ -21,7 +21,7 @@ class Exp(CoreExpBase):
     def copy(self):
         return Exp(self.base.copy(), self.power.copy())
 
-    def apply(self, func, args, to_iter=False):
+    def apply(self, func, args=(), to_iter=False):
         exp = Exp(func(self.base, *args), func(self.power, *args))
         if to_iter:
             return exp.base, exp.power

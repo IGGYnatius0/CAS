@@ -17,7 +17,7 @@ class Func(CoreFuncBase):
     def copy(self):
         return type(self)(*[arg.copy() for arg in self.args])
 
-    def apply(self, func, args, to_iter=False):
+    def apply(self, func, args=(), to_iter=False):
         # TODO implement path for to_iter
         return type(self)(*[func(arg, *args) for arg in self.args])
 
