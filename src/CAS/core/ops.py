@@ -145,7 +145,7 @@ def _evaluate(expr):
 @_evaluate.register(Num)
 # No need Var because isnum ensures there is no Var
 def _(expr):
-    return expr
+    return expr.value
 
 
 @_evaluate.register(Sum)
