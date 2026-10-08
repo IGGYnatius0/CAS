@@ -9,6 +9,8 @@ from CAS.exceptions import BadMethodError
 
 class FormNum(FormNumBase):
     def __init__(self, value):
+        if not isinstance(value, int):
+            raise TypeError("FormNum can only be initialized with int")
         self.value = value
 
     def match(self, expr, var_map):

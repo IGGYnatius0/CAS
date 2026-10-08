@@ -7,6 +7,8 @@ from CAS.exceptions import BadMethodError
 
 class Num(CoreNumBase):
     def __init__(self, value):
+        if not isinstance(value, int):
+            raise TypeError("Num can only be initialized with int")
         self.value = value
 
     @cached_property
