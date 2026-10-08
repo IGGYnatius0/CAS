@@ -2,8 +2,8 @@ from functools import cached_property
 
 from .registry import FORMS
 from .base import FormConstBase
+from .utils import form2core
 
-from CAS.core import Num
 from CAS.interval import REALS, from_str
 from CAS.exceptions import BadMethodError
 
@@ -25,11 +25,11 @@ class FormConst(FormConstBase):
 
     @cached_property
     def isconst(self):
-        return False
+        return True
 
     @cached_property
     def get_consts(self):
-        return set()
+        return {self}
 
     @cached_property
     def get_vars(self):
@@ -43,7 +43,7 @@ class FormConst(FormConstBase):
 
     def substitute_consts(self, const_map):
         if self in const_map:
-            return Num(const_map[self].value)
+            return const_map[self]
         return self
 
 
