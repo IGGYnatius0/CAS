@@ -194,7 +194,7 @@ def _(exp):
     if power == 1:
         return base
     if base == -1 and isinstance(power, Num):
-        return Num(base.value ** power.value)
+        return Num(int(base.value ** power.value))
     if base == 1 or (power == 0 and base != 0):
         return one
     if base == 0 and power != 0:
