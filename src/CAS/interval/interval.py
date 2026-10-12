@@ -13,9 +13,9 @@ class BaseInterval:
 
 def cmp_lower(int1, int2):
     """Returns -1, 0 or +1 depending on int2.lower relative to int1.lower"""
-    if int2.lower.eval_nums() > int1.lower.eval_nums():
+    if evaluate(int2.lower) > evaluate(int1.lower):
         return 1
-    if int2.lower.eval_nums() < int1.lower.eval_nums():
+    if evaluate(int2.lower) < evaluate(int1.lower):
         return -1
     if int2.lo_inc == int1.lo_inc:
         return 0
@@ -27,9 +27,9 @@ def cmp_lower(int1, int2):
 
 def cmp_upper(int1, int2):
     """Returns -1, 0 or +1 depending on int2.upper relative to int1.upper"""
-    if int2.upper.eval_nums() > int1.upper.eval_nums():
+    if evaluate(int2.upper) > evaluate(int1.upper):
         return 1
-    if int2.upper.eval_nums() < int1.upper.eval_nums():
+    if evaluate(int2.upper) < evaluate(int1.upper):
         return -1
     if int2.up_inc == int1.up_inc:
         return 0
