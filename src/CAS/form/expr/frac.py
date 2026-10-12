@@ -43,11 +43,11 @@ class FormFrac(FormFracBase):
     def get_vars(self):
         return self.numer.get_vars | self.denom.get_vars
 
-    def apply(self, func, args, to_iter=False):
-        frac = FormFrac(func(self.numer, *args), func(self.denom, *args))
+    def apply(self, func, args=(), to_iter=False):
+        frac = func(self.numer, *args), func(self.denom, *args)
         if to_iter:
-            return frac.numer, frac.denom
-        return frac
+            return frac
+        return FormFrac(frac)
 
     def group_consts(self):
         return FormFrac(self.numer.group_consts(), self.denom.group_consts())

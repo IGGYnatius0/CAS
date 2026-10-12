@@ -38,11 +38,11 @@ class FormEqn:
     def get_vars(self):
         return self.lhs.get_vars | self.rhs.get_vars
 
-    def apply(self, func, args, to_iter=False):
-        eqn = FormEqn(func(self.lhs, *args), func(self.rhs, *args))
+    def apply(self, func, args=(), to_iter=False):
+        eqn = func(self.lhs, *args), func(self.rhs, *args)
         if to_iter:
-            return eqn.lhs, eqn.rhs
-        return eqn
+            return eqn
+        return FormEqn(eqn)
 
     def group_consts(self):
         return FormEqn(self.lhs.group_consts(), self.rhs.group_consts())

@@ -49,11 +49,11 @@ class FormExp(FormExpBase):
     def get_vars(self):
         return self.base.get_vars | self.power.get_vars
 
-    def apply(self, func, args, to_iter=False):
-        exp = FormExp(func(self.base, *args), func(self.power, *args))
+    def apply(self, func, args=(), to_iter=False):
+        exp = func(self.base, *args), func(self.power, *args)
         if to_iter:
-            return exp.base, exp.power
-        return exp
+            return exp
+        return FormExp(exp)
 
     def group_consts(self):
         return FormExp(self.base.group_consts(), self.power.group_consts())

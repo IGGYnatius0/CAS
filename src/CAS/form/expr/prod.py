@@ -60,10 +60,10 @@ class FormProd(FormProdBase):
         return set.union(*[factor.get_vars for factor in self.factors])
 
     def apply(self, func, args, to_iter=False):
-        prod = FormProd([func(factor, *args) for factor in self.factors])
+        prod = [func(factor, *args) for factor in self.factors]
         if to_iter:
-            return prod.factors
-        return prod
+            return prod
+        return FormProd(prod)
 
 
     def group_consts(self):
