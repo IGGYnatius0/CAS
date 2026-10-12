@@ -34,32 +34,32 @@ class SingleConstraint:
 
     def simplify_sum(self):
         for i, term in enumerate(self.form.terms):
-            if isinstance(term, FORMS.num):
-                self.value -= term.value
+            if term.isnum:
+                self.value -= term
                 self.form.terms.pop(i)
                 return
 
     def simplify_prod(self):
         for i, factor in enumerate(self.form.factors):
-            if isinstance(factor, FORMS.num):
-                self.value /= factor.value # FIXME possible division by zero
+            if factor.isnum:
+                self.value /= factor # Potential zero division will be handled by core simplify
                 self.form.factors.pop(i)
                 return
 
     def simplify_frac(self):
-        if isinstance(self.form.numer, FORMS.num):
-            self.value = self.form.numer.value / self.value
+        if self.form.numer.isnum:
+            self.value = self.form.numer / self.value
             self.form = self.form.denom
-        elif isinstance(self.form.denom, FORMS.num):
-            self.value *= self.form.denom.value
+        elif self.form.denom.isnum:
+            self.value *= self.form.denom
             self.form = self.form.numer
 
     def simplify_exp(self):
-        if isinstance(self.form.base, FORMS.num):
+        if self.form.base.isnum:
             # TODO logarithm
             pass
-        elif isinstance(self.form.power, FORMS.num):
-            self.value **= one / self.form.power.value
+        elif self.form.power.isnum:
+            self.value **= one / self.form.power
             self.form = self.form.base
 
     def __bool__(self):
