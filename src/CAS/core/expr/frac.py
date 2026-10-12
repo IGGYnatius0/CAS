@@ -25,7 +25,7 @@ class Frac(CoreFracBase):
         frac = func(self.numer, *args), func(self.denom, *args)
         if to_iter:
             return frac
-        return Frac(frac)
+        return Frac(*frac)
 
 
 EXPRS.frac = Frac

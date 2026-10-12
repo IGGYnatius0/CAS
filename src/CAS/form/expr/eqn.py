@@ -42,7 +42,7 @@ class FormEqn:
         eqn = func(self.lhs, *args), func(self.rhs, *args)
         if to_iter:
             return eqn
-        return FormEqn(eqn)
+        return FormEqn(*eqn)
 
     def group_consts(self):
         return FormEqn(self.lhs.group_consts(), self.rhs.group_consts())

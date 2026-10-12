@@ -25,7 +25,7 @@ class Exp(CoreExpBase):
         exp = func(self.base, *args), func(self.power, *args)
         if to_iter:
             return exp
-        return Exp(exp)
+        return Exp(*exp)
 
 
 EXPRS.exp = Exp

@@ -28,7 +28,7 @@ class Eqn:
         eqn = func(self.lhs, *args), func(self.rhs, *args)
         if to_iter:
             eqn
-        return Eqn(eqn)
+        return Eqn(*eqn)
 
 
     def __eq__(self, other):
