@@ -1,4 +1,5 @@
-__all__ = ['BadMethodError', 'BadFunctionError', 'MissingVariableError']
+__all__ = ['BadMethodError', 'BadFunctionError',
+           'MissingVarError', 'MissingConstError']
 
 
 class CASError(Exception):
@@ -17,5 +18,13 @@ class BadFunctionError(BadSubroutineError):
     pass
 
 
-class MissingVariableError(CASError):
+class MissingExprError(CASError):
+    pass
+
+
+class MissingVarError(MissingExprError):
+    pass
+
+
+class MissingConstError(MissingExprError):
     pass
