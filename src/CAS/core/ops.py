@@ -149,8 +149,8 @@ def _(expr):
 
 
 @_evaluate.register(Sum)
-def _(sum):
-    return sum([_evaluate(term) for term in sum.terms])
+def _(sum_):
+    return sum([_evaluate(term) for term in sum_.terms])
 
 
 @_evaluate.register(Prod)
