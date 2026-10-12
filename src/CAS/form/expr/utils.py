@@ -26,7 +26,7 @@ def make_form(expr):
     except ValueError:
         if isinstance(expr, FormExprBase):
             return expr
-        raise ValueError("Input expression must inherit from FormExprBase")
+        raise TypeError("Input expression must inherit from FormExprBase")
 
 
 #############

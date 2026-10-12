@@ -27,4 +27,4 @@ def make_expr(expr):
     except ValueError:
         if isinstance(expr, CoreExprBase):
             return expr
-        raise ValueError("Input expression must inherit from CoreExprBase")
+        raise TypeError("Input expression must inherit from CoreExprBase")
