@@ -52,7 +52,7 @@ class FormExp(FormExpBase):
     def apply(self, func, args, to_iter=False):
         exp = FormExp(func(self.base, *args), func(self.power, *args))
         if to_iter:
-            exp.base, exp.power
+            return exp.base, exp.power
         return exp
 
     def group_consts(self):

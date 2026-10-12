@@ -46,7 +46,7 @@ class FormFrac(FormFracBase):
     def apply(self, func, args, to_iter=False):
         frac = FormFrac(func(self.numer, *args), func(self.denom, *args))
         if to_iter:
-            frac.numer, frac.denom
+            return frac.numer, frac.denom
         return frac
 
     def group_consts(self):
