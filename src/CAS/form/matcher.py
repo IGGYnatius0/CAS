@@ -2,6 +2,7 @@ from collections import Counter
 from CAS.core import *
 from .expr import *
 from .expr.constraints import SingleConstraint
+from .ops import *
 
 
 __all__ = ['match']
@@ -17,13 +18,11 @@ def solve_constraints(constrs, n_consts, n_vars):
         for form, var in constr.var_map.items():
             if form in var_map:
                 if var_map[form] == var:
-                    if isinstance(form, FormVar) and \
-                        Counter(var_map.values())[var] != 1:
+                    if isinstance(form, FormVar) and Counter(var_map.values())[var] != 1:
                         return False
                 else:
                     return False
-            elif isinstance(form, FormVar) and \
-                Counter(var_map.values())[var] != 0:
+            elif isinstance(form, FormVar) and Counter(var_map.values())[var] != 0:
                 return False
             var_map[form] = var
 
@@ -35,33 +34,47 @@ def solve_constraints(constrs, n_consts, n_vars):
     if n_consts == 0:
         return {}, var_map
 
+    # Removing all (None: None) and (FormVar: Var) constraints
+    # ie removing useless constrs and var-only constrs
+    # Changing all SingleConstraint.value from core to form
+    for i, constr in reversed(list(enumerate(constrs))):
+        if isinstance(constr.form, FormVar) and isinstance(constr.value, Var):
+            constrs.pop(i)
+        elif constr.form is None and constr.value is None:
+            constrs.pop(i)
+        elif isinstance(constr.value, Num):
+            constrs[i].value = core2form(constr.value)
+
     # Solving const_map from all the SingleConstraint.form and SingleConstraint.value
     const_map = {}
+    solved_idxs = []
     n_passes = len(constrs) - len(const_map)
     i = 0
     while len(const_map) < n_consts and i < n_passes:
         # Getting all 'lone' constants
-        for constr in constrs:
-            if isinstance(constr.form, FormConst):
-                if constr.form in const_map:
-                    return False
-                if constr.value not in constr.form.domain:
-                    return False
-                const_map[constr.form] = constr.value
         for j, constr in enumerate(constrs):
+            if j in solved_idxs or not isinstance(constr.form, FormConst):
+                continue
+            if constr.form in const_map:
+                return False
+            if form2core(constr.value) not in constr.form.domain:
+                return False
+            const_map[constr.form] = constr.value
+            solved_idxs.append(j)
+        for j, constr in enumerate(constrs):
+            if j in solved_idxs:
+                continue
             # Substitute
             # Create new instance of SingleConstraint to prevent downstream SingleConstraints from getting modified,
             # since simplify runs in-place
-            if constr.form is None:
-                continue
-            constr = SingleConstraint(form=constr.form.substitute_consts(const_map),
+            constr = SingleConstraint(form=substitute_consts(constr.form, const_map),
                                       value=constr.value)
             # Simplify
             constr.simplify()
             constrs[j] = constr
         i += 1
     for const, value in const_map.items():
-        const_map[const] = simplify(value)
+        const_map[const] = simplify(form2core(value))
     if len(const_map) == n_consts:
         return const_map, var_map
     return False
@@ -69,7 +82,7 @@ def solve_constraints(constrs, n_consts, n_vars):
 
 def match(form, expr):
     var_map = {}
-    expr = expr.group_nums()
+    expr = group_nums(expr)
     matches = form.match(expr, var_map)
     if not matches:
         return False
@@ -95,21 +108,21 @@ if __name__ == '__main__':
     c = FormConst('c')
     d = FormConst('d')
     e = FormConst('e')
-    # form = ((a*b+c)*y**3 + b*c*y**2 + c*d*y + d).group_consts()
-    # expr =  10*x**3   + 12*x**2  + 20*x  + 5
+    form = ((a*b+c)*y**3 + b*c*y**2 + c*d*y + d).group_consts()
+    expr =  10*x**3   + 12*x**2  + 20*x  + 5
     # form = (y**(a*b+c) + b*c*y + b/y).group_consts()
     # expr = (x**-5 + 2*x + 2/x)
     # form = y + 2
     # expr = x + 2
 
-    a1 = FormWild('a1')
-    a2 = FormWild('a2')
-    a3 = FormWild('a3')
+    # a1 = FormWild('a1')
+    # a2 = FormWild('a2')
+    # a3 = FormWild('a3')
     # form = a1**a2 * a1**a3
     # expr = x**2 * x**3
 
-    form = a1 + a2
-    expr = x**2-x
+    # form = a1 + a2
+    # expr = x**2-x
 
     print(form)
     print(expr)
