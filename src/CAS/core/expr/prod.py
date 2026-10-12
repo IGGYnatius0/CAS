@@ -31,10 +31,10 @@ class Prod(CoreProdBase):
         return Prod([factor.copy() for factor in self.factors])
 
     def apply(self, func, args=(), to_iter=False):
-        prod = Prod([func(factor, *args) for factor in self.factors])
+        prod = [func(factor, *args) for factor in self.factors]
         if to_iter:
-            return prod.factors
-        return prod
+            return prod
+        return Prod(prod)
 
 
 EXPRS.prod = Prod

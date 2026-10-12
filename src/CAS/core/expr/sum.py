@@ -31,10 +31,10 @@ class Sum(CoreSumBase):
         return Sum([term.copy() for term in self.terms])
 
     def apply(self, func, args=(), to_iter=False):
-        sum = Sum([func(term, *args) for term in self.terms])
+        sum = [func(term, *args) for term in self.terms]
         if to_iter:
-            return sum.terms
-        return sum
+            return sum
+        return Sum(sum)
 
 
 EXPRS.sum = Sum

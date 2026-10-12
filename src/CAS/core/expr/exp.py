@@ -22,10 +22,10 @@ class Exp(CoreExpBase):
         return Exp(self.base.copy(), self.power.copy())
 
     def apply(self, func, args=(), to_iter=False):
-        exp = Exp(func(self.base, *args), func(self.power, *args))
+        exp = func(self.base, *args), func(self.power, *args)
         if to_iter:
-            return exp.base, exp.power
-        return exp
+            return exp
+        return Exp(exp)
 
 
 EXPRS.exp = Exp

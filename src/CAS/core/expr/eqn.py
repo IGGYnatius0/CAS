@@ -25,10 +25,10 @@ class Eqn:
         return Eqn(self.lhs.copy, self.rhs.copy)
 
     def apply(self, func, args=(), to_iter=False):
-        eqn = Eqn(func(self.lhs, *args), func(self.rhs, *args))
+        eqn = func(self.lhs, *args), func(self.rhs, *args)
         if to_iter:
-            return eqn.lhs, eqn.rhs
-        return eqn
+            eqn
+        return Eqn(eqn)
 
 
     def __eq__(self, other):

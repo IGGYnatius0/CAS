@@ -22,10 +22,10 @@ class Frac(CoreFracBase):
         return EXPRS.frac(self.numer.copy(), self.denom.copy())
 
     def apply(self, func, args=(), to_iter=False):
-        frac = Frac(func(self.numer, *args), func(self.denom, *args))
+        frac = func(self.numer, *args), func(self.denom, *args)
         if to_iter:
-            return frac.numer, frac.denom
-        return frac
+            return frac
+        return Frac(frac)
 
 
 EXPRS.frac = Frac
