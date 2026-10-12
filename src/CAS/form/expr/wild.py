@@ -29,6 +29,10 @@ class FormWild(FormWildBase):
         return FORMS.SingleConstraint(self, expr, var_map)
 
     @cached_property
+    def isnum(self):
+        return False
+
+    @cached_property
     def isconst(self):
         return False
 

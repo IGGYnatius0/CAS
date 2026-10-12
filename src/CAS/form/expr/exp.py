@@ -34,12 +34,12 @@ class FormExp(FormExpBase):
         return False
 
     @cached_property
+    def isnum(self):
+        return self.base.isnum and self.power.isnum
+
+    @cached_property
     def isconst(self):
-        if not self.base.isconst:
-            return False
-        if not self.power.isconst:
-            return False
-        return True
+        return self.base.isconst and self.power.isconst
 
     @cached_property
     def get_consts(self):

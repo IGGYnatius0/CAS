@@ -44,6 +44,13 @@ class FormSum(FormSumBase):
         return False
 
     @cached_property
+    def isnum(self):
+        for term in self.terms:
+            if not term.isnum:
+                return False
+        return True
+
+    @cached_property
     def isconst(self):
         for term in self.terms:
             if not term.isconst:

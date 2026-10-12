@@ -45,6 +45,13 @@ class FormProd(FormProdBase):
         return False
 
     @cached_property
+    def isnum(self):
+        for factor in self.factors:
+            if not factor.isnum:
+                return False
+        return True
+
+    @cached_property
     def isconst(self):
         for factor in self.factors:
             if not factor.isconst:

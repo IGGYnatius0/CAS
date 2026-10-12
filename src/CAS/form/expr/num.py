@@ -19,6 +19,10 @@ class FormNum(FormNumBase):
         return False
 
     @cached_property
+    def isnum(self):
+        return True
+
+    @cached_property
     def isconst(self):
         return True
 

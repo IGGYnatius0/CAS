@@ -28,12 +28,12 @@ class FormFrac(FormFracBase):
         return False
 
     @cached_property
+    def isnum(self):
+        return self.numer.isnum and self.denom.isnum
+
+    @cached_property
     def isconst(self):
-        if not self.numer.isconst:
-            return False
-        if not self.denom.isconst:
-            return False
-        return True
+        return self.numer.isconst and self.denom.isconst
 
     @cached_property
     def get_consts(self):

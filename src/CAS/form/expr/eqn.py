@@ -2,7 +2,9 @@ from functools import cached_property
 
 from .registry import FORMS
 from .utils import make_form
+
 from CAS.core import Eqn
+from CAS.exceptions import BadMethodError
 
 
 class FormEqn:
@@ -23,12 +25,12 @@ class FormEqn:
         return False
 
     @cached_property
+    def isnum(self):
+        raise BadMethodError("Cannot use .isnum method on FormEqn")
+
+    @cached_property
     def isconst(self):
-        if not self.lhs.isconst:
-            return False
-        if not self.rhs.isconst:
-            return False
-        return True
+        raise BadMethodError("Cannot use .isconst method on FormEqn")
 
     @cached_property
     def get_consts(self):

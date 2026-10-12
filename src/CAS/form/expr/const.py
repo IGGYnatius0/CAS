@@ -2,7 +2,6 @@ from functools import cached_property
 
 from .registry import FORMS
 from .base import FormConstBase
-from .utils import form2core
 
 from CAS.interval import REALS, from_str
 from CAS.exceptions import BadMethodError
@@ -21,6 +20,10 @@ class FormConst(FormConstBase):
             return False
         if expr in self.domain:
             return FORMS.SingleConstraint(self, expr, var_map)
+        return False
+
+    @cached_property
+    def isnum(self):
         return False
 
     @cached_property
