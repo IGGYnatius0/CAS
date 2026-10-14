@@ -65,7 +65,7 @@ class FormSum(FormSumBase):
     def get_vars(self):
         return set.union(*[term.get_vars for term in self.terms])
 
-    def apply(self, func, args, to_iter=False):
+    def apply(self, func, args=(), to_iter=False):
         sum = [func(term, *args) for term in self.terms]
         if to_iter:
             return sum

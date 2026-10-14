@@ -38,7 +38,7 @@ class FormConst(FormConstBase):
     def get_vars(self):
         return set()
 
-    def apply(self, func, args, to_iter=False):
+    def apply(self, func, args=(), to_iter=False):
         raise BadMethodError("Cannot use .apply method on FormConst")
 
     def group_consts(self):

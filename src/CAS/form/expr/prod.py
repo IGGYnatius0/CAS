@@ -66,7 +66,7 @@ class FormProd(FormProdBase):
     def get_vars(self):
         return set.union(*[factor.get_vars for factor in self.factors])
 
-    def apply(self, func, args, to_iter=False):
+    def apply(self, func, args=(), to_iter=False):
         prod = [func(factor, *args) for factor in self.factors]
         if to_iter:
             return prod

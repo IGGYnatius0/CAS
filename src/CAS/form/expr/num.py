@@ -34,8 +34,8 @@ class FormNum(FormNumBase):
     def get_vars(self):
         return set()
 
-    def apply(self, func, args, to_iter=False):
-        raise BadMethodError("Cannot use .apply on FormNum")
+    def apply(self, func, args=(), to_iter=False):
+        raise BadMethodError("Cannot use .apply method on FormNum")
 
     def group_consts(self):
         return self
