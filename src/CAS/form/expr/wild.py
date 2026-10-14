@@ -47,11 +47,5 @@ class FormWild(FormWildBase):
     def apply(self, func, args=(), to_iter=False):
         raise BadMethodError("Cannot use .apply method on FormWild")
 
-    def group_consts(self):
-        return self
-
-    def substitute_consts(self, const_map):
-        return self
-
 
 FORMS.wild = FormWild

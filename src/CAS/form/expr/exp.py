@@ -55,12 +55,5 @@ class FormExp(FormExpBase):
             return exp
         return FormExp(*exp)
 
-    def group_consts(self):
-        return FormExp(self.base.group_consts(), self.power.group_consts())
-
-    def substitute_consts(self, const_map):
-        return FormExp(self.base.substitute_consts(const_map),
-                       self.power.substitute_consts(const_map))
-
 
 FORMS.exp = FormExp

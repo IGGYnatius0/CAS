@@ -1,5 +1,5 @@
 from CAS.core import simplify
-from CAS.form import FormExprBase, FormEqn, form2core, match, substitute_consts
+from CAS.form import FormExprBase, FormEqn, form2core, match, group_consts
 
 
 __all__ = ['SolveRule', 'SolveGroup']
@@ -9,9 +9,9 @@ class SolveRule:
     def __init__(self, target_form, formula):
         if target_form is not None:
             if isinstance(target_form, FormExprBase) and not isinstance(target_form, FormEqn):
-                self.target_form = FormEqn(target_form, 0).group_consts()
+                self.target_form = group_consts(FormEqn(target_form, 0))
             else:
-                self.target_form = target_form.group_consts()
+                self.target_form = group_consts(target_form)
             if isinstance(formula, FormExprBase):
                 formula = (formula,)
             formula = tuple(formula)

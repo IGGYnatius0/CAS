@@ -73,24 +73,4 @@ class FormProd(FormProdBase):
         return FormProd(prod)
 
 
-    def group_consts(self):
-        """Groups all constants in this FormProd into a single FormProd"""
-        factors = [factor.group_consts() for factor in self.factors]
-        temp = FormProd(factors)
-        if temp.isconst:
-            return temp
-        consts = []
-        for i, factor in reversed(list(enumerate(factors))):
-            if factor.isconst:
-                consts.append(factors.pop(i))
-        if len(consts) == 1:
-            factors.append(consts[0])
-        elif len(consts) > 1:
-            factors.append(FormProd(consts))
-        return FormProd(factors)
-
-    def substitute_consts(self, const_map):
-        return FormProd([factor.substitute_consts(const_map) for factor in self.factors])
-
-
 FORMS.prod = FormProd

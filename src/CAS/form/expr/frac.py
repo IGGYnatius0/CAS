@@ -49,12 +49,5 @@ class FormFrac(FormFracBase):
             return frac
         return FormFrac(*frac)
 
-    def group_consts(self):
-        return FormFrac(self.numer.group_consts(), self.denom.group_consts())
-
-    def substitute_consts(self, const_map):
-        return FormFrac(self.numer.substitute_consts(const_map),
-                        self.denom.substitute_consts(const_map))
-
 
 FORMS.frac = FormFrac

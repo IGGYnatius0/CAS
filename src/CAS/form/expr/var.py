@@ -42,11 +42,5 @@ class FormVar(FormVarBase):
     def apply(self, func, args=(), to_iter=False):
         raise BadMethodError("Cannot use .apply method on FormVar")
 
-    def group_consts(self):
-        return self
-
-    def substitute_consts(self, const_map):
-        return self
-
 
 FORMS.var = FormVar

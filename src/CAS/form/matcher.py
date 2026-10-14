@@ -108,7 +108,7 @@ if __name__ == '__main__':
     c = FormConst('c')
     d = FormConst('d')
     e = FormConst('e')
-    form = ((a*b+c)*y**3 + b*c*y**2 + c*d*y + d).group_consts()
+    form = group_consts(((a*b+c)*y**3 + b*c*y**2 + c*d*y + d))
     expr =  10*x**3   + 12*x**2  + 20*x  + 5
     # form = (y**(a*b+c) + b*c*y + b/y).group_consts()
     # expr = (x**-5 + 2*x + 2/x)

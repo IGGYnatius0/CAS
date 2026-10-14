@@ -37,12 +37,6 @@ class FormNum(FormNumBase):
     def apply(self, func, args=(), to_iter=False):
         raise BadMethodError("Cannot use .apply method on FormNum")
 
-    def group_consts(self):
-        return self
-
-    def substitute_consts(self, const_map):
-        return self
-
 
 FORMS.num = FormNum
 FORMS.zero = FormNum(0)

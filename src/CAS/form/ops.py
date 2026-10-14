@@ -132,7 +132,60 @@ def _(form, const_map={}):
     return form.apply(substitute_consts, args=(const_map,))
 
 
+################
+# GROUP_CONSTS #
+################
+
+
+@singledispatch
 def group_consts(form):
     raise TypeError(f"Invalid type: {type(form)}")
 
 
+@group_consts.register(FormNum)
+@group_consts.register(FormVar)
+@group_consts.register(FormWild)
+@group_consts.register(FormConst)
+def _(form):
+    return form
+
+
+@group_consts.register(FormSum)
+def _(sum):
+    terms = sum.apply(group_consts, to_iter=True)
+    temp = FormSum(terms)
+    if temp.isconst:
+        return temp
+    consts = []
+    for i, term in reversed(list(enumerate(terms))):
+        if term.isconst:
+            consts.append(terms.pop(i))
+    if len(consts) == 1:
+        terms.append(consts[0])
+    elif len(consts) > 1:
+        terms.append(FormSum(consts))
+    return FormSum(terms)
+
+
+@group_consts.register(FormProd)
+def _(prod):
+    factors = prod.apply(group_consts, to_iter=True)
+    temp = FormProd(factors)
+    if temp.isconst:
+        return temp
+    consts = []
+    for i, factor in reversed(list(enumerate(factors))):
+        if factor.isconst:
+            consts.append(factors.pop(i))
+    if len(consts) == 1:
+        factors.append(consts[0])
+    elif len(consts) > 1:
+        factors.append(FormProd(consts))
+    return FormProd(factors)
+
+
+@group_consts.register(FormFrac)
+@group_consts.register(FormExp)
+@group_consts.register(FormEqn)
+def _(form):
+    return form.apply(group_consts)

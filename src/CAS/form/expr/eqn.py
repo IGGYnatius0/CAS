@@ -46,12 +46,6 @@ class FormEqn:
             return eqn
         return FormEqn(*eqn)
 
-    def group_consts(self):
-        return FormEqn(self.lhs.group_consts(), self.rhs.group_consts())
-
-    def substitute_consts(self, const_map):
-        return FormEqn(self.lhs.substitute_consts(const_map), self.rhs.substitute_consts(const_map))
-
 
     def __str__(self):
         return f'{str(self.lhs)} = {str(self.rhs)}'

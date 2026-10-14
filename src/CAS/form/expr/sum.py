@@ -72,24 +72,4 @@ class FormSum(FormSumBase):
         return FormSum(sum)
 
 
-    def group_consts(self):
-        """Groups all constants in this FormSum into a single FormSum"""
-        terms = [term.group_consts() for term in self.terms]
-        temp = FormSum(terms)
-        if temp.isconst:
-            return temp
-        consts = []
-        for i, term in reversed(list(enumerate(terms))):
-            if term.isconst:
-                consts.append(terms.pop(i))
-        if len(consts) == 1:
-            terms.append(consts[0])
-        elif len(consts) > 1:
-            terms.append(FormSum(consts))
-        return FormSum(terms)
-
-    def substitute_consts(self, const_map):
-        return FormSum([term.substitute_consts(const_map) for term in self.terms])
-
-
 FORMS.sum = FormSum

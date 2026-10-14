@@ -41,13 +41,5 @@ class FormConst(FormConstBase):
     def apply(self, func, args=(), to_iter=False):
         raise BadMethodError("Cannot use .apply method on FormConst")
 
-    def group_consts(self):
-        return self
-
-    def substitute_consts(self, const_map):
-        if self in const_map:
-            return const_map[self]
-        return self
-
 
 FORMS.const = FormConst
