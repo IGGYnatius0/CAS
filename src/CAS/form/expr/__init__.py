@@ -33,4 +33,4 @@ __all__ = ['FormExprBase',
            'FormNum', 'FormConst', 'FormVar', 'FormWild',
            'FormSum', 'FormProd', 'FormFrac', 'FormExp', 'FormEqn',
            'fzero', 'fone', 'fneg_one',
-           'make_form', 'core2form', 'form2core']
+           'make_form']
