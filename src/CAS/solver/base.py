@@ -1,5 +1,5 @@
 from CAS.core import simplify
-from CAS.form import FormExprBase, FormEqn, form2core, match
+from CAS.form import FormExprBase, FormEqn, form2core, match, substitute_consts
 
 
 __all__ = ['SolveRule', 'SolveGroup']
@@ -26,8 +26,7 @@ class SolveRule:
             return None
         solns = []
         for formula in self.formula:
-            soln = formula.substitute_consts(result['consts'])
-            soln_core = simplify(form2core(soln, const_map=result['consts']))
+            soln_core = simplify(form2core(formula, const_map=result['consts']))
             solns.append(soln_core)
         return solns
 
