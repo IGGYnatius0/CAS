@@ -9,7 +9,7 @@ __all__ = ['isrational']
 
 @singledispatch
 def isrational(expr):
-    pass
+    raise TypeError(f"Invalid type: {type(expr)}")
 
 
 @isrational.register(Num)

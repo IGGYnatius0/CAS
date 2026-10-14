@@ -31,7 +31,7 @@ def _exprize_decomp(counter: Counter):
 @lru_cache
 @singledispatch
 def decomp(expr, top=True):
-    pass
+    raise TypeError(f"Invalid type: {type(expr)}")
 
 
 @decomp.register(Num)
@@ -108,7 +108,7 @@ def _(eqn, top=True):
 @lru_cache
 @singledispatch
 def simplify(expr):
-    pass
+    raise TypeError(f"Invalid type: {type(expr)}")
 
 
 @simplify.register(int) # simplify sometimes processes int because decomp sometimes returns int

@@ -15,7 +15,7 @@ __all__ = ['core2form', 'form2core', 'substitute_consts', 'group_consts']
 
 @singledispatch
 def core2form(expr):
-    pass
+    raise TypeError(f"Invalid type: {type(expr)}")
 
 @core2form.register(Num)
 def _(num):
@@ -57,7 +57,7 @@ def _(func):
 
 @singledispatch
 def form2core(form, var_map={}, const_map={}):
-    pass
+    raise TypeError(f"Invalid type: {type(form)}")
 
 @form2core.register(FormNum)
 def _(num, var_map={}, const_map={}):
@@ -99,16 +99,6 @@ def _(eqn, var_map={}, const_map={}):
     return Eqn(*eqn.apply(form2core, args=(var_map, const_map), to_iter=True))
 
 
-# ############
-# # EVALUATE #
-# ############
-#
-#
-# @singledispatch
-# def evaluate(form):
-#     pass
-
-
 #####################
 # SUBSTITUTE_CONSTS #
 #####################
@@ -116,7 +106,7 @@ def _(eqn, var_map={}, const_map={}):
 
 @singledispatch
 def substitute_consts(form, const_map={}):
-    pass
+    raise TypeError(f"Invalid type: {type(form)}")
 
 
 @substitute_consts.register(FormNum)
@@ -143,4 +133,6 @@ def _(form, const_map={}):
 
 
 def group_consts(form):
-    pass
+    raise TypeError(f"Invalid type: {type(form)}")
+
+

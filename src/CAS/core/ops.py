@@ -15,7 +15,7 @@ __all__ = ['expand', 'factorize', 'substitute_vars', 'evaluate', 'group_nums']
 
 @singledispatch
 def expand(expr):
-    pass
+    raise TypeError(f"Invalid type: {type(expr)}")
 
 
 @expand.register(Num)
@@ -52,7 +52,7 @@ def _(prod):
 
 @singledispatch
 def factorize(expr):
-    pass
+    raise TypeError(f"Invalid type: {type(expr)}")
 
 
 @factorize.register(Num)
@@ -101,7 +101,7 @@ def _(sum):
 
 @singledispatch
 def substitute_vars(expr, var_map):
-    pass
+    raise TypeError(f"Invalid type: {type(expr)}")
 
 
 @substitute_vars.register(Num)
@@ -139,7 +139,7 @@ def evaluate(expr):
 
 @singledispatch
 def _evaluate(expr):
-    pass
+    raise TypeError(f"Invalid type: {type(expr)}")
 
 
 @_evaluate.register(Num)
@@ -180,7 +180,7 @@ def _(exp):
 
 @singledispatch
 def group_nums(expr):
-    pass
+    raise TypeError(f"Invalid type: {type(expr)}")
 
 
 @group_nums.register(Num)
