@@ -42,7 +42,7 @@ def solve_constraints(constrs, n_consts, n_vars):
             constrs.pop(i)
         elif constr.form is None and constr.value is None:
             constrs.pop(i)
-        elif isinstance(constr.value, Num):
+        elif isinstance(constr.value, CoreExprBase):
             constrs[i].value = core2form(constr.value)
 
     # Solving const_map from all the SingleConstraint.form and SingleConstraint.value
