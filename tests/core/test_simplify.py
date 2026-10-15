@@ -29,7 +29,7 @@ class TestExpSimplify:
         assert simplify(Exp(8, Exp(3, -1))) == Num(2)
 
     def test_base_noninteger(self):
-        assert simplify(Exp(Exp(2, -1), 2)) == Exp(2, -2)
+        assert simplify(Exp(Exp(2, -1), 2)) == Exp(4, -1)
 
     def test_args_noninteger(self):
         assert simplify(Exp(0.5, 0.5)) == Exp(2, Prod([-1, Exp(2, -1)]))
