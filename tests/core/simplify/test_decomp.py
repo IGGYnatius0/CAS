@@ -22,32 +22,31 @@ class TestNumDecomp:
                        Num(13): Num(1),
                        Num(17): Num(1),
                        Num(19): Num(1)})
-
         # 20 factorial
         assert decomp(Num(2432902008176640000)) == ans
 
 
 class TestVarDecomp:
-    def test(self, x):
+    def test(self):
         assert decomp(x) == Counter({x: Num(1)})
 
 
 class TestSumDecomp:
-    def test(self, x):
+    def test(self):
         assert decomp(Sum([x, 1])) == Counter({Sum([x, 1]): Num(1)})
 
 
 class TestProdDecomp:
-    def test(self, x, y):
+    def test(self):
         assert decomp(x * y * x**3 * y**-3) == Counter({x: Num(4), y: Num(-2)})
 
 
 class TestExpDecomp:
-    def test_pow_integer(self, x):
+    def test_pow_integer(self):
         assert decomp((x**2)) == Counter({x: Num(2)})
 
-    def test_pow_noninteger(self, x):
+    def test_pow_noninteger(self):
         assert decomp((x**1.5)) == Counter({x: Prod([3, Exp(2, -1)])})
 
-    def test_nested_exp(self, x):
+    def test_nested_exp(self):
         assert decomp(((x**3)**2)) == Counter({x: Num(6)})
