@@ -11,4 +11,13 @@ __all__ = ['CoreExprBase', 'Num', 'Var', 'Sum', 'Prod', 'Frac', 'Exp', 'Eqn', 'F
            'pfactor',
            'decomp', 'simplify', 'simplify_decomp',
            'expand', 'factorize', 'substitute_vars', 'evaluate', 'group_nums',
-           'isrational']
+           'isrational',
+           'x', 'y', 'z', 'a', 'b', 'c']
+
+
+x = Var('x')
+y = Var('y')
+z = Var('z')
+a = Var('a')
+b = Var('b')
+c = Var('c')
