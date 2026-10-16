@@ -5,7 +5,6 @@ from .base import CoreFuncBase
 
 
 class Func(CoreFuncBase):
-
     @cached_property
     def get_vars(self):
         return set()
