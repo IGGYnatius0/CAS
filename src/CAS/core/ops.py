@@ -136,7 +136,7 @@ def _(expr, var_map):
 
 
 def evaluate(expr: CoreExprBase) -> int | float:
-    """Returns the numerical result of an expr. If not expr.isnum, an error is raised."""
+    """Returns the numerical result of an expr. If not expr.isnum, an error is raised"""
     if not isinstance(expr, CoreExprBase):
         raise TypeError(f"Invalid type: {type(expr)}")
     if not expr.isnum:
@@ -189,7 +189,7 @@ def _(func):
 
 @singledispatch
 def group_nums(expr: CoreExprBase) -> CoreExprBase:
-    """Returns expr with all Nums grouped together recursively, to be used with form.matcher()."""
+    """Returns expr with all Nums grouped together recursively, to be used with form.matcher"""
     raise TypeError(f"Invalid type: {type(expr)}")
 
 
