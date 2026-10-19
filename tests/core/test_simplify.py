@@ -156,3 +156,7 @@ class TestSimplify:
     )
     def test_exp(self, expr, expected):
         assert simplify(expr) == expected
+
+    def test_zero_pow_zero(self):
+        with pytest.raises(ArithmeticError):
+            simplify(Exp(0, 0))
