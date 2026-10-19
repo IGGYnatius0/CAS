@@ -2,16 +2,20 @@ from functools import cached_property
 
 from .registry import EXPRS
 from .base import CoreFuncBase
+from .utils import make_expr
 
 
 class Func(CoreFuncBase):
     @cached_property
     def get_vars(self):
-        return set()
+        return set.union(*[arg.get_vars for arg in self.args])
 
     @cached_property
     def isnum(self):
-        return False
+        for arg in self.args:
+            if not arg.isnum:
+                return False
+        return True
 
     def copy(self):
         return type(self)(*[arg.copy() for arg in self.args])
@@ -23,12 +27,12 @@ class Func(CoreFuncBase):
 
 class SingleArgInit:
     def __init__(self, arg):
-        self.args = [arg]
+        self.args = (make_expr(arg),)
 
 
 class MultiArgInit:
     def __init__(self, *args):
-        self.args = args
+        self.args = tuple(make_expr(arg) for arg in args)
 
 
 EXPRS.func = Func
