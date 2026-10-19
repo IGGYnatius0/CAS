@@ -199,6 +199,7 @@ def _(expr):
     return expr
 
 
+# TODO rework this to use the new flatten parameter
 @group_nums.register(Sum)
 def _(sum):
     terms = [group_nums(term) for term in sum.terms]
