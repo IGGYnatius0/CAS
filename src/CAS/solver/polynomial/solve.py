@@ -9,6 +9,8 @@ def solve(expr: CoreExprBase, main_solve):
     expr = simplify(expand(expr))
     if not Poly.is_poly_expr(expr):
         return []
+    # TODO this is the only place that uses factorize as of now and factorize is broken.
+    #  so will have to find a replacement
     expr = simplify(factorize(expr)) # Global factorize
     if not Poly.is_poly_expr(expr):
         return zero_solve(expr, main_solve)
