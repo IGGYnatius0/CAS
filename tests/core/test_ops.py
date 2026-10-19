@@ -24,7 +24,7 @@ class TestSubstituteVars:
 
 class TestEvaluate:
     @pytest.mark.parametrize(
-        'expr,ans',
+        'expr,expected',
         [
             (one, 1),
             (Sum([-1, 2, -3, 4, -5]), -3),
@@ -34,10 +34,10 @@ class TestEvaluate:
             (log(2), 0.6931471805599453)
         ]
     )
-    def test(self, expr, ans):
+    def test(self, expr, expected):
         evaluated = evaluate(expr)
-        assert evaluated == ans
-        assert type(evaluated) == type(ans)
+        assert evaluated == expected
+        assert type(evaluated) == type(expected)
 
     def test_not_isnum(self):
         with pytest.raises(ValueError):
@@ -54,7 +54,7 @@ class TestEvaluate:
 
 class TestGroupNums:
     @pytest.mark.parametrize(
-        'expr,ans',
+        'expr,expected',
         [
             (one, one),
             (x, x),
@@ -62,8 +62,8 @@ class TestGroupNums:
             (x * 2 * 3, Prod([x, Prod([2, 3])], flatten=False))
         ]
     )
-    def test(self, expr, ans):
-        assert group_nums(expr) == ans
+    def test(self, expr, expected):
+        assert group_nums(expr) == expected
 
     def test_wrong_type(self):
         with pytest.raises(TypeError):
