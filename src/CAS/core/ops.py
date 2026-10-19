@@ -14,7 +14,8 @@ __all__ = ['expand', 'factorize', 'substitute_vars', 'evaluate', 'group_nums']
 
 
 @singledispatch
-def expand(expr):
+def expand(expr: CoreExprBase) -> CoreExprBase:
+    """Expands expr recursively following distributive law"""
     raise TypeError(f"Invalid type: {type(expr)}")
 
 
@@ -51,7 +52,8 @@ def _(prod):
 
 
 @singledispatch
-def factorize(expr):
+def factorize(expr: CoreExprBase) -> CoreExprBase:
+    """Factorizes expr recursively"""
     raise TypeError(f"Invalid type: {type(expr)}")
 
 
@@ -79,6 +81,7 @@ def _(sum):
     common = simplify_decomp(common)
     for i in range(len(decomps)):
         decomps[i].subtract(common)
+        decomps[i] = simplify_decomp(decomps[i])
 
     common_prod = decomp2prod(common)
 
@@ -100,7 +103,8 @@ def _(sum):
 
 
 @singledispatch
-def substitute_vars(expr, var_map):
+def substitute_vars(expr: CoreExprBase, var_map: dict[Var, CoreExprBase]) -> CoreExprBase:
+    """Substitutes variables in the expr recursively based on var_map"""
     raise TypeError(f"Invalid type: {type(expr)}")
 
 
@@ -123,7 +127,7 @@ def _(var, var_map):
 @substitute_vars.register(Func)
 @substitute_vars.register(Eqn)
 def _(expr, var_map):
-    return expr.apply(substitute_vars, var_map)
+    return expr.apply(substitute_vars, (var_map,))
 
 
 ############
@@ -131,9 +135,12 @@ def _(expr, var_map):
 ############
 
 
-def evaluate(expr):
+def evaluate(expr: CoreExprBase) -> int | float:
+    """Returns the numerical result of an expr. If not expr.isnum, an error is raised."""
+    if not isinstance(expr, CoreExprBase):
+        raise TypeError(f"Invalid type: {type(expr)}")
     if not expr.isnum:
-        raise RuntimeError("Cannot evaluate non isnum expression")
+        raise ValueError("Cannot evaluate non isnum expression")
     return _evaluate(expr)
 
 
@@ -170,7 +177,9 @@ def _(exp):
     return _evaluate(exp.base) ** _evaluate(exp.power)
 
 
-# TODO Eqn and Func
+@_evaluate.register(Func)
+def _(func):
+    return func.func(*[_evaluate(arg) for arg in func.args])
 
 
 ##############
@@ -179,7 +188,8 @@ def _(exp):
 
 
 @singledispatch
-def group_nums(expr):
+def group_nums(expr: CoreExprBase) -> CoreExprBase:
+    """Returns expr with all Nums grouped together recursively, to be used with form.matcher()."""
     raise TypeError(f"Invalid type: {type(expr)}")
 
 
