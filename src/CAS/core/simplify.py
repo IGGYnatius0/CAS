@@ -9,7 +9,8 @@ from .utils import isrational # TODO to be replaced by intervals
 __all__ = ['decomp', 'simplify', 'simplify_decomp']
 
 
-def simplify_decomp(counter: Counter):
+def simplify_decomp(counter: Counter) -> Counter:
+    """Simplifies the values of the result of decomp()"""
     new_decomp = Counter()
     for base, power in counter.items():
         new_decomp[base] = simplify(power)
@@ -30,7 +31,8 @@ def _exprize_decomp(counter: Counter):
 
 @lru_cache
 @singledispatch
-def decomp(expr, top=True):
+def decomp(expr: CoreExprBase, top: bool = True) -> Counter:
+    """Returns the multiplicative decomposition of expr"""
     raise TypeError(f"Invalid type: {type(expr)}")
 
 
@@ -107,7 +109,7 @@ def _(eqn, top=True):
 
 @lru_cache
 @singledispatch
-def simplify(expr):
+def simplify(expr: CoreExprBase) -> CoreExprBase:
     raise TypeError(f"Invalid type: {type(expr)}")
 
 
@@ -151,10 +153,10 @@ def _(prod):
             factors.append(simplify(Exp(base, power)))
     # DO NOT use Frac(numer, denom).simplify() as that uses Prod simplify,
     # which will cause RecursionError
-    if numer == 0:
+    if numer == 0 and denom != 0:
         return zero
     if denom == 0:
-        raise ZeroDivisionError(f'{numer=}; {denom=}; {factors=}')
+        raise ZeroDivisionError
 
     if numer == 1 and denom != 1:
         const = Exp(denom, -1)
@@ -177,7 +179,10 @@ def _(prod):
 @simplify.register(Frac)
 def _(frac):
     numer = decomp(simplify(frac.numer)).copy()
-    denom = decomp(simplify(frac.denom))
+    denom = simplify(frac.denom)
+    if denom == 0:
+        raise ZeroDivisionError('division by zero')
+    denom = decomp(denom)
     numer.subtract(denom)
     numer = simplify_decomp(numer)
     s = simplify(decomp2prod(numer))
@@ -200,7 +205,7 @@ def _(exp):
     if base == 0 and power != 0:
         return zero
     if base == 0 and power == 0:
-        return Exp(0, 0)
+        raise ArithmeticError('zero to the power of zero')
     if isinstance(base, Num):
         if isinstance(power, Num):
             if power > 0:
@@ -246,7 +251,6 @@ def _sum_no_vars(decomps: list[Counter]):
     if len(output) == 1:
         return output[0]
     return Sum(output)
-
 
 
 def _sum_with_vars(decomps: list[Counter]):
@@ -319,10 +323,10 @@ def _simplify_term(coeff, expr):
 def _get_frac(expr):
     if isinstance(expr, Prod):
         if isinstance(expr.factors[0], Exp):
-            return (expr.factors[1], expr.factors[0].base)
-        return (expr.factors[0], expr.factors[1].base)
+            return expr.factors[1], expr.factors[0].base
+        return expr.factors[0], expr.factors[1].base
     if isinstance(expr, Exp):
-        return (one, expr.base)
+        return one, expr.base
     raise ValueError(f"Cannot turn expr into fraction: {expr}")
 
 
@@ -343,11 +347,3 @@ def _pow_int_test(base: Num, power: Exp):
     for p, n in f_new.items():
         result *= p ** n
     return Num(result)
-
-
-if __name__ == '__main__':
-    x = Var('x')
-    y = Var('y')
-    print(decomp(x * y * x ** 3 * y ** -3))
-    # sqrt2 = Exp(2, Exp(2, -1))
-    # print(simplify(2 * sqrt2))
