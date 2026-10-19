@@ -1,12 +1,15 @@
-from math import log
+from math import log as mlog
 
 from CAS.core import *
 from CAS.core.expr.func import SingleArgInit
 
 
+__all__ = ['log']
+
+
 class log(Func, SingleArgInit):
     name = 'log'
-    func = lambda num: log(evaluate(num))
+    func = mlog # lambda expr: mlog(evaluate(expr))
     n_args = 1
 
 
