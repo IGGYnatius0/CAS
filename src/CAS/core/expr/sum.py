@@ -6,13 +6,16 @@ from .utils import *
 
 
 class Sum(CoreSumBase):
-    def __init__(self, terms):
-        self.terms = []
-        for term in terms:
-            if isinstance(term, EXPRS.sum):
-                self.terms.extend(term.terms)
-            else:
-                self.terms.append(make_expr(term))
+    def __init__(self, terms, flatten=True):
+        if flatten:
+            self.terms = []
+            for term in terms:
+                if isinstance(term, EXPRS.sum):
+                    self.terms.extend(term.terms)
+                else:
+                    self.terms.append(make_expr(term))
+        else:
+            self.terms = terms
         if not self.terms:
             self.terms = [EXPRS.zero]
 

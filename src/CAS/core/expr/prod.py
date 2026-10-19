@@ -6,13 +6,16 @@ from .utils import *
 
 
 class Prod(CoreProdBase):
-    def __init__(self, factors):
-        self.factors = []
-        for factor in factors:
-            if isinstance(factor, EXPRS.prod):
-                self.factors.extend(factor.factors)
-            else:
-                self.factors.append(make_expr(factor))
+    def __init__(self, factors, flatten=True):
+        if flatten:
+            self.factors = []
+            for factor in factors:
+                if isinstance(factor, EXPRS.prod):
+                    self.factors.extend(factor.factors)
+                else:
+                    self.factors.append(make_expr(factor))
+        else:
+            self.factors = factors
         if not self.factors:
             self.factors = [EXPRS.one]
 
