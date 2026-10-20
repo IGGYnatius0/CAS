@@ -4,7 +4,6 @@ from functools import cached_property
 from itertools import groupby
 
 from CAS.core import *
-from CAS.core.abc import a, b, c, x
 
 
 __all__ = ['groebner_basis']
