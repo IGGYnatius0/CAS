@@ -2,11 +2,15 @@ from itertools import product
 from collections import Counter
 
 from CAS.core import *
-from CAS.form import match
-from CAS.form.abc import A, B, x
+from CAS.form import match, FormConst, FormVar
 
 
 __all__ = ['Polynomial', 'Poly', 'poly_div', 'get_rational_roots']
+
+
+a = FormConst('a')
+b = FormConst('b')
+x = FormVar('x')
 
 
 class Polynomial:
@@ -49,19 +53,19 @@ class Polynomial:
             for term in expr.terms:
                 if term.isnum:
                     continue
-                result = match(A * x ** B, term)
+                result = match(a * x ** b, term)
                 if not result:
                     return False
-                b = result['consts'][B]
-                if not (isinstance(b, Num) and b.value > 0):
+                power = result['consts'][b]
+                if not (isinstance(power, Num) and power > 0):
                     return False
 
         else:
-            result = match(A * x ** B, expr)
+            result = match(a * x ** b, expr)
             if not result:
                 return False
-            b = result['consts'][B]
-            if not (isinstance(b, Num) and b > 0):
+            power = result['consts'][b]
+            if not (isinstance(power, Num) and power > 0):
                 return False
         return True
 
@@ -75,15 +79,15 @@ def poly_to_coeffs(poly):
             if term.isnum:
                 temp[zero] = term
                 continue
-            result = match(A * x ** B, term)
+            result = match(a * x ** b, term)
             if not result:
                 raise ValueError('Input is not a polynomial')
-            temp[result['consts'][B]] = result['consts'][A]
+            temp[result['consts'][b]] = result['consts'][a]
     else:
-        result = match(A * x ** B, poly)
+        result = match(a * x ** b, poly)
         if not result:
             raise ValueError('Input is not a polynomial')
-        temp[result['consts'][B]] = result['consts'][A]
+        temp[result['consts'][b]] = result['consts'][a]
     coeffs = [zero] * (max(temp.keys()).value + 1)
     for i, coeff in temp.items():
         coeffs[i.value] = coeff
